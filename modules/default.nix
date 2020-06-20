@@ -1,5 +1,9 @@
 { ... }:
 
 {
-  imports = [ ./soxin ];
+  imports = [
+    ./soxin
+
+    ./hardware/bluetooth.nix
+  ];
 }
