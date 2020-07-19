@@ -3,7 +3,6 @@
 with lib;
 
 let
-  backend = config.soxin;
   cfg = config.soxin.workstation.bluetooth;
 in {
   options = {
@@ -12,12 +11,14 @@ in {
     };
   };
 
-  config = mkIf cfg.enable (mkMerge [
-    (mkIf backend.isNixOS {
+  config = mkIf cfg.enable {
+    nixos.config = {
       hardware.bluetooth.enable = true;
       services.blueman.enable = true;
-    })
+    };
 
-    (mkIf backend.isHome { services.blueman-applet.enable = true; })
-  ]);
+    home-manager.config = {
+      services.blueman-applet.enable = true;
+    };
+  };
 }
