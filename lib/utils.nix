@@ -34,6 +34,7 @@ in
   # and imported content of the file as value.
   pathsToImportedAttrs = paths:
     genAttrs' paths (path: {
+      # name = removeSuffix ".nix" (builtins.replaceStrings [ "/" ] [ "-" ] (builtins.toString path));
       name = removeSuffix ".nix" (baseNameOf path);
       value = import path;
     });
