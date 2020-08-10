@@ -9,6 +9,6 @@
 
   outputs = inputs@{ self, nixpkgs, home-manager }:
   {
-    nixosModules.soxin = import ./modules/nixos-module.nix;
+    nixosModules.soxin = import ./modules/nixos-modules.nix;
   };
 }
