@@ -8,12 +8,7 @@
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager }:
-  let
-    inherit (nixpkgs) lib;
-    inherit (utils) pathsToImportedAttrs;
-
-    utils = import ./lib/utils.nix { inherit lib; };
-  in {
-    nixosModules = pathsToImportedAttrs (import ./modules/list.nix);
+  {
+    nixosModules.soxin = import ./modules/nixos-module.nix;
   };
 }

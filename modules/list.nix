@@ -1,3 +1,0 @@
-[
-  ./soxin/hardware/bluetooth.nix
-]
