@@ -10,5 +10,10 @@
   outputs = inputs@{ self, nixpkgs, home-manager }:
   {
     nixosModules.soxin = import ./modules/nixos-modules.nix;
+
+    lib.nixosSystem = import ./lib/nixos-system.nix {
+      inherit (nixpkgs) lib;
+      inherit self home-manager;
+    };
   };
 }
