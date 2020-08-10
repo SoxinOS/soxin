@@ -33,9 +33,15 @@ in
   # that has the filenames stripped of nix extension as keys
   # and imported content of the file as value.
   pathsToImportedAttrs = paths:
-    genAttrs' paths (path: {
+  genAttrs' paths (path:
+    let
+      relPath = lib.strings.removePrefix "${builtins.toString ../modules}/" (builtins.toString path);
+      nameWithoutExtension = removeSuffix ".nix" relPath;
+      name = builtins.replaceStrings [ "/" ] [ "-" ] nameWithoutExtension;
+    in {
       # name = removeSuffix ".nix" (builtins.replaceStrings [ "/" ] [ "-" ] (builtins.toString path));
-      name = removeSuffix ".nix" (baseNameOf path);
+      # name = removeSuffix ".nix" (baseNameOf path);
+      inherit name;
       value = import path;
     });
 

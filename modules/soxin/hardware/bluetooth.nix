@@ -10,12 +10,10 @@ in {
   };
 
   config = mkIf cfg.enable {
-    nixos.config = {
-      hardware.bluetooth.enable = true;
-      services.blueman.enable = true;
-    };
+    hardware.bluetooth.enable = true;
+    services.blueman.enable = true;
 
-    home-manager.config = {
+    home-manager = {
       services.blueman-applet.enable = true;
     };
   };
