@@ -5,18 +5,17 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1591751635,
-        "narHash": "sha256-KgGtyFlkI/fsp+j8VEgJ/ynY9B91aX35Xp04HlDLRTo=",
-        "owner": "rycee",
-        "repo": "home-manager",
-        "rev": "b3fee796fcd5531693d9b84ece76ad6836bb1cfa",
-        "type": "github"
+        "lastModified": 1597084797,
+        "narHash": "sha256-JEFe0RAPpliyJMIduE81gVv+GnCXGyrwW7JVd2Cr79A=",
+        "ref": "bqv-flakes",
+        "rev": "731f9afd209cdb78ddd849a36c03ba855cdf0e31",
+        "revCount": 1169,
+        "type": "git",
+        "url": "file:///yl/code/stories/opensource/home-manager/flakes/github.com/rycee/home-manager"
       },
       "original": {
-        "owner": "rycee",
-        "ref": "bqv-flakes",
-        "repo": "home-manager",
-        "type": "github"
+        "type": "git",
+        "url": "file:///yl/code/stories/opensource/home-manager/flakes/github.com/rycee/home-manager"
       }
     },
     "nixpkgs": {

@@ -8,6 +8,8 @@ let
       echo "Usage: $(basename $0) host {switch|boot|test|iso}"
     elif [[ $1 == "iso" ]]; then
       nix build ${configs}.niximg.${build}.isoImage
+    elif [[ $2 == "build" ]]; then
+      nix build ${configs}.$1.${build}.toplevel
     else
       sudo -E nix shell -vv ${configs}.$1.${build}.toplevel -c switch-to-configuration $2
     fi
