@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.soxin.hardware.bluetooth
+  cfg = config.soxin.hardware.bluetooth;
 in {
   options.soxin.hardware.bluetooth = {
     enable = mkEnableOption "enable bluetooth";
