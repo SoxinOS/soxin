@@ -7,7 +7,13 @@
     home-manager.url = "git+file:///yl/code/stories/opensource/home-manager/flakes/github.com/rycee/home-manager";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager }: {
-    nixosModules = import ./modules/list.nix;
+  outputs = inputs@{ self, nixpkgs, home-manager }:
+  let
+    inherit (nixpkgs) lib;
+    inherit (utils) pathsToImportedAttrs;
+
+    utils = import ./lib/utils.nix { inherit lib; };
+  in {
+    nixosModules = pathsToImportedAttrs (import ./modules/list.nix);
   };
 }
