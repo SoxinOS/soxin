@@ -13,8 +13,9 @@ in {
     hardware.bluetooth.enable = true;
     services.blueman.enable = true;
 
-    home-manager = {
-      services.blueman-applet.enable = true;
-    };
+    # home-manager = {
+    #   services.blueman-applet.enable = true;
+    # };
+    home-manager.useUserPackages.enable = true;
   };
 }
