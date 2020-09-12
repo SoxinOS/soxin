@@ -13,6 +13,7 @@
     {
       nixosModules = {
         soxinNixOS = import ./modules/nixos/list.nix;
+        soxinHome = import ./modules/home/list.nix;
       };
 
       lib = lib.extend (final: prev: {
