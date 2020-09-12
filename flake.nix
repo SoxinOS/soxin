@@ -11,7 +11,9 @@
       inherit (nixpkgs) lib;
     in
     {
-      nixosModules = { };
+      nixosModules = {
+        soxinNixOS = import ./modules/nixos/list.nix;
+      };
 
       lib = lib.extend (final: prev: {
         nixosSystem = import ./lib/nixos-system.nix {

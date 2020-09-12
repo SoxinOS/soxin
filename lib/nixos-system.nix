@@ -3,6 +3,8 @@
 { modules ? [], ... } @ args:
 lib.nixosSystem (args // {
   modules = lib.concat modules [
+    self.nixosModules.soxinNixOS
+
     home-manager.nixosModules.home-manager
     {
       # This is required when using flakes.
