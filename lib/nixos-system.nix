@@ -15,7 +15,9 @@ lib.nixosSystem (args // {
     ({ config, ... }: {
       options.home-manager.users = lib.mkOption {
         type = lib.types.attrsOf (lib.types.submoduleWith {
-          modules = [ ];
+          modules = [
+            self.nixosModules.soxinHome
+          ];
           specialArgs = {
             super = config;
           };
