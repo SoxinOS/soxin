@@ -6,8 +6,18 @@
     home-manager.url = "github:nix-community/home-manager";
   };
 
-  outputs = { self, nixpkgs, home-manager }@inputs:
-  {
-    nixosModules = { };
-  };
+  outputs = { self, nixpkgs, home-manager } @ inputs:
+    let
+      inherit (nixpkgs) lib;
+    in
+    {
+      nixosModules = { };
+
+      lib = lib.extend (final: prev: {
+        nixosSystem = import ./lib/nixos-system.nix {
+          lib = prev;
+          inherit self home-manager;
+        };
+      });
+    };
 }
