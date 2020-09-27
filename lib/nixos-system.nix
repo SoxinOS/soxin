@@ -1,10 +1,13 @@
 { self, lib, home-manager }:
 
-{ modules ? [], ... } @ args:
+{ modules ? [], specialArgs ? { }, ... } @ args:
 lib.nixosSystem (args // {
-  modules = lib.concat modules [
-    self.nixosModules.soxinOptions
-    self.nixosModules.soxinNixOS
+  specialArgs = lib.mergeAttrs {
+    mode = "NixOS";
+  } specialArgs;
+
+  modules = lib.concat [
+    self.nixosModules.soxin
 
     home-manager.nixosModules.home-manager
     {
@@ -17,14 +20,14 @@ lib.nixosSystem (args // {
       options.home-manager.users = lib.mkOption {
         type = lib.types.attrsOf (lib.types.submoduleWith {
           modules = [
-            self.nixosModules.soxinOptions
-            self.nixosModules.soxinHome
+            self.nixosModules.soxin
           ];
           specialArgs = {
             super = config;
+            mode = "home-manager";
           };
         });
       };
     })
-  ];
+  ] modules;
 })
