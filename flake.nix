@@ -47,6 +47,11 @@
         nixosModules = {
           soxin = import ./modules/list.nix;
         };
+
+        defaultTemplate = {
+          path = ./template;
+          description = "Template for a personal soxincfg repository.";
+        };
       };
     in
     recursiveUpdate multiSystemOutputs outputs;
