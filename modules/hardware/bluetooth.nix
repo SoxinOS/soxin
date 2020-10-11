@@ -13,5 +13,6 @@ with lib;
       services.blueman.enable = true;
     } else if (mode == "home-manager") then {
       services.blueman-applet.enable = true;
-    } else {});
+    } else { }
+  );
 }
