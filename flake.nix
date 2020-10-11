@@ -28,7 +28,9 @@
         {
           devShell = pkgs.mkShell {
             buildInputs = with pkgs; [
-              git nixpkgs-fmt
+              git
+              nixpkgs-fmt
+              pre-commit
             ];
           };
         }

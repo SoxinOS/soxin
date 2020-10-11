@@ -1,10 +1,12 @@
 { self, lib, home-manager }:
 
-{ modules ? [], specialArgs ? { }, ... } @ args:
+{ modules ? [ ], specialArgs ? { }, ... } @ args:
 lib.nixosSystem (args // {
-  specialArgs = lib.mergeAttrs {
-    mode = "NixOS";
-  } specialArgs;
+  specialArgs = lib.mergeAttrs
+    {
+      mode = "NixOS";
+    }
+    specialArgs;
 
   modules = lib.concat [
     self.nixosModules.soxin
@@ -27,5 +29,6 @@ lib.nixosSystem (args // {
         });
       };
     })
-  ] modules;
+  ]
+    modules;
 })
