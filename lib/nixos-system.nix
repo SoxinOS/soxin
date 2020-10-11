@@ -15,7 +15,6 @@ lib.nixosSystem (args // {
       home-manager.useGlobalPkgs = true;
     }
 
-    # Allow accessing the parent NixOS configuration.
     ({ config, ... }: {
       options.home-manager.users = lib.mkOption {
         type = lib.types.attrsOf (lib.types.submoduleWith {
@@ -23,7 +22,6 @@ lib.nixosSystem (args // {
             self.nixosModules.soxin
           ];
           specialArgs = {
-            super = config;
             mode = "home-manager";
           };
         });
