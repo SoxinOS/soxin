@@ -7,22 +7,45 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    futils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, home-manager } @ inputs:
+  outputs = { self, nixpkgs, home-manager, futils } @ inputs:
     let
       inherit (nixpkgs) lib;
-    in
-    {
-      nixosModules = {
-        soxin = import ./modules/list.nix;
-      };
+      inherit (lib) recursiveUpdate;
+      inherit (futils.lib) eachDefaultSystem;
 
-      lib = lib.extend (final: prev: {
-        nixosSystem = import ./lib/nixos-system.nix {
-          lib = prev;
-          inherit self home-manager;
+      pkgImport = pkgs: system:
+        import pkgs {
+          inherit system;
         };
-      });
-    };
+
+      multiSystemOutputs = eachDefaultSystem (system:
+        let
+          pkgs = pkgImport nixpkgs system;
+        in
+        {
+          devShell = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              git nixpkgs-fmt
+            ];
+          };
+        }
+      );
+
+      outputs = {
+        lib = lib.extend (final: prev: {
+          nixosSystem = import ./lib/nixos-system.nix {
+            lib = prev;
+            inherit self home-manager;
+          };
+        });
+
+        nixosModules = {
+          soxin = import ./modules/list.nix;
+        };
+      };
+    in
+    recursiveUpdate multiSystemOutputs outputs;
 }
