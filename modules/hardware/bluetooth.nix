@@ -7,12 +7,16 @@ with lib;
     soxin.hardware.bluetooth.enable = mkEnableOption "Enable bluetooth";
   };
 
-  config = mkIf config.soxin.hardware.bluetooth.enable (
-    if (mode == "NixOS") then {
+  config = mkIf config.soxin.hardware.bluetooth.enable (mkMerge [
+
+    (mkIf (mode == "NixOS") {
       hardware.bluetooth.enable = true;
       services.blueman.enable = true;
-    } else if (mode == "home-manager") then {
+    })
+
+    (mkIf (mode == "home-manager") {
       services.blueman-applet.enable = true;
-    } else { }
-  );
+    })
+
+  ]);
 }
