@@ -37,12 +37,11 @@
       );
 
       outputs = {
-        lib = lib.extend (final: prev: {
+        lib = {
           nixosSystem = import ./lib/nixos-system.nix {
-            lib = prev;
-            inherit self home-manager;
+            inherit self lib home-manager;
           };
-        });
+        };
 
         nixosModules = {
           soxin = import ./modules/list.nix;
