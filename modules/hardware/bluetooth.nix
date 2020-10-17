@@ -9,12 +9,12 @@ with lib;
 
   config = mkIf config.soxin.hardware.bluetooth.enable (mkMerge [
 
-    (mkIf (mode == "NixOS") {
+    (optionalAttrs (mode == "NixOS") {
       hardware.bluetooth.enable = true;
       services.blueman.enable = true;
     })
 
-    (mkIf (mode == "home-manager") {
+    (optionalAttrs (mode == "home-manager") {
       services.blueman-applet.enable = true;
     })
 
