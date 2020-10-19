@@ -8,7 +8,7 @@ lib.nixosSystem (args // {
     }
     specialArgs;
 
-  modules = lib.concat [
+  modules = modules ++ [
     self.nixosModules.soxin
 
     home-manager.nixosModules.home-manager
@@ -30,6 +30,5 @@ lib.nixosSystem (args // {
         });
       };
     })
-  ]
-    modules;
+  ];
 })
