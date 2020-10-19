@@ -15,6 +15,7 @@ lib.nixosSystem (args // {
     {
       # This is required when using flakes.
       home-manager.useGlobalPkgs = true;
+      home-manager.useUserPackages = true;
     }
 
     ({ config, ... }: {
