@@ -1,5 +1,3 @@
 {
-  imports = [
-    ./hardware/bluetooth.nix
-  ];
+  bluetooth = ./hardware/bluetooth.nix;
 }

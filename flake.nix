@@ -43,8 +43,8 @@
           };
         };
 
-        nixosModules = {
-          soxin = import ./modules/list.nix;
+        nixosModules = (import ./modules) // {
+          soxin = import ./modules/soxin.nix;
         };
 
         defaultTemplate = {
