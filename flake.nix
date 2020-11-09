@@ -16,14 +16,9 @@
       inherit (lib) recursiveUpdate;
       inherit (futils.lib) eachDefaultSystem;
 
-      pkgImport = pkgs: system:
-        import pkgs {
-          inherit system;
-        };
-
       multiSystemOutputs = eachDefaultSystem (system:
         let
-          pkgs = pkgImport nixpkgs system;
+          pkgs = nixpkgs.legacyPackages.${system};
         in
         {
           devShell = pkgs.mkShell {
