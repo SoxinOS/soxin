@@ -12,12 +12,14 @@ lib.nixosSystem (args // {
     self.nixosModules.soxin
 
     home-manager.nixosModules.home-manager
+    # Required when using flakes.
     {
-      # This is required when using flakes.
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
     }
 
+    # Override home-manager per-user submodule to add our own modules to it,
+    # and to pass the argument `mode`.
     ({ config, ... }: {
       options.home-manager.users = lib.mkOption {
         type = lib.types.attrsOf (lib.types.submoduleWith {
