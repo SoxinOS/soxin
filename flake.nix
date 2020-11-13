@@ -36,6 +36,7 @@
           nixosSystem = import ./lib/nixos-system.nix {
             inherit self lib home-manager;
           };
+          overlaysToPkgs = import ./lib/overlays-to-pkgs.nix { inherit lib; };
         };
 
         nixosModules = (import ./modules) // {

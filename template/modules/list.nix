@@ -1,0 +1,3 @@
+{
+  bogus = ./services/bogus.nix;
+}

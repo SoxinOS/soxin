@@ -1,2 +1,4 @@
 /flake.lock
 /result*
+/template/flake.lock
+/template/result*
