@@ -17,3 +17,14 @@ To build and run the provided configuration, you can do this:
 $ nixos-rebuild --flake .#example build-vm
 $ ./result/bin/run-example-vm
 ```
+
+## Acknowledgments
+
+Here is a list of the tools we are using for this project. If licensed code was
+borrowed, its license is kept with it.
+
+* [nixflk](https://github.com/nrdxp/nixflk) for the general project structure
+* [nixpkgs-fmt](https://github.com/nix-community/nixpkgs-fmt) for source code
+  formatting
+* [flake-utils](https://github.com/numtide/flake-utils) very useful to work
+  with flake
