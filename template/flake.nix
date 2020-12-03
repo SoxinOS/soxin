@@ -51,7 +51,7 @@
             ];
           };
 
-          packages = soxin.lib.overlayToPkgs self.overlays pkgs;
+          packages = soxin.lib.overlaysToPkgs self.overlays pkgs;
         }
       );
 
