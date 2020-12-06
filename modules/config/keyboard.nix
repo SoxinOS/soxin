@@ -43,6 +43,11 @@ in
 {
   options = {
     soxin.settings.keyboard = {
+      submodule = mkOption {
+        default = layoutModule;
+        internal = true;
+      };
+
       layouts = mkOption {
         default = [ ];
         type = with types; listOf layoutModule;

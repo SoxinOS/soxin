@@ -34,12 +34,7 @@
       );
 
       outputs = {
-        lib = {
-          nixosSystem = import ./lib/nixos-system.nix {
-            inherit self lib home-manager;
-          };
-          overlaysToPkgs = import ./lib/overlays-to-pkgs.nix { inherit lib; };
-        };
+        lib = import ./lib (recursiveUpdate inputs { inherit lib; });
 
         overlay = self.overlays.packages;
 
