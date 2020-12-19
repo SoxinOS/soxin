@@ -39,6 +39,8 @@
           overlaysToPkgs = import ./lib/overlays-to-pkgs.nix { inherit lib; };
         };
 
+        overlay = import ./pkgs;
+
         nixosModules = (import ./modules) // {
           soxin = import ./modules/soxin.nix;
         };
