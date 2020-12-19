@@ -1,1 +1,5 @@
-final: prev: { }
+final: prev:
+
+{
+  rbrowser = final.callPackage ./rbrowser { };
+}
