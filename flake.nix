@@ -28,6 +28,8 @@
               pre-commit
             ];
           };
+
+          packages = self.lib.overlaysToPkgs self.overlays pkgs;
         }
       );
 
@@ -39,7 +41,9 @@
           overlaysToPkgs = import ./lib/overlays-to-pkgs.nix { inherit lib; };
         };
 
-        overlay = import ./pkgs;
+        overlay = self.overlays.packages;
+
+        overlays = import ./overlays;
 
         nixosModules = (import ./modules) // {
           soxin = import ./modules/soxin.nix;
