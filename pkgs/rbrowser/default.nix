@@ -218,8 +218,8 @@ stdenvNoCC.mkDerivation rec {
   installPhase = ''
     install -Dm755 $src/bin/rbrowser $out/bin/rbrowser
 
-    install -dm755 $out/share/applications
-    ln -s ${desktopItem}/share/appications/* $out/share/applications/
+    mkdir -p $out/share
+    ln -s ${desktopItem}/share/applications $out/share/applications
   '';
 
   meta =
