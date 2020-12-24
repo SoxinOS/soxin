@@ -5,6 +5,7 @@ lib.nixosSystem (args // {
   specialArgs = lib.mergeAttrs
     {
       mode = "NixOS";
+      inherit home-manager;
     }
     specialArgs;
 
@@ -28,6 +29,7 @@ lib.nixosSystem (args // {
           ];
           specialArgs = {
             mode = "home-manager";
+            inherit home-manager;
           };
         });
       };
