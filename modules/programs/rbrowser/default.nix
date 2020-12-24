@@ -1,20 +1,52 @@
-{ mode, config, pkgs, lib, ... }:
+{ mode, config, home-manager, lib, pkgs, ... }:
 
 with lib;
 let
   cfg = config.soxin.programs.rbrowser;
 
-  browserSubmodule = { name, ... }: {
-    options = {
-      enable = mkOption {
-        default = true;
-        type = types.bool;
-        description = ''
-          Whether to enable the ${name} integration with rbrowser.
-        '';
+  browserSubmodule =
+    let
+      getFromDagName = dagName: index:
+        let
+          hasAt = lib.stringAsChars (x: if x == "@" then x else "") dagName == "@";
+          nameProfile = builtins.head (builtins.tail (builtins.split "^(.*)@(.*)$" dagName));
+        in
+        assert lib.asserts.assertMsg hasAt ''The dagName must be of the format browser@profile, got "${dagName}"!'';
+        assert lib.asserts.assertMsg (builtins.length nameProfile == 2) "The dagName must be of the format browser@profile.";
+        builtins.elemAt nameProfile index;
+    in
+    { dagName, ... }:
+    {
+      options = {
+        name = mkOption {
+          type = types.enum pkgs.rbrowser.supportedBrowsers;
+          default = getFromDagName dagName 0;
+          readOnly = true; # do not allow changes to this value
+          internal = true; # do not show this option in the manual
+          description = ''
+            The name of the browser. These browsers are supported: ${builtins.concatStringsSep " " pkgs.rbrowser.supportedBrowsers}.
+          '';
+        };
+
+        profile = mkOption {
+          type = types.str;
+          default = getFromDagName dagName 1;
+          readOnly = true; # do not allow changes to this value
+          internal = true; # do not show this option in the manual
+          description = ''
+            The name of the profile.
+          '';
+        };
+
+        flags = mkOption {
+          type = with types; listOf str;
+          default = [ ];
+          description = ''
+            The flags to apply when calling the browser's command.
+          '';
+        };
       };
     };
-  };
 
   mimeTypes = [
     "application/pdf"
@@ -49,43 +81,38 @@ in
     soxin.programs.rbrowser = {
       enable = mkEnableOption "rbrowser, a rofi browser picker";
 
-      browsers = {
-        brave = mkOption {
-          type = types.submodule browserSubmodule;
-          default = { };
-        };
-        chromium = mkOption {
-          type = types.submodule browserSubmodule;
-          default = { };
-        };
-        firefox = mkOption {
-          type = types.submodule browserSubmodule;
-          default = { };
-        };
+      browsers = mkOption {
+        type = home-manager.lib.hm.types.dagOf (types.submodule browserSubmodule);
+        default = { };
+        description = ''
+          The browsers to enable in Rbrowser.
+        '';
+
+        # when the browsers option is accessed, the dag is then converted to an
+        # ordered list of attribute set of all browsers.
+        apply = with pkgs; config:
+          let
+            sortedCommands = home-manager.lib.hm.dag.topoSort config;
+          in
+          if sortedCommands ? result
+          # build the list by getting the data attr out of the list of
+          # attrs result.
+          then map (e: e.data) sortedCommands.result
+          else abort ("Dependency cycle in hook script: " + builtins.toJSON sortedCommands);
       };
 
       package = mkOption {
         type = types.package;
-        default = pkgs.rbrowser.override {
-          withBrave = cfg.browsers.brave.enable;
-          withChromium = cfg.browsers.chromium.enable;
-          withFirefox = cfg.browsers.firefox.enable;
-        };
+        default = pkgs.rbrowser.override { inherit (cfg) browsers; };
         defaultText = ''
-          pkgs.rbrowser.override {
-            withBrave = cfg.browsers.brave.enable;
-            withChromium = cfg.browsers.chromium.enable;
-            withFirefox = cfg.browsers.firefox.enable;
-          };
+          pkgs.rbrowser.override { inherit (cfg) browsers; };
         '';
-        example = literalExample ''
-          pkgs.rbrowser.override {
-            withBrave = false;
-          };
+        example = ''
+          pkgs.rbrowser.override { browsers = [ { name = "chromium"; profile = "personal"; flags = []; } ]; };
         '';
         description = ''
-          The rbrowser package to use. It it automatically overriden
-          depending on the browsers you enabled.
+          The rbrowser package to use. It it automatically overriden depending
+          on the browsers you enabled.
 
           If you choose to use your own, it should expose a binary under
           `bin/rbrowser` that will be used by this module.
