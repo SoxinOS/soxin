@@ -190,7 +190,12 @@ let
           ''}
           fi
 
-          entry="$(${rofi}/bin/rofi -dmenu < <(printf "%s\n" "''${items[@]}"))"
+          # Some applications such as Slack are failing to open rbrowser
+          # because of fails to access the system locale. I'm not sure why this
+          # is happening. A workaround is to use LC_ALL=C which essentially
+          # disables the locale lookup. Bash (the shebang) is still complaining
+          # about locale not found.
+          entry="$(LC_ALL=C ${rofi}/bin/rofi -dmenu < <(printf "%s\n" "''${items[@]}"))"
           browser="$(echo "''${entry}" | cut -d@ -f1)"
           profile="$(echo "''${entry}" | cut -d@ -f2)"
         fi
