@@ -279,8 +279,6 @@ stdenvNoCC.mkDerivation rec {
 
   src = rbrowser;
 
-  phases = [ "installPhase" "fixupPhase" ];
-
   installPhase = ''
     install -Dm755 $src/bin/rbrowser $out/bin/rbrowser
 
