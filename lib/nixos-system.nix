@@ -1,15 +1,14 @@
 { self, lib, home-manager }:
 
-{ modules ? [ ], specialArgs ? { }, ... } @ args:
-lib.nixosSystem (args // {
-  specialArgs = lib.mergeAttrs
-    {
-      mode = "NixOS";
-      inherit home-manager;
-    }
-    specialArgs;
+{ modules ? [ ], globalSpecialArgs ? { }, nixosSpecialArgs ? { }, hmSpecialArgs ? { }, ... } @ args:
+lib.nixosSystem (lib.recursiveUpdate (removeAttrs args [ "globalSpecialArgs" "nixosSpecialArgs" "hmSpecialArgs" ]) {
+  specialArgs = { mode = "NixOS"; } // globalSpecialArgs // nixosSpecialArgs;
 
   modules = modules ++ [
+    {
+      _module.args = { inherit home-manager; };
+    }
+
     self.nixosModules.soxin
 
     home-manager.nixosModules.home-manager
@@ -25,12 +24,12 @@ lib.nixosSystem (args // {
       options.home-manager.users = lib.mkOption {
         type = lib.types.attrsOf (lib.types.submoduleWith {
           modules = [
+            {
+              _module.args = { inherit home-manager; };
+            }
             self.nixosModules.soxin
           ];
-          specialArgs = {
-            mode = "home-manager";
-            inherit home-manager;
-          };
+          specialArgs = { mode = "home-manager"; } // globalSpecialArgs // hmSpecialArgs;
         });
       };
     })
