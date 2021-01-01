@@ -43,7 +43,9 @@
 
         overlay = self.overlays.packages;
 
-        overlays = import ./overlays;
+        overlays = import ./overlays // {
+          packages = import ./pkgs;
+        };
 
         nixosModules = (import ./modules) // {
           soxin = import ./modules/soxin.nix;
