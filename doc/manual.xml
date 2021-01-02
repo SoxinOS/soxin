@@ -1,0 +1,10 @@
+<book xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      version="5.0"
+      xml:id="book-soxin-manual">
+ <info>
+  <title>Soxin manual</title>
+ </info>
+     <!--<xi:include href="man-nur-rycee-hm-options.xml" />-->
+</book>

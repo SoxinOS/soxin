@@ -50,11 +50,28 @@
         "type": "github"
       }
     },
+    "nmd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1591526120,
+        "narHash": "sha256-srJ+qub7TdhBwQxnjDYY5qc/3180XG616u7Ft/a0vOI=",
+        "owner": "rycee",
+        "repo": "nmd",
+        "rev": "f204dd1e1033c891a00ae53ae29bc275c68e54dd",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "rycee",
+        "repo": "nmd",
+        "type": "gitlab"
+      }
+    },
     "root": {
       "inputs": {
         "futils": "futils",
         "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "nmd": "nmd"
       }
     }
   },

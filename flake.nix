@@ -8,9 +8,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     futils.url = "github:numtide/flake-utils";
+    nmd = {
+      url = "gitlab:rycee/nmd";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, futils } @ inputs:
+  outputs = { self, nixpkgs, home-manager, futils, nmd } @ inputs:
     let
       inherit (nixpkgs) lib;
       inherit (lib) recursiveUpdate;
@@ -29,7 +33,8 @@
             ];
           };
 
-          packages = self.lib.overlaysToPkgs self.overlays pkgs;
+          packages = (self.lib.overlaysToPkgs self.overlays pkgs) //
+            (import ./doc { inherit self nixpkgs pkgs lib; nmdSrc = nmd; });
         }
       );
 
