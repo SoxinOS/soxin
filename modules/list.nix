@@ -1,5 +1,5 @@
 {
-  keyboard = ./config/keyboard.nix;
+  keyboard = ./settings/keyboard.nix;
 
   bluetooth = ./hardware/bluetooth.nix;
 
