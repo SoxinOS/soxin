@@ -19,5 +19,7 @@ in
     };
   };
 
-  imports = [ ];
+  imports = [
+    ./gruvbox-dark.nix
+  ];
 }
