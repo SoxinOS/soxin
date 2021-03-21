@@ -2,6 +2,15 @@
 
 with lib;
 let
+  rofiModule = types.submodule {
+    options = {
+      theme = mkOption {
+        type = types.str;
+        default = "";
+      };
+    };
+  };
+
   themeModule = types.submodule {
     options = {
       rofi = mkOption {
