@@ -3,5 +3,9 @@
 with lib;
 
 {
-  config.soxin.themes.gruvbox = { };
+  config.soxin.themes.gruvbox = {
+    rofi = {
+      theme = "gruvbox-dark";
+    };
+  };
 }

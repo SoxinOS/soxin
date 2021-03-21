@@ -12,6 +12,11 @@ in
     soxin.programs.rofi = {
       enable = mkEnableOption "rofi";
 
+      theme = mkOption {
+        default = config.soxin.settings.theme;
+        apply = value: value.rofi;
+      };
+
       modi = mkOption {
         type = with types; attrsOf (nullOr str);
         default = { };
@@ -62,6 +67,8 @@ in
     (optionalAttrs (mode == "home-manager") {
       programs.rofi = {
         enable = true;
+
+        theme = cfg.theme.theme;
 
         extraConfig = ''
           rofi.modi: ${modi}
