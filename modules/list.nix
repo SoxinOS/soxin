@@ -1,5 +1,8 @@
 {
   keyboard = ./settings/keyboard.nix;
+  theme = ./settings/theme.nix;
+
+  themes = ./themes;
 
   bluetooth = ./hardware/bluetooth.nix;
 
