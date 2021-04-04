@@ -2,28 +2,12 @@
 
 with lib;
 let
-  rofiModule = types.submodule {
-    options = {
-      name = mkOption {
-        type = types.str;
-        default = "";
-      };
-    };
-  };
-
-  themeModule = types.submodule {
-    options = {
-      rofi = mkOption {
-        type = with types; nullOr rofiModule;
-        default = null;
-      };
-    };
-  };
+  utils = config.soxin.utils.themes;
 in
 {
   options = {
     soxin.themes = mkOption {
-      type = with types; attrsOf themeModule;
+      type = with types; attrsOf utils.themeModule;
       default = { };
     };
   };
@@ -31,4 +15,26 @@ in
   imports = [
     ./gruvbox-dark.nix
   ];
+
+  config = {
+    soxin.utils.themes = {
+      themeModule = types.submodule {
+        options = {
+          rofi = mkOption {
+            type = utils.rofiModule;
+            default = { };
+          };
+        };
+      };
+
+      rofiModule = types.submodule {
+        options = {
+          name = mkOption {
+            type = with types; nullOr str;
+            default = null;
+          };
+        };
+      };
+    };
+  };
 }
