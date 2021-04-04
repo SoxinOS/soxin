@@ -1,29 +1,13 @@
-{ config, lib, ... }:
+{ soxin, config, lib, ... }:
 
 with lib;
 let
-  rofiModule = types.submodule {
-    options = {
-      theme = mkOption {
-        type = types.str;
-        default = "";
-      };
-    };
-  };
-
-  themeModule = types.submodule {
-    options = {
-      rofi = mkOption {
-        type = with types; nullOr rofiModule;
-        default = null;
-      };
-    };
-  };
+  utils = config.soxin.utils.themes;
 in
 {
   options = {
     soxin.themes = mkOption {
-      type = with types; attrsOf themeModule;
+      type = with types; attrsOf soxin.lib.modules.themes.themeModule;
       default = { };
     };
   };

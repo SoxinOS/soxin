@@ -1,4 +1,4 @@
-{ mode, config, pkgs, lib, ... }:
+{ mode, soxin, options, config, pkgs, lib, ... }:
 
 with lib;
 let
@@ -13,8 +13,10 @@ in
       enable = mkEnableOption "rofi";
 
       theme = mkOption {
+        type = with types; oneOf [ str soxin.lib.modules.themes.themeModule ];
         default = config.soxin.settings.theme;
-        apply = value: value.rofi;
+        apply = value: if isString value then config.soxin.themes.${value}.rofi
+                       else value.rofi;
       };
 
       modi = mkOption {
@@ -68,7 +70,7 @@ in
       programs.rofi = {
         enable = true;
 
-        theme = cfg.theme.theme;
+        theme = cfg.theme.name;
 
         extraConfig = ''
           rofi.modi: ${modi}
