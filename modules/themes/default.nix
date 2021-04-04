@@ -4,7 +4,7 @@ with lib;
 let
   rofiModule = types.submodule {
     options = {
-      theme = mkOption {
+      name = mkOption {
         type = types.str;
         default = "";
       };

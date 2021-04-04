@@ -68,7 +68,7 @@ in
       programs.rofi = {
         enable = true;
 
-        theme = cfg.theme.theme;
+        theme = cfg.theme.name;
 
         extraConfig = ''
           rofi.modi: ${modi}
