@@ -9,50 +9,47 @@ let
 in
 {
   options = {
-    soxin.programs.rofi = {
-      enable = mkEnableOption "rofi";
+    soxin.programs.rofi = soxin.lib.mkSoxinModule {
+      inherit config;
+      name = "rofi";
+      includeTheme = true;
 
-      theme = mkOption {
-        type = with types; oneOf [ str soxin.lib.modules.themes.themeModule ];
-        default = config.soxin.settings.theme;
-        apply = value: if isString value then config.soxin.themes.${value}.rofi
-                       else value.rofi;
-      };
-
-      modi = mkOption {
-        type = with types; attrsOf (nullOr str);
-        default = { };
-        description = ''
-          rofi.modi configuration option. The attribute name is used as the
-          modi name. If the attribute value is not null, its path is given to
-          rofi.
-        '';
-        example = {
-          custom = "/some/custom/script.sh";
-        };
-      };
-
-      i3 = {
-        enable = mkOption {
-          type = types.bool;
-          default = false;
-          example = true;
+      extraOptions = {
+        modi = mkOption {
+          type = with types; attrsOf (nullOr str);
+          default = { };
           description = ''
-            Whether to enable i3 support for rofi.
-
-            When enabled, you can set i3 bindings to the following commands:
-            exec ''${pkgs.rofi}/bin/rofi -show i3Workspaces
-            exec ''${pkgs.rofi}/bin/rofi -show i3RenameWorkspace
-            exec ''${pkgs.rofi}/bin/rofi -show i3MoveContainer
+            rofi.modi configuration option. The attribute name is used as the
+            modi name. If the attribute value is not null, its path is given to
+            rofi.
           '';
+          example = {
+            custom = "/some/custom/script.sh";
+          };
         };
-      };
 
-      dpi = mkOption {
-        type = with types; nullOr ints.positive;
-        default = null;
-        description = "The DPI of the rofi.";
-        apply = value: toString value;
+        i3 = {
+          enable = mkOption {
+            type = types.bool;
+            default = false;
+            example = true;
+            description = ''
+              Whether to enable i3 support for rofi.
+
+              When enabled, you can set i3 bindings to the following commands:
+              exec ''${pkgs.rofi}/bin/rofi -show i3Workspaces
+              exec ''${pkgs.rofi}/bin/rofi -show i3RenameWorkspace
+              exec ''${pkgs.rofi}/bin/rofi -show i3MoveContainer
+            '';
+          };
+        };
+
+        dpi = mkOption {
+          type = with types; nullOr ints.positive;
+          default = null;
+          description = "The DPI of the rofi.";
+          apply = value: toString value;
+        };
       };
     };
   };
