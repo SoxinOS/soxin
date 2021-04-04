@@ -4,8 +4,6 @@
 
   themes = ./themes;
 
-  utils = ./utils.nix;
-
   bluetooth = ./hardware/bluetooth.nix;
 
   rbrowser = ./programs/rbrowser;

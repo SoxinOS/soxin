@@ -2,7 +2,10 @@
 
 { modules ? [ ], globalSpecialArgs ? { }, nixosSpecialArgs ? { }, hmSpecialArgs ? { }, ... } @ args:
 lib.nixosSystem (lib.recursiveUpdate (removeAttrs args [ "globalSpecialArgs" "nixosSpecialArgs" "hmSpecialArgs" ]) {
-  specialArgs = { mode = "NixOS"; } // globalSpecialArgs // nixosSpecialArgs;
+  specialArgs = {
+    mode = "NixOS";
+    soxin = self;
+  } // globalSpecialArgs // nixosSpecialArgs;
 
   modules = modules ++ [
     {
@@ -29,7 +32,10 @@ lib.nixosSystem (lib.recursiveUpdate (removeAttrs args [ "globalSpecialArgs" "ni
             }
             self.nixosModules.soxin
           ];
-          specialArgs = { mode = "home-manager"; } // globalSpecialArgs // hmSpecialArgs;
+          specialArgs = {
+            mode = "home-manager";
+            soxin = self;
+          } // globalSpecialArgs // hmSpecialArgs;
         });
       };
     })

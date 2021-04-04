@@ -1,51 +1,15 @@
-{ mode, config, lib, ... }:
+{ mode, soxin, config, lib, ... }:
 
 with lib;
 let
   cfg = config.soxin.settings.keyboard;
-
-  layoutModule = types.submodule ({ config, ... }: {
-    options = {
-      x11 = {
-        layout = mkOption {
-          type = types.str;
-          default = "us";
-          example = "fr";
-          description = "Keyboard layout";
-        };
-
-        variant = mkOption {
-          type = types.str;
-          default = "";
-          example = "colemak";
-          description = "Keyboard variant";
-        };
-      };
-
-      console = {
-        keyMap = mkOption {
-          type = types.str;
-          example = "us";
-          description = ''
-            The keyboard mapping table for the virtual consoles. The default is
-            the layout associated with the keyMap but you may need to change this
-            depending on your keyboard variant.
-          '';
-        };
-      };
-    };
-
-    config = {
-      console.keyMap = mkDefault config.x11.layout;
-    };
-  });
 in
 {
   options = {
     soxin.settings.keyboard = {
       layouts = mkOption {
         default = [ ];
-        type = with types; listOf layoutModule;
+        type = with types; listOf soxin.lib.modules.keyboard.layoutModule;
         description = ''
           Keyboard layouts to use for consoles and Xorg server. The first
           layout of this list will be used as the default layout.
@@ -67,7 +31,7 @@ in
       };
 
       defaultLayout = mkOption {
-        type = layoutModule;
+        type = soxin.lib.modules.keyboard.layoutModule;
         default = builtins.head cfg.layouts;
         internal = true;
         description = ''

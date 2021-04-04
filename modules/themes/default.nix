@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ soxin, config, lib, ... }:
 
 with lib;
 let
@@ -7,7 +7,7 @@ in
 {
   options = {
     soxin.themes = mkOption {
-      type = with types; attrsOf utils.themeModule;
+      type = with types; attrsOf soxin.lib.modules.themes.themeModule;
       default = { };
     };
   };
@@ -15,26 +15,4 @@ in
   imports = [
     ./gruvbox-dark.nix
   ];
-
-  config = {
-    soxin.utils.themes = {
-      themeModule = types.submodule {
-        options = {
-          rofi = mkOption {
-            type = utils.rofiModule;
-            default = { };
-          };
-        };
-      };
-
-      rofiModule = types.submodule {
-        options = {
-          name = mkOption {
-            type = with types; nullOr str;
-            default = null;
-          };
-        };
-      };
-    };
-  };
 }
