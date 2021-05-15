@@ -1,21 +1,21 @@
 ---
-feature: (languages)
-start-date: (2021-04-30)
-author: (Shahrukh Khan)
-related-issues: (None)
+feature: tools-and-programming-languages
+start-date: 2021-04-30
+author: Shahrukh Khan
+related-issues: None
 ---
 
 # Summary
 [summary]: #summary
 
-This RFC describes how language support is to be implemented in Soxin. This
-breaks down in two areas:
+This RFC describes how tools and programming languages support is to be
+implemented in Soxin. This breaks down in two areas:
 
 * How languages are defined, i-e how to define the language and its properties
   i-e its compiler, tools, editor plugins etc. How the user can define the
-  defualt plugins for a language in his editor(s).
+  default plugins for a language in their editor(s).
 * How the user can select default set of languages and its required tools in
-  his editor, and how to override default settings on the editor.
+  their editor, and how to override default settings per-editor.
 
 # Motivation
 [motivation]: #motivation
@@ -50,7 +50,7 @@ soxin.programming.tools = {
   tmux = { /* ... */ };
 }
 ```
-This allows soxin to define its own support for languages and tools, while
+This allows Soxin to define its own support for languages and tools, while
 allowing room for user customization as well.
 
 Similar to RFC 2, each programming language must include a key for each editor
@@ -67,17 +67,18 @@ Similar to RFC 2, a `soxin.settings.programming.languages` and
 to choose his programming stack. The only permitted values here shall be the
 defined in `config.soxin.programming.<type>`. This option shall be of type
 `Array` of `str`, with apply function which iterate over the array and find
-appropriate language or tool.
+appropriate languages or tools.
 
-### Per-editor
+### Per-program
 
-Each editor that supports a language must provide a
-`soxin.programs.<editor-name>.language` and `soxin.programs.<editor-name>.tool`
-option to allow the user to override the programming stack settings per editor.
-These options will default to `config.soxin.settings.programming.<type>`,
-and thus will be of type `attrs`. Similar to RFC 2, they will also have will
-also allow `str` and have an `apply` function that will lookup the theme
-from `config.soxin.programming.<type>` for each option.
+Each program that supports a language must provide a
+`soxin.programs.<program-name>.programming.language` and
+`soxin.programs.<editor-name>.programming.tool` option to allow the user to
+override the programming language stack settings per program. These options will default
+to `config.soxin.settings.programming.<type>`, and thus will be of type
+`attrs`. Similar to RFC 2, they will also have will also allow `str` and have
+an `apply` function that will lookup the theme from `config.soxin.programming.<type>`
+for each option.
 
 # Examples and Interactions
 [examples-and-interactions]: #examples-and-interactions
@@ -137,13 +138,13 @@ let
 The options of the `programs.neovim` have been modified for simplicity's sake.
 
 
-# Examples and Interactions
-[examples-and-interactions]: #examples-and-interactions
-
-
 # Drawbacks
 [drawbacks]: #drawbacks
 
+Adds additional layer of segregation between `soxin.programs` and
+`soxin.programming.tools`. Which will require Soxin developers to be cognizant
+about where to add a new language or a tool, thus adding additional layer of
+complexity.
 
 # Alternatives
 [alternatives]: #alternatives
@@ -151,9 +152,5 @@ The options of the `programs.neovim` have been modified for simplicity's sake.
 
 # Unresolved questions
 [unresolved]: #unresolved-questions
-
-
-# Future work
-[future]: #future-work
 
 
