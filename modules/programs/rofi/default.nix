@@ -23,6 +23,8 @@ in
             modi name. If the attribute value is not null, its path is given to
             rofi.
           '';
+          apply = attrs:
+            builtins.concatStringsSep "," (lib.attrsets.mapAttrsToList (name: value: name + (optionalString (value != null) "=${value}")) attrs);
           example = {
             custom = "/some/custom/script.sh";
           };
@@ -37,9 +39,10 @@ in
               Whether to enable i3 support for rofi.
 
               When enabled, you can set i3 bindings to the following commands:
-              exec ''${pkgs.rofi}/bin/rofi -show i3Workspaces
-              exec ''${pkgs.rofi}/bin/rofi -show i3RenameWorkspace
               exec ''${pkgs.rofi}/bin/rofi -show i3MoveContainer
+              exec ''${pkgs.rofi}/bin/rofi -show i3RenameWorkspace
+              exec ''${pkgs.rofi}/bin/rofi -show i3SwapWorkspaces
+              exec ''${pkgs.rofi}/bin/rofi -show i3Workspaces
             '';
           };
         };
