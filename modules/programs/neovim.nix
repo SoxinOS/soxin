@@ -26,7 +26,7 @@ in {
         };
 
         plugins = mkOption {
-          type = with types; listOf (either package pluginWithConfigType);
+          type = with types; listOf (either package soxin.lib.modules.neovim.pluginWithConfigModule);
           default = cfg.theme.plugins;
           example = literalExample ''
             with pkgs.vimPlugins; [
