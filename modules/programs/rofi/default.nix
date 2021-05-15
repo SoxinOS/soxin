@@ -3,9 +3,6 @@
 with lib;
 let
   cfg = config.soxin.programs.rofi;
-
-  modi = concatStringsSep ","
-    (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") cfg.modi);
 in
 {
   options = {
@@ -24,7 +21,8 @@ in
             rofi.
           '';
           apply = attrs:
-            builtins.concatStringsSep "," (lib.attrsets.mapAttrsToList (name: value: name + (optionalString (value != null) "=${value}")) attrs);
+            builtins.concatStringsSep ","
+            (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") attrs);
           example = {
             custom = "/some/custom/script.sh";
           };
@@ -74,7 +72,7 @@ in
         theme = cfg.theme.name;
 
         extraConfig = ''
-          rofi.modi: ${modi}
+          rofi.modi: ${cfg.modi}
         '' + (optionalString (cfg.dpi != null) ''
           rofi.dpi: ${cfg.dpi}
         '');
