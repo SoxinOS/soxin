@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 
@@ -20,12 +20,14 @@ in {
   config.soxin.themes = {
     gruvbox-dark = {
       neovim = {
-        plugins = singleton vim-color-gruvbox;
-        extraRC = ''
-          set background=dark
-          colorscheme gruvbox
-          let g:airline_theme='gruvbox'
-        '';
+        plugins = singleton {
+          plugin = vim-color-gruvbox;
+          config = ''
+            set background=dark
+            colorscheme gruvbox
+            let g:airline_theme='gruvbox'
+          '';
+        };
       };
 
       rofi = { name = "gruvbox-dark"; };
@@ -33,12 +35,14 @@ in {
 
     gruvbox-light = {
       neovim = {
-        plugins = singleton vim-color-gruvbox;
-        extraRC = ''
-          set background=light
-          colorscheme gruvbox
-          let g:airline_theme='gruvbox'
-        '';
+        plugins = singleton {
+          plugin = vim-color-gruvbox;
+          config = ''
+            set background=light
+            colorscheme gruvbox
+            let g:airline_theme='gruvbox'
+          '';
+        };
       };
 
       rofi = { name = "gruvbox-light"; };
