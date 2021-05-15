@@ -3,7 +3,8 @@
 with lib;
 let
   cfg = config.soxin.programs.neovim;
-in {
+in
+{
   options = {
     soxin.programs.neovim = soxin.lib.mkSoxinModule {
       inherit config;

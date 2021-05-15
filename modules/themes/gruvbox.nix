@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-
 let
   vim-color-gruvbox = with pkgs; vimUtils.buildVimPluginFrom2Nix rec {
     pname = "gruvbox";
@@ -16,7 +15,8 @@ let
 
     dependencies = [ ];
   };
-in {
+in
+{
   config.soxin.themes = {
     gruvbox-dark = {
       neovim = {

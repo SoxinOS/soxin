@@ -22,7 +22,7 @@ in
           '';
           apply = attrs:
             builtins.concatStringsSep ","
-            (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") attrs);
+              (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") attrs);
           example = {
             custom = "/some/custom/script.sh";
           };

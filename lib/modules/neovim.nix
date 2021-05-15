@@ -1,13 +1,13 @@
 { lib }:
-
 let
   inherit (lib)
     mkEnableOption
     mkOption
     types
-  ;
+    ;
 
-in {
+in
+{
   pluginWithConfigModule = types.submodule {
     options = {
       config = mkOption {

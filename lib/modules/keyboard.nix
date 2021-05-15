@@ -1,11 +1,10 @@
 { lib }:
-
 let
   inherit (lib)
     mkDefault
     mkOption
     types
-  ;
+    ;
 in
 {
   layoutModule = types.submodule ({ config, ... }: {
