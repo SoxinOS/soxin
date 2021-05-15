@@ -13,6 +13,6 @@ in
   };
 
   imports = [
-    ./gruvbox-dark.nix
+    ./gruvbox.nix
   ];
 }
