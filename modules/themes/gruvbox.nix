@@ -85,6 +85,20 @@ in
         };
       };
 
+      polybar = {
+        extraConfig = {
+          colors = {
+            background = "#282828";
+            background-alt = "#689d68";
+            foreground = "#ebdbb2";
+            foreground-alt = "#ebdbb2";
+            primary = "#689d68";
+            secondary = "#1d2021";
+            alert = "#cc241d";
+          };
+        };
+      };
+
       termite = {
         extraConfig = {
           # hard contrast: backgroundColor = "#1d2021";

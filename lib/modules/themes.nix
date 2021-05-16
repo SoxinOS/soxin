@@ -20,6 +20,11 @@ rec {
         default = { };
       };
 
+      polybar = mkOption {
+        type = polybarModule;
+        default = { };
+      };
+
       rofi = mkOption {
         type = rofiModule;
         default = { };
@@ -92,6 +97,16 @@ rec {
       };
     };
   };
+
+  polybarModule = with types; submodule {
+    options = {
+      extraConfig = mkOption {
+        type = attrs;
+        default = { }; # TODO: Make this more specific by getting home-manager's type
+      };
+    };
+  };
+
 
   rofiModule = with types; submodule {
     options = {
