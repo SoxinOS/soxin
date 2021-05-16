@@ -15,7 +15,7 @@ home-manager.lib.homeManagerConfiguration (lib.recursiveUpdate (removeAttrs args
     soxin = self;
   } // hmSpecialArgs;
 
-  extraModules = modules ++ [
-    self.nixosModules.soxin
-  ];
+  extraModules =
+    modules
+    ++ self.nixosModules;
 })
