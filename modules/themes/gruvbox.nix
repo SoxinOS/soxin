@@ -2,17 +2,19 @@
 
 with lib;
 let
+  version = "3.0.1-rc.0";
+
+  src = fetchFromGitHub {
+    owner = "morhetz";
+    repo = "gruvbox";
+    rev = "v${version}";
+    sha256 = "01as1pkrlbzhcn1kyscy476w8im3g3wmphpcm4lrx7nwdq8ch7h1";
+  };
+
   vim-color-gruvbox = with pkgs; vimUtils.buildVimPluginFrom2Nix rec {
+    inherit src version;
+
     pname = "gruvbox";
-    version = "3.0.1-rc.0";
-
-    src = fetchFromGitHub {
-      owner = "morhetz";
-      repo = "gruvbox";
-      rev = "v${version}";
-      sha256 = "01as1pkrlbzhcn1kyscy476w8im3g3wmphpcm4lrx7nwdq8ch7h1";
-    };
-
     dependencies = [ ];
   };
 in
@@ -137,6 +139,16 @@ in
       };
 
       rofi = { name = "gruvbox-dark"; };
+
+      zsh = {
+        plugins = [
+          {
+            inherit src;
+            name = "gruvbox-dark";
+            file = "gruvbox_256palette.sh";
+          }
+        ];
+      };
     };
 
     gruvbox-light = {
