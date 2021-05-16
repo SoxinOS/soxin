@@ -41,7 +41,7 @@ rec {
     options = {
       config = mkOption {
         type = attrs;
-        default = {};
+        default = { };
       };
     };
   };
@@ -92,7 +92,7 @@ rec {
     options = {
       plugins = mkOption {
         type = types.listOf zsh.pluginModule;
-        default = [];
+        default = [ ];
         example = literalExample ''
           [
             {
