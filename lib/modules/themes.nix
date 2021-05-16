@@ -19,6 +19,20 @@ rec {
         type = rofiModule;
         default = { };
       };
+
+      tmux = mkOption {
+        type = tmuxModule;
+        default = { };
+      };
+    };
+  };
+
+  tmuxModule = with types; submodule {
+    options = {
+      extraConfig = mkOption {
+        type = nullOr str;
+        default = null;
+      };
     };
   };
 
@@ -46,10 +60,10 @@ rec {
     };
   };
 
-  rofiModule = types.submodule {
+  rofiModule = with types; submodule {
     options = {
       name = mkOption {
-        type = with types; nullOr str;
+        type = nullOr str;
         default = null;
       };
     };
