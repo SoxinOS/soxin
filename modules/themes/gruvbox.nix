@@ -19,6 +19,63 @@ in
 {
   config.soxin.themes = {
     gruvbox-dark = {
+      i3 = {
+        config =
+          let
+            # hard contrast: bg = '#282828'
+            bg = "#282828";
+            # soft contrast: bg = '#32302f'
+
+            aqua = "#689d68";
+            blue = "#458588";
+            darkgray = "#1d2021";
+            gray = "#a89984";
+            green = "#98971a";
+            purple = "#b16286";
+            red = "#cc241d";
+            white = "#ebdbb2";
+            yellow = "#d79921";
+
+          in
+          {
+            colors = {
+              background = darkgray;
+
+              focused = {
+                border = blue;
+                background = blue;
+                text = darkgray;
+                indicator = purple;
+                childBorder = darkgray;
+              };
+
+              focusedInactive = {
+                border = darkgray;
+                background = darkgray;
+                text = yellow;
+                indicator = purple;
+                childBorder = darkgray;
+              };
+
+              unfocused = {
+                border = darkgray;
+                background = darkgray;
+                text = yellow;
+                indicator = purple;
+                childBorder = darkgray;
+              };
+
+              urgent = {
+                border = red;
+                background = red;
+                text = white;
+                indicator = red;
+                childBorder = red;
+              };
+            };
+          };
+      };
+
       neovim = {
         plugins = singleton {
           plugin = vim-color-gruvbox;

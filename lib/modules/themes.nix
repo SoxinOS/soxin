@@ -10,6 +10,11 @@ in
 rec {
   themeModule = with types; submodule {
     options = {
+      i3 = mkOption {
+        type = i3Module;
+        default = { };
+      };
+
       neovim = mkOption {
         type = neovimModule;
         default = { };
@@ -23,6 +28,15 @@ rec {
       tmux = mkOption {
         type = tmuxModule;
         default = { };
+      };
+    };
+  };
+
+  i3Module = with types; submodule {
+    options = {
+      config = mkOption {
+        type = nullOr str;
+        default = null;
       };
     };
   };
