@@ -35,8 +35,8 @@ rec {
   i3Module = with types; submodule {
     options = {
       config = mkOption {
-        type = nullOr str;
-        default = null;
+        type = attrs;
+        default = {};
       };
     };
   };
