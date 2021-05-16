@@ -25,6 +25,11 @@ rec {
         default = { };
       };
 
+      termite = mkOption {
+        type = termiteModule;
+        default = { };
+      };
+
       tmux = mkOption {
         type = tmuxModule;
         default = { };
@@ -41,7 +46,16 @@ rec {
     options = {
       config = mkOption {
         type = attrs;
-        default = { };
+        default = { }; # TODO: Make this more specific by getting home-manager's type
+      };
+    };
+  };
+
+  termiteModule = with types; submodule {
+    options = {
+      extraConfig = mkOption {
+        type = attrs;
+        default = { }; # TODO: Make this more specific by getting home-manager's type
       };
     };
   };
