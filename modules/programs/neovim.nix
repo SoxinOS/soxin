@@ -21,14 +21,13 @@ in
           '';
           description = ''
             Custom vimrc lines.
-            </para><para>
-            This option is mutually exclusive with <varname>configure</varname>.
           '';
         };
 
         plugins = mkOption {
           type = with types; listOf (either package soxin.lib.modules.neovim.pluginWithConfigModule);
           default = cfg.theme.plugins;
+          defaultText = "The plugins added by the theme";
           example = literalExample ''
             with pkgs.vimPlugins; [
               yankring
@@ -41,8 +40,6 @@ in
           description = ''
             List of vim plugins to install optionally associated with
             configuration to be placed in init.vim.
-            </para><para>
-            This option is mutually exclusive with <varname>configure</varname>.
           '';
         };
       };
@@ -79,6 +76,7 @@ in
 
     (optionalAttrs (mode == "home-manager") {
       home.sessionVariables = { EDITOR = "nvim"; };
+
       programs.neovim = {
         inherit (cfg) enable extraConfig;
 
