@@ -16,6 +16,6 @@ home-manager.lib.homeManagerConfiguration (lib.recursiveUpdate (removeAttrs args
   } // hmSpecialArgs;
 
   extraModules =
-    modules
-    ++ (builtins.attrValues self.nixosModules);
+    (builtins.attrValues self.nixosModules)
+    ++ modules;
 })

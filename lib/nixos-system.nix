@@ -7,37 +7,38 @@ lib.nixosSystem (lib.recursiveUpdate (removeAttrs args [ "globalSpecialArgs" "ni
     soxin = self;
   } // globalSpecialArgs // nixosSpecialArgs;
 
-  modules = modules ++ [
-    {
-      _module.args = { inherit home-manager; };
-    }
+  modules =
+    modules
+    ++ (builtins.attrValues self.nixosModules)
+    ++ (builtins.attrValues home-manager.nixosModules)
+    ++ [
+      {
+        _module.args = { inherit home-manager; };
+      }
 
-    self.nixosModules.soxin
+      # Required when using flakes.
+      {
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+      }
 
-    home-manager.nixosModules.home-manager
-    # Required when using flakes.
-    {
-      home-manager.useGlobalPkgs = true;
-      home-manager.useUserPackages = true;
-    }
+      # Override home-manager per-user submodule to add our own modules to it,
+      # and to pass the argument `mode`.
+      ({ config, ... }: {
+        options.home-manager.users = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.submoduleWith {
+            modules =
+              (builtins.attrValues self.nixosModules)
+              ++ [{ _module.args = { inherit home-manager; }; }];
 
-    # Override home-manager per-user submodule to add our own modules to it,
-    # and to pass the argument `mode`.
-    ({ config, ... }: {
-      options.home-manager.users = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.submoduleWith {
-          modules = [
-            {
-              _module.args = { inherit home-manager; };
+            specialArgs = {
+              mode = "home-manager";
+              soxin = self;
             }
-            self.nixosModules.soxin
-          ];
-          specialArgs = {
-            mode = "home-manager";
-            soxin = self;
-          } // globalSpecialArgs // hmSpecialArgs;
-        });
-      };
-    })
-  ];
+            // globalSpecialArgs
+            // hmSpecialArgs;
+          });
+        };
+      })
+    ];
 })
