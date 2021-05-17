@@ -199,13 +199,11 @@ with lib;
       rofi = { name = "gruvbox-dark"; };
 
       zsh = {
-        plugins = [
-          {
-            src = pkgs.vimPlugins.gruvbox-community;
-            name = "gruvbox-dark";
-            file = "share/vim-plugins/gruvbox-community/gruvbox_256palette.sh";
-          }
-        ];
+        plugins = singleton {
+          src = pkgs.vimPlugins.gruvbox-community;
+          name = "gruvbox-dark";
+          file = "share/vim-plugins/gruvbox-community/gruvbox_256palette.sh";
+        };
       };
     };
 

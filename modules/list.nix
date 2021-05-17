@@ -11,4 +11,5 @@
   rofi = ./programs/rofi;
   termite = ./programs/termite;
   tmux = ./programs/tmux;
+  zsh = ./programs/zsh;
 }
