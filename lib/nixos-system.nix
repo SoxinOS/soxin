@@ -51,7 +51,8 @@ in nixosSystem (recursiveUpdate args' {
     ++ (builtins.attrValues self.nixosModules)
     # include all home-manager modules
     ++ (builtins.attrValues home-manager.nixosModules)
-
+    # configure Nix registry so users can find soxin
+    ++ singleton { nix.registry.soxin.flake = self; }
     # send home-manager down to NixOS modules
     ++ (singleton { _module.args = { inherit home-manager; }; })
 
