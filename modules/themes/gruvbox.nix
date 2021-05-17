@@ -193,7 +193,7 @@ in
               set-option -g message-command-style bg=colour239,fg=colour223
             '';
           in
-          pkgs.tmuxPlugins.mkTmuxPlugin rec {
+          singleton (pkgs.tmuxPlugins.mkTmuxPlugin rec {
             pluginName = "gruvbox-dark";
             src = extraConfig;
             unpackPhase = ":";
@@ -201,7 +201,7 @@ in
               mkdip -p $out/share/tmux-plugins
               ln -s ${extraConfig} $out/share/tmux-plugins/gruvbox-dark.tmux
             '';
-          };
+          });
       };
 
       rofi = { name = "gruvbox-dark"; };
