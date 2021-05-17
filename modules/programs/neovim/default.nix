@@ -84,19 +84,13 @@ in
       programs.neovim = {
         inherit (cfg) enable extraConfig plugins;
 
-        # Create aliases
-        viAlias = true;
-        vimAlias = true;
-        vimdiffAlias = true;
-
-        # Add support for NodeJS, Python 2 and 3 as well as Ruby
-        withNodeJs = true;
-        withPython3 = true;
-        withRuby = true;
-
         # Add the Python's neovim plugin
         extraPython3Packages = ps: with ps; [ pynvim ];
-      };
+      }
+      # Create aliases
+      // (genAttrs [ "viAlias" "vimAlias" "vimdiffAlias" ] (name: true))
+      # Add support for NodeJS, Python 2 and 3 as well as Ruby
+      // (genAttrs [ "withNodeJs" "withPython3" "withRuby" ] (name: true));
     })
   ]);
 }
