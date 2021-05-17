@@ -1,19 +1,6 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let
-  pname = "gruvbox";
-  version = "3.0.1-rc.0";
-
-  src = pkgs.fetchFromGitHub {
-    owner = "morhetz";
-    repo = pname;
-    rev = "v${version}";
-    sha256 = "01as1pkrlbzhcn1kyscy476w8im3g3wmphpcm4lrx7nwdq8ch7h1";
-  };
-
-  vim-color-gruvbox = pkgs.vimUtils.buildVimPluginFrom2Nix { inherit pname src version; };
-in
 {
   config.soxin.themes = {
     gruvbox-dark = {
@@ -76,7 +63,7 @@ in
 
       neovim = {
         plugins = singleton {
-          plugin = vim-color-gruvbox;
+          plugin = with pkgs.vimPlugins; gruvbox-community;
           config = ''
             set background=dark
             colorscheme gruvbox
@@ -209,9 +196,9 @@ in
       zsh = {
         plugins = [
           {
-            inherit src;
+            src = pkgs.vimPlugins.gruvbox-community;
             name = "gruvbox-dark";
-            file = "gruvbox_256palette.sh";
+            file = "share/vim-plugins/gruvbox-community/gruvbox_256palette.sh";
           }
         ];
       };
