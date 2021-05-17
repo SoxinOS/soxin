@@ -6,35 +6,39 @@ let
 
   # copied from home-manager
   # TODO: Move this to NixOS instead!
-configPlugins = {
-    assertions = [(
-      let
-        hasBadPluginName = p: !(hasPrefix "tmuxplugin" (pluginName p));
-        badPlugins = filter hasBadPluginName cfg.plugins;
-      in
+  configPlugins = {
+    assertions = [
+      (
+        let
+          hasBadPluginName = p: !(hasPrefix "tmuxplugin" (pluginName p));
+          badPlugins = filter hasBadPluginName cfg.plugins;
+        in
         {
-          assertion = badPlugins == [];
+          assertion = badPlugins == [ ];
           message =
             "Invalid tmux plugin (not prefixed with \"tmuxplugins\"): "
             + concatMapStringsSep ", " pluginName badPlugins;
         }
-    )];
+      )
+    ];
 
     programs.tmux.extraConfig = ''
-      # ============================================= #
-      # Load plugins with NixOS                       #
-      # --------------------------------------------- #
-      ${(concatMapStringsSep "\n\n" (p: ''
-          # ${pluginName p}
-          # ---------------------
-          ${p.extraConfig or ""}
-          run-shell ${
-            if types.package.check p
-            then p.rtp
-            else p.plugin.rtp
-          }
-      '') cfg.plugins)}
-      # ============================================= #
+            # ============================================= #
+            # Load plugins with NixOS                       #
+            # --------------------------------------------- #
+            ${(concatMapStringsSep "\n\n"
+      (p: ''
+                # ${pluginName p}
+                # ---------------------
+                ${p.extraConfig or ""}
+                run-shell ${
+                  if types.package.check p
+                  then p.rtp
+                  else p.plugin.rtp
+                }
+            '')
+      cfg.plugins)}
+            # ============================================= #
     '';
   };
 in
@@ -79,13 +83,13 @@ in
           '';
         };
 
-      secureSocket = recursiveUpdate
-        (mkEnableOption ''
-          Store tmux socket under <filename>/run</filename>, which is more
-          secure than <filename>/tmp</filename>, but as a downside it doesn't
-          survive user logout.
-        '')
-        { default = true; };
+        secureSocket = recursiveUpdate
+          (mkEnableOption ''
+            Store tmux socket under <filename>/run</filename>, which is more
+            secure than <filename>/tmp</filename>, but as a downside it doesn't
+            survive user logout.
+          '')
+          { default = true; };
       };
     };
   };
@@ -93,13 +97,11 @@ in
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs (mode == "NixOS") (mkMerge [
       { inherit (cfg) enable extraConfig secureSocket; }
-      (mkIf (cfg.plugins != []) configPlugins)
+      (mkIf (cfg.plugins != [ ]) configPlugins)
     ]))
 
     (optionalAttrs (mode == "home-manager") {
-      programs.tmux = {
-        inherit (cfg) enable extraConfig plugins secureSocket;
-      };
+      programs.tmux = { inherit (cfg) enable extraConfig plugins secureSocket; };
     })
   ]);
 }
