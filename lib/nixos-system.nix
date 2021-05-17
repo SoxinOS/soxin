@@ -23,14 +23,21 @@ with lib;
 
 , ...
 } @ args:
-
 let
   args' = removeAttrs args [
-    "globalModules" "nixosModules" "hmModules"
-    "globalSpecialArgs" "nixosSpecialArgs" "hmSpecialArgs"
+    "globalModules"
+    "nixosModules"
+    "hmModules"
+
+    "globalSpecialArgs"
+    "nixosSpecialArgs"
+    "hmSpecialArgs"
   ];
-in nixosSystem (recursiveUpdate args' {
+in
+nixosSystem (recursiveUpdate args' {
   specialArgs = {
+    inherit home-manager;
+
     # the mode allows us to tell at what level we are within the modules.
     mode = "NixOS";
 
@@ -53,9 +60,6 @@ in nixosSystem (recursiveUpdate args' {
     ++ (builtins.attrValues home-manager.nixosModules)
     # configure Nix registry so users can find soxin
     ++ singleton { nix.registry.soxin.flake = self; }
-    # send home-manager down to NixOS modules
-    ++ (singleton { _module.args = { inherit home-manager; }; })
-
     # configure home-manager
     ++ (singleton {
       # tell home-manager to use the global (as in NixOS system-level) pkgs and
