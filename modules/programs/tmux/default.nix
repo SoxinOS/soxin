@@ -23,22 +23,22 @@ let
     ];
 
     programs.tmux.extraConfig = ''
-            # ============================================= #
-            # Load plugins with NixOS                       #
-            # --------------------------------------------- #
-            ${(concatMapStringsSep "\n\n"
+      # ============================================= #
+      # Load plugins with NixOS                       #
+      # --------------------------------------------- #
+      ${(concatMapStringsSep "\n\n"
       (p: ''
-                # ${pluginName p}
-                # ---------------------
-                ${p.extraConfig or ""}
-                run-shell ${
-                  if types.package.check p
-                  then p.rtp
-                  else p.plugin.rtp
-                }
-            '')
+        # ${pluginName p}
+        # ---------------------
+        ${p.extraConfig or ""}
+        run-shell ${
+          if types.package.check p
+          then p.rtp
+          else p.plugin.rtp
+        }
+      '')
       cfg.plugins)}
-            # ============================================= #
+      # ============================================= #
     '';
   };
 in
