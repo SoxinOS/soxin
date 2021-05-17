@@ -59,7 +59,7 @@ in
 
         plugins = mkOption {
           type = with types; listOf (either package soxin.lib.modules.tmux.pluginWithConfigModule);
-          default = cfg.theme.plugins;
+          default = [ ];
           defaultText = "The plugins added by the theme";
           example = literalExample ''
             with pkgs; [
@@ -96,6 +96,9 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
+    # add all plugins installed by themes
+    { soxin.programs.tmux.plugins = cfg.theme.plugins; }
+
     (optionalAttrs (mode == "NixOS") (mkMerge [
       { programs.tmux = { inherit (cfg) enable extraConfig secureSocket; }; }
       (mkIf (cfg.plugins != [ ]) configPlugins)

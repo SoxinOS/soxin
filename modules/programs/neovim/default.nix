@@ -26,7 +26,7 @@ in
 
         plugins = mkOption {
           type = with types; listOf (either package soxin.lib.modules.neovim.pluginWithConfigModule);
-          default = cfg.theme.plugins;
+          default = [ ];
           defaultText = "The plugins added by the theme";
           example = literalExample ''
             with pkgs.vimPlugins; [
@@ -47,6 +47,9 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
+    # add all plugins installed by themes
+    { soxin.programs.neovim.plugins = cfg.theme.plugins; }
+
     (optionalAttrs (mode == "NixOS") {
       # TODO!
       # programs.neovim = {
