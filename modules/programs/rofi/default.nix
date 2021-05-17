@@ -69,11 +69,9 @@ in
 
         theme = cfg.theme.name;
 
-        extraConfig = ''
-          rofi.modi: ${cfg.modi}
-        '' + (optionalString (cfg.dpi != null) ''
-          rofi.dpi: ${cfg.dpi}
-        '');
+        extraConfig = {
+          inherit (cfg) modi dpi;
+        };
 
         font = "Source Code Pro for Powerline 9";
       };
