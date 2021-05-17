@@ -31,6 +31,8 @@ nixosSystem (recursiveUpdate (removeAttrs args [ "globalSpecialArgs" "nixosSpeci
       // globalSpecialArgs
       // hmSpecialArgs;
 
-      home-manager.sharedModules = builtins.attrValues self.nixosModules;
+      home-manager.sharedModules = singleton {
+        imports = builtins.attrValues self.nixosModules;
+      };
     });
 })
