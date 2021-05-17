@@ -36,6 +36,7 @@ let
 in
 nixosSystem (recursiveUpdate args' {
   specialArgs = {
+    # send home-manager down to the NixOS modules
     inherit home-manager;
 
     # the mode allows us to tell at what level we are within the modules.
@@ -67,8 +68,10 @@ nixosSystem (recursiveUpdate args' {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
 
-      #
       home-manager.extraSpecialArgs = {
+      # send home-manager down to the home-manager modules
+        inherit home-manager;
+
         # the mode allows us to tell at what level we are within the modules.
         mode = "home-manager";
         # send soxin to all NixOS modules
