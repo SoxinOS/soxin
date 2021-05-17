@@ -51,7 +51,7 @@ in
     { soxin.programs.neovim.plugins = cfg.theme.plugins; }
 
     (optionalAttrs (mode == "NixOS") {
-      # TODO!
+      # TODO: Add support for NeoVim on NixOS.
       # programs.neovim = {
       #   enable = true;
       #
@@ -78,6 +78,7 @@ in
     })
 
     (optionalAttrs (mode == "home-manager") {
+      # TODO: I wish home-manager had a defaultEditor as well!
       home.sessionVariables = { EDITOR = "nvim"; };
 
       programs.neovim = {
