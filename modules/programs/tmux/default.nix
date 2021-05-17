@@ -6,6 +6,7 @@ let
 
   # copied from home-manager
   # TODO: Move this to NixOS instead!
+  pluginName = p: if types.package.check p then p.pname else p.plugin.pname;
   configPlugins = {
     assertions = [
       (
