@@ -133,7 +133,7 @@ with lib;
       tmux = {
         plugins =
           let
-            extraConfig = pkgs.writeText "tmux-gruvbox-dark.tmux" ''
+            tmux-gruvbox-dark-plugin-src = pkgs.writeText "tmux-gruvbox-dark.tmux" ''
               # pane number display
               set-option -g display-panes-active-colour colour250 #fg2
               set-option -g display-panes-colour colour237 #bg1
@@ -182,11 +182,16 @@ with lib;
           in
           singleton (pkgs.tmuxPlugins.mkTmuxPlugin rec {
             pluginName = "gruvbox-dark";
-            src = extraConfig;
+            inherit (pkgs.vimPlugins.gruvbox-community) version;
+            src = tmux-gruvbox-dark-plugin-src;
             unpackPhase = ":";
             installPhase = ''
+              ls -la
+              env
+              exit 1
+
               mkdip -p $out/share/tmux-plugins
-              ln -s ${extraConfig} $out/share/tmux-plugins/gruvbox-dark.tmux
+              cp $sourceRoot $out/share/tmux-plugins/gruvbox-dark.tmux
             '';
           });
       };
