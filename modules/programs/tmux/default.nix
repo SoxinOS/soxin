@@ -95,10 +95,12 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    (optionalAttrs (mode == "NixOS") (mkMerge [
-      { inherit (cfg) enable extraConfig secureSocket; }
-      (mkIf (cfg.plugins != [ ]) configPlugins)
-    ]))
+    (optionalAttrs (mode == "NixOS") {
+      programs.tmux = mkMerge [
+        { inherit (cfg) enable extraConfig secureSocket; }
+        (mkIf (cfg.plugins != [ ]) configPlugins)
+      ];
+    })
 
     (optionalAttrs (mode == "home-manager") {
       programs.tmux = { inherit (cfg) enable extraConfig plugins secureSocket; };
