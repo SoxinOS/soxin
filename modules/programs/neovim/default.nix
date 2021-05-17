@@ -78,9 +78,7 @@ in
       home.sessionVariables = { EDITOR = "nvim"; };
 
       programs.neovim = {
-        inherit (cfg) enable extraConfig;
-
-        plugins = cfg.plugins ++ cfg.theme.plugins;
+        inherit (cfg) enable extraConfig plugins;
 
         # Create aliases
         viAlias = true;
