@@ -23,7 +23,13 @@ with lib;
 
 , ...
 } @ args:
-nixosSystem (recursiveUpdate (removeAttrs args [ "globalSpecialArgs" "nixosSpecialArgs" "hmSpecialArgs" ]) {
+
+let
+  args' = removeAttrs args [
+    "globalModules" "nixosModules" "hmModules"
+    "globalSpecialArgs" "nixosSpecialArgs" "hmSpecialArgs"
+  ];
+in nixosSystem (recursiveUpdate args' {
   specialArgs = {
     # the mode allows us to tell at what level we are within the modules.
     mode = "NixOS";
