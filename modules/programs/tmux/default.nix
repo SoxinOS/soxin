@@ -89,7 +89,7 @@ in
             secure than <filename>/tmp</filename>, but as a downside it doesn't
             survive user logout.
           '')
-          { default = true; };
+          { default = pkgs.stdenv.isLinux; };
       };
     };
   };
