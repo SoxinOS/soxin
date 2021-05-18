@@ -84,13 +84,15 @@ in
           '';
         };
 
-        secureSocket = recursiveUpdate
-          (mkEnableOption ''
+        secureSocket = mkOption {
+          type = types.bool;
+          default = pkgs.stdenv.isLinux;
+          description = ''
             Store tmux socket under <filename>/run</filename>, which is more
             secure than <filename>/tmp</filename>, but as a downside it doesn't
             survive user logout.
-          '')
-          { default = pkgs.stdenv.isLinux; };
+          '';
+        };
       };
     };
   };
