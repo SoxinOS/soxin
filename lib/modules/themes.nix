@@ -8,8 +8,18 @@ in
 rec {
   themeModule = with types; submodule {
     options = {
+      i3 = mkOption {
+        type = i3Module;
+        default = { };
+      };
+
       neovim = mkOption {
         type = neovimModule;
+        default = { };
+      };
+
+      polybar = mkOption {
+        type = polybarModule;
         default = { };
       };
 
@@ -31,6 +41,15 @@ rec {
       zsh = mkOption {
         type = zshModule;
         default = { };
+      };
+    };
+  };
+
+  i3Module = with types; submodule {
+    options = {
+      config = mkOption {
+        type = attrs;
+        default = { }; # TODO: Make this more specific by getting home-manager's type
       };
     };
   };
@@ -96,6 +115,15 @@ rec {
           </para><para>
           This option is mutually exclusive with <varname>configure</varname>.
         '';
+      };
+    };
+  };
+
+  polybarModule = with types; submodule {
+    options = {
+      extraConfig = mkOption {
+        type = attrs;
+        default = { }; # TODO: Make this more specific by getting home-manager's type
       };
     };
   };
