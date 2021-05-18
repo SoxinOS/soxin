@@ -7,7 +7,7 @@ let
     mkOption
     recursiveUpdate
     types
-  ;
+    ;
 in
 { config
 , name
@@ -30,8 +30,9 @@ recursiveUpdate
     type = with types; oneOf [ str modules.themes.themeModule ];
     default = config.soxin.settings.theme;
     description = "Theme to use for ${name}.";
-    apply = value: if builtins.isString value then config.soxin.themes.${value}.${name}
-                   else value.${name};
+    apply = value:
+      if builtins.isString value then config.soxin.themes.${value}.${name}
+      else value.${name};
   });
 }
-extraOptions
+  extraOptions

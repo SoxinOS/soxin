@@ -5,7 +5,7 @@ let
     mkDefault
     mkOption
     types
-  ;
+    ;
 in
 {
   layoutModule = types.submodule ({ config, ... }: {

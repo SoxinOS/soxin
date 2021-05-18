@@ -4,7 +4,7 @@ let
   inherit (lib)
     mkOption
     types
-  ;
+    ;
 in
 rec {
   themeModule = types.submodule {
