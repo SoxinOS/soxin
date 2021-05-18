@@ -26,12 +26,12 @@ with lib;
 let
   args' = removeAttrs args [
     "globalModules"
-    "nixosModules"
     "hmModules"
+    "nixosModules"
 
     "globalSpecialArgs"
-    "nixosSpecialArgs"
     "hmSpecialArgs"
+    "nixosSpecialArgs"
   ];
 in
 nixosSystem (recursiveUpdate args' {
@@ -42,7 +42,7 @@ nixosSystem (recursiveUpdate args' {
     # the mode allows us to tell at what level we are within the modules.
     mode = "NixOS";
 
-    # send soxin to all NixOS modules
+    # send soxin down to NixOS.
     soxin = self;
   }
   # include the global special arguments.
@@ -55,10 +55,10 @@ nixosSystem (recursiveUpdate args' {
     globalModules
     # include the NixOS modules
     ++ nixosModules
-    # include all Soxin modules
-    ++ (builtins.attrValues self.nixosModules)
-    # include all home-manager modules
-    ++ (builtins.attrValues home-manager.nixosModules)
+    # include Soxin modules
+    ++ (singleton self.nixosModules.soxin)
+    # include home-manager modules
+    ++ (singleton home-manager.nixosModules.home-manager)
     # configure Nix registry so users can find soxin
     ++ singleton { nix.registry.soxin.flake = self; }
     # configure home-manager
@@ -74,12 +74,12 @@ nixosSystem (recursiveUpdate args' {
 
         # the mode allows us to tell at what level we are within the modules.
         mode = "home-manager";
-        # send soxin to all NixOS modules
+        # send soxin down to home-manager.
         soxin = self;
       }
       # include the global special arguments.
       // globalSpecialArgs
-      # include the NixOS special arguments.
+      # include the home-manager special arguments.
       // hmSpecialArgs;
 
       home-manager.sharedModules =
@@ -87,7 +87,7 @@ nixosSystem (recursiveUpdate args' {
         globalModules
         # include the home-manager modules
         ++ hmModules
-        # include all Soxin modules
-        ++ (builtins.attrValues self.nixosModules);
+        # include Soxin module
+        ++ (singleton self.nixosModules.soxin);
     });
 })
