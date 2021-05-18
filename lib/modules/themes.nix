@@ -61,6 +61,7 @@ rec {
 
   zshModule = with types; submodule {
     options = {
+      # TODO: Get this directly from home-manager instead of copying it
       plugins = mkOption {
         type = types.listOf zsh.pluginModule;
         default = [ ];

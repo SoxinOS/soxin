@@ -10,6 +10,7 @@ let
 
 in
 {
+  # TODO: Bring this from home-manager!
   pluginModule = with types; submodule {
     options = {
       src = mkOption {
