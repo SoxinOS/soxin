@@ -26,12 +26,12 @@ with lib;
 let
   args' = removeAttrs args [
     "globalModules"
-    "nixosModules"
     "hmModules"
+    "nixosModules"
 
     "globalSpecialArgs"
-    "nixosSpecialArgs"
     "hmSpecialArgs"
+    "nixosSpecialArgs"
   ];
 in
 nixosSystem (recursiveUpdate args' {
