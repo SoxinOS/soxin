@@ -85,6 +85,8 @@ with lib;
       };
     };
 
+    rofi = { name = "gruvbox-dark"; };
+
     termite = {
       extraConfig = {
         # hard contrast: backgroundColor = "#1d2021";
@@ -194,8 +196,6 @@ with lib;
           src = tmux-gruvbox-dark-plugin-src;
         });
     };
-
-    rofi = { name = "gruvbox-dark"; };
 
     zsh = {
       plugins = singleton {
