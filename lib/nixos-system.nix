@@ -55,10 +55,10 @@ nixosSystem (recursiveUpdate args' {
     globalModules
     # include the NixOS modules
     ++ nixosModules
-    # include all Soxin modules
-    ++ (builtins.attrValues self.nixosModules)
-    # include all home-manager modules
-    ++ (builtins.attrValues home-manager.nixosModules)
+    # include Soxin modules
+    ++ (singleton self.nixosModules.soxin)
+    # include home-manager modules
+    ++ (singleton home-manager.nixosModules.home-manager)
     # configure Nix registry so users can find soxin
     ++ singleton { nix.registry.soxin.flake = self; }
     # configure home-manager
@@ -87,7 +87,7 @@ nixosSystem (recursiveUpdate args' {
         globalModules
         # include the home-manager modules
         ++ hmModules
-        # include all Soxin modules
-        ++ (builtins.attrValues self.nixosModules);
+        # include Soxin modules
+        ++ (singleton self.nixosModules.soxin);
     });
 })
