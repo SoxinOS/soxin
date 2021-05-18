@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-
 {
   config.soxin.themes.gruvbox-light = {
     neovim = {
