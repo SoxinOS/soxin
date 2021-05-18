@@ -35,7 +35,7 @@ rec {
     };
   };
 
- # TODO: Make this more specific by getting home-manager's type
+  # TODO: Make this more specific by getting home-manager's type
   termiteModule = with types; submodule {
     options = {
       extraConfig = mkOption {

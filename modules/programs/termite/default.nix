@@ -15,14 +15,11 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs (mode == "home-manager") {
-      programs.termite = {
-        enable = true;
-      };
+      programs.termite = mkMerge [
+        { inherit (cfg) enable; }
+        cfg.theme.extraConfig
+      ];
     })
 
-    # add the theme configuration
-    (optionalAttrs (mode == "home-manager") {
-      programs.termite = cfg.theme.extraConfig;
-    })
   ]);
 }
