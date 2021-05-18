@@ -15,6 +15,14 @@ with lib;
       };
     };
 
+    zsh = {
+      plugins = singleton {
+        src = pkgs.vimPlugins.gruvbox-community;
+        name = "gruvbox-dark";
+        file = "share/vim-plugins/gruvbox-community/gruvbox_256palette.sh";
+      };
+    };
+
     rofi = { name = "gruvbox-dark"; };
   };
 }
