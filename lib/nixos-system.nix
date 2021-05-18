@@ -79,7 +79,7 @@ nixosSystem (recursiveUpdate args' {
       }
       # include the global special arguments.
       // globalSpecialArgs
-      # include the NixOS special arguments.
+      # include the home-manager special arguments.
       // hmSpecialArgs;
 
       home-manager.sharedModules =
@@ -87,7 +87,7 @@ nixosSystem (recursiveUpdate args' {
         globalModules
         # include the home-manager modules
         ++ hmModules
-        # include Soxin modules
+        # include Soxin module
         ++ (singleton self.nixosModules.soxin);
     });
 })
