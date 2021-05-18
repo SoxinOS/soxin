@@ -1,4 +1,4 @@
-{ lib, neovim }:
+{ lib, neovim, zsh }:
 let
   inherit (lib)
     mkOption
