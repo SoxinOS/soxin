@@ -42,7 +42,7 @@ nixosSystem (recursiveUpdate args' {
     # the mode allows us to tell at what level we are within the modules.
     mode = "NixOS";
 
-    # send soxin to all NixOS modules
+    # send soxin down to NixOS.
     soxin = self;
   }
   # include the global special arguments.
@@ -74,7 +74,7 @@ nixosSystem (recursiveUpdate args' {
 
         # the mode allows us to tell at what level we are within the modules.
         mode = "home-manager";
-        # send soxin to all NixOS modules
+        # send soxin down to home-manager.
         soxin = self;
       }
       # include the global special arguments.
