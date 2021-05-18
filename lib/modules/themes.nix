@@ -5,7 +5,6 @@ let
     mkOption
     types
     ;
-
 in
 rec {
   themeModule = with types; submodule {
