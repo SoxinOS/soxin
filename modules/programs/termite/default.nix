@@ -20,6 +20,5 @@ in
         cfg.theme.extraConfig
       ];
     })
-
   ]);
 }
