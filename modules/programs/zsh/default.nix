@@ -60,16 +60,19 @@ in
 
     { programs.zsh = { inherit (cfg) enable; }; }
 
-    (optionalAttrs (mode == "NixOS") {
-      programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
-      programs.zsh.shellInit = concatStrings (map
-        (plugin: ''
-          path+="/etc/${pluginsDir}/${plugin.name}"
-          fpath+="/etc/${pluginsDir}/${plugin.name}"
-        '')
-        cfg.plugins);
+    # Forward configurations to home-manager.
+    (optionalAttrs (mode == "home-manager") {
+      programs.zsh = { inherit (cfg) enableAutosuggestions plugins; };
     })
 
+    # Forward configurations to NixOS.
+    (optionalAttrs (mode == "NixOS") {
+      programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
+    })
+
+    # Forward plugins to NixOS.
+    # Copy the plugin management from home-manager
+    # TODO: Send it upstream to NixOS.
     (optionalAttrs (mode == "NixOS") (mkIf (cfg.plugins != [ ]) {
       # Many plugins require compinit to be called
       # but allow the user to opt out.
@@ -79,15 +82,18 @@ in
         foldl' (a: b: a // b) { }
           (map (plugin: { "${pluginsDir}/${plugin.name}".source = plugin.src; })
             cfg.plugins);
+
+      programs.zsh.shellInit = concatStrings (map
+        (plugin: ''
+          path+="/etc/${pluginsDir}/${plugin.name}"
+          fpath+="/etc/${pluginsDir}/${plugin.name}"
+        '')
+        cfg.plugins);
     }))
 
     # install all completions libraries for system packages
     (optionalAttrs (mode == "NixOS") (mkIf config.programs.zsh.enableCompletion {
       environment.pathsToLink = [ "/share/zsh" ];
     }))
-
-    (optionalAttrs (mode == "home-manager") {
-      programs.zsh = { inherit (cfg) enable enableAutosuggestions plugins; };
-    })
   ]);
 }
