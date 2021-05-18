@@ -1,7 +1,6 @@
 { lib, neovim, zsh }:
 let
   inherit (lib)
-    mkEnableOption
     mkOption
     types
     ;
