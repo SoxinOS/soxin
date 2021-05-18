@@ -18,5 +18,3 @@ with lib;
     rofi = { name = "gruvbox-light"; };
   };
 }
-
-

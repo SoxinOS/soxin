@@ -18,4 +18,3 @@ with lib;
     rofi = { name = "gruvbox-dark"; };
   };
 }
-
