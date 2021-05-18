@@ -96,6 +96,7 @@ rec {
 
   neovimModule = with types; submodule {
     options = {
+      # TODO: Get this directly from home-manager instead of copying it
       plugins = mkOption {
         type = listOf (either package neovim.pluginWithConfigModule);
         default = [ ];
@@ -126,7 +127,6 @@ rec {
       };
     };
   };
-
 
   rofiModule = with types; submodule {
     options = {

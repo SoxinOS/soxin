@@ -8,6 +8,7 @@ let
 
 in
 {
+  # TODO: Bring this from home-manager!
   pluginWithConfigModule = types.submodule {
     options = {
       config = mkOption {

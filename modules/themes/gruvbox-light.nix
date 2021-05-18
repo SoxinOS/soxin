@@ -5,7 +5,7 @@ with lib;
   config.soxin.themes.gruvbox-light = {
     neovim = {
       plugins = singleton {
-        plugin = vim-color-gruvbox;
+        plugin = with pkgs.vimPlugins; gruvbox-community;
         config = ''
           set background=light
           colorscheme gruvbox

@@ -51,7 +51,7 @@ in
     { soxin.programs.neovim.plugins = cfg.theme.plugins; }
 
     (optionalAttrs (mode == "NixOS") {
-      # TODO!
+      # TODO: Add support for NeoVim on NixOS.
       # programs.neovim = {
       #   enable = true;
       #
