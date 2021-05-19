@@ -82,7 +82,8 @@ in
       home.sessionVariables = { EDITOR = "nvim"; };
 
       programs.neovim = {
-        inherit (cfg) enable extraConfig plugins;
+        enable = true;
+        inherit (cfg) extraConfig plugins;
 
         # Add the Python's neovim plugin
         extraPython3Packages = ps: with ps; [ pynvim ];
