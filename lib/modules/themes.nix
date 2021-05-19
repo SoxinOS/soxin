@@ -18,9 +18,44 @@ rec {
         default = { };
       };
 
+      tmux = mkOption {
+        type = tmuxModule;
+        default = { };
+      };
+
       zsh = mkOption {
         type = zshModule;
         default = { };
+      };
+    };
+  };
+
+  tmuxModule = with types; submodule {
+    options = {
+      plugins = mkOption {
+        type = with types; listOf (either package soxin.lib.modules.tmux.pluginWithConfigModule);
+        default = [ ];
+        example = literalExample ''
+          with pkgs; [
+            tmuxPlugins.cpu
+            {
+              plugin = tmuxPlugins.resurrect;
+              extraConfig = "set -g @resurrect-strategy-nvim 'session'";
+            }
+            {
+              plugin = tmuxPlugins.continuum;
+              extraConfig = '''
+                set -g @continuum-restore 'on'
+                set -g @continuum-save-interval '60' # minutes
+              ''';
+            }
+          ]
+        '';
+        description = ''
+          List of tmux plugins to be included at the end of your tmux
+          configuration. The sensible plugin, however, is defaulted to
+          run at the top of your configuration.
+        '';
       };
     };
   };
