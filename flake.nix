@@ -40,7 +40,7 @@
 
         overlays = import ./overlays;
 
-        nixosModules.soxin = import ./modules/soxin.nix;
+        nixosModules = (import ./modules) // { soxin = import ./modules/soxin.nix; };
         nixosModule = self.nixosModules.soxin;
 
         defaultTemplate = {
