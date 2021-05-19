@@ -9,4 +9,5 @@
   neovim = ./programs/neovim;
   rbrowser = ./programs/rbrowser;
   rofi = ./programs/rofi;
+  zsh = ./programs/zsh;
 }
