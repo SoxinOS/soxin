@@ -3,6 +3,7 @@
   bluetooth = ./hardware/bluetooth.nix;
 
   # programs
+  autorandr = ./programs/autorandr;
   neovim = ./programs/neovim;
   rbrowser = ./programs/rbrowser;
   rofi = ./programs/rofi;
