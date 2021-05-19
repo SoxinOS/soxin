@@ -56,7 +56,7 @@ nixosSystem (recursiveUpdate args' {
     # include the NixOS modules
     ++ nixosModules
     # include Soxin modules
-    ++ (singleton self.nixosModules.soxin)
+    ++ self.nixosModule
     # include home-manager modules
     ++ (singleton home-manager.nixosModules.home-manager)
     # configure Nix registry so users can find soxin
@@ -88,6 +88,6 @@ nixosSystem (recursiveUpdate args' {
         # include the home-manager modules
         ++ hmModules
         # include Soxin module
-        ++ (singleton self.nixosModules.soxin);
+        ++ self.nixosModule;
     });
 })
