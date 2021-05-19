@@ -1,43 +1,93 @@
 { self, lib, home-manager }:
 
-{ modules ? [ ], globalSpecialArgs ? { }, nixosSpecialArgs ? { }, hmSpecialArgs ? { }, ... } @ args:
-lib.nixosSystem (lib.recursiveUpdate (removeAttrs args [ "globalSpecialArgs" "nixosSpecialArgs" "hmSpecialArgs" ]) {
+with lib;
+
+{
+  # The global modules are included in both NixOS and home-manager.
+  globalModules ? [ ]
+
+  # Home-manager specific modules.
+, hmModules ? [ ]
+
+  # NixOS specific modules.
+, nixosModules ? [ ]
+
+  # The global extra arguments are included in both NixOS and home-manager.
+, globalSpecialArgs ? { }
+
+  # Home-manager specific extra arguments.
+, hmSpecialArgs ? { }
+
+  # NixOS specific extra arguments.
+, nixosSpecialArgs ? { }
+
+, ...
+} @ args:
+let
+  args' = removeAttrs args [
+    "globalModules"
+    "hmModules"
+    "nixosModules"
+
+    "globalSpecialArgs"
+    "hmSpecialArgs"
+    "nixosSpecialArgs"
+  ];
+in
+nixosSystem (recursiveUpdate args' {
   specialArgs = {
+    # send home-manager down to the NixOS modules
+    inherit home-manager;
+
+    # the mode allows us to tell at what level we are within the modules.
     mode = "NixOS";
+
+    # send soxin down to NixOS.
     soxin = self;
-  } // globalSpecialArgs // nixosSpecialArgs;
+  }
+  # include the global special arguments.
+  // globalSpecialArgs
+  # include the NixOS special arguments.
+  // nixosSpecialArgs;
 
-  modules = modules ++ [
-    {
-      _module.args = { inherit home-manager; };
-    }
-
-    self.nixosModules.soxin
-
-    home-manager.nixosModules.home-manager
-    # Required when using flakes.
-    {
+  modules =
+    # include the global modules
+    globalModules
+    # include the NixOS modules
+    ++ nixosModules
+    # include Soxin modules
+    ++ (singleton self.nixosModule)
+    # include home-manager modules
+    ++ (singleton home-manager.nixosModules.home-manager)
+    # configure Nix registry so users can find soxin
+    ++ singleton { nix.registry.soxin.flake = self; }
+    # configure home-manager
+    ++ (singleton {
+      # tell home-manager to use the global (as in NixOS system-level) pkgs and
+      # install all  user packages through the users.users.<name>.packages.
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
-    }
 
-    # Override home-manager per-user submodule to add our own modules to it,
-    # and to pass the argument `mode`.
-    ({ config, ... }: {
-      options.home-manager.users = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.submoduleWith {
-          modules = [
-            {
-              _module.args = { inherit home-manager; };
-            }
-            self.nixosModules.soxin
-          ];
-          specialArgs = {
-            mode = "home-manager";
-            soxin = self;
-          } // globalSpecialArgs // hmSpecialArgs;
-        });
-      };
-    })
-  ];
+      home-manager.extraSpecialArgs = {
+        # send home-manager down to the home-manager modules
+        inherit home-manager;
+
+        # the mode allows us to tell at what level we are within the modules.
+        mode = "home-manager";
+        # send soxin down to home-manager.
+        soxin = self;
+      }
+      # include the global special arguments.
+      // globalSpecialArgs
+      # include the home-manager special arguments.
+      // hmSpecialArgs;
+
+      home-manager.sharedModules =
+        # include the global modules
+        globalModules
+        # include the home-manager modules
+        ++ hmModules
+        # include Soxin module
+        ++ (singleton self.nixosModule);
+    });
 })
