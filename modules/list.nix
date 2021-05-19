@@ -9,6 +9,7 @@
   neovim = ./programs/neovim;
   rbrowser = ./programs/rbrowser;
   rofi = ./programs/rofi;
+  termite = ./programs/termite;
   tmux = ./programs/tmux;
   zsh = ./programs/zsh;
 }
