@@ -86,7 +86,7 @@ in
 
         secureSocket = mkOption {
           type = types.bool;
-          default = pkgs.stdenv.isLinux;
+          default = true;
           description = ''
             Store tmux socket under <filename>/run</filename>, which is more
             secure than <filename>/tmp</filename>, but as a downside it doesn't
