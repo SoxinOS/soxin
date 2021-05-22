@@ -13,6 +13,8 @@ in
 , name
 , includeKeyboardLayout ? false
 , includeTheme ? false
+, includeTool ? false
+, includeprogrammingLanguage ? false
 , extraOptions ? { }
 }:
 
@@ -32,6 +34,24 @@ recursiveUpdate
     description = "Theme to use for ${name}.";
     apply = value:
       if builtins.isString value then config.soxin.themes.${value}.${name}
+      else value.${name};
+  });
+
+  tool = optionalAttrs includeTool (mkOption {
+    type = with types; oneOf [ str modules.tools.toolsModule ];
+    default = config.soxin.settings.tools;
+    description = "Tool to use for ${name}.";
+    apply = value:
+      if builtins.isString value then config.soxin.themes.${value}.${name}
+      else value.${name};
+  });
+
+  programmingLanguage = optionalAttrs includeprogrammingLanguage (mkOption {
+    type = with types; oneOf [ str modules.programmingLanguages.programmingLanguagesModule ];
+    default = config.soxin.settings.programmingLanguages;
+    description = "Programming language to use for ${name}.";
+    apply = value:
+      if builtins.isString value then config.soxin.programmingLanguages.${value}.${name}
       else value.${name};
   });
 }
