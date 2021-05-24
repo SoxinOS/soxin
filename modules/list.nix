@@ -10,6 +10,7 @@
   neovim = ./programs/neovim;
   rbrowser = ./programs/rbrowser;
   rofi = ./programs/rofi;
+  starship = ./programs/starship;
   termite = ./programs/termite;
   tmux = ./programs/tmux;
   zsh = ./programs/zsh;
