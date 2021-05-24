@@ -4,6 +4,7 @@
 
   # programs
   autorandr = ./programs/autorandr;
+  git = ./programs/git;
   neovim = ./programs/neovim;
   rbrowser = ./programs/rbrowser;
   rofi = ./programs/rofi;
