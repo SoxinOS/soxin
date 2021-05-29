@@ -6,7 +6,8 @@
 , sops-nix
 , unstable
 , utils
-, ... }:
+, ...
+}:
 
 {
   # inputs of your own soxincfg
@@ -58,7 +59,7 @@ let
   soxincfg = inputs.self;
 
   inherit (nixpkgs) lib;
-  inherit (lib) mapAttrs recursiveUpdate singleton;
+  inherit (lib) mapAttrs optionalAttrs recursiveUpdate singleton;
   inherit (builtins) removeAttrs;
 
   otherArguments = removeAttrs args [
@@ -98,6 +99,8 @@ let
       ))
       hosts;
 
+  deploy = mapAttrs (hostname: host: host.deploy) hosts;
+
   soxinSystemFlake = {
     # inherit the required fields as-is
     inherit inputs utils;
@@ -131,8 +134,6 @@ let
     # Evaluates to `devShell.<system> = "attributeValue"`
     devShellBuilder = channels: with channels.nixpkgs;
       let
-        inherit (lib) optionalAttrs;
-
         # the base devShell.
         baseShell = mkShell {
           name = "soxincfg";
@@ -182,24 +183,24 @@ let
     # configure the modules
     hostDefaults =
       hostDefaults
-      // {
+        // {
         modules =
           # include the modules that are passed in
           (hostDefaults.modules or [ ])
-          # include the global modules
-          ++ extraGlobalModules
-          # include sane flake defaults from utils which sets sane `nix.*` defaults.
-          # Please refer to implementation/readme in
-          # github:gytis-ivaskevicius/flake-utils-plus for more details.
-          ++ (singleton utils.nixosModules.saneFlakeDefaults)
-          # include the NixOS modules
-          ++ extraNixosModules
-          # include Soxin modules
-          ++ (singleton self.nixosModule)
-          # include home-manager modules
-          ++ (singleton home-manager.nixosModules.home-manager)
-          # configure home-manager
-          ++ (singleton {
+            # include the global modules
+            ++ extraGlobalModules
+            # include sane flake defaults from utils which sets sane `nix.*` defaults.
+            # Please refer to implementation/readme in
+            # github:gytis-ivaskevicius/flake-utils-plus for more details.
+            ++ (singleton utils.nixosModules.saneFlakeDefaults)
+            # include the NixOS modules
+            ++ extraNixosModules
+            # include Soxin modules
+            ++ (singleton self.nixosModule)
+            # include home-manager modules
+            ++ (singleton home-manager.nixosModules.home-manager)
+            # configure home-manager
+            ++ (singleton {
             # tell home-manager to use the global (as in NixOS system-level) pkgs and
             # install all  user packages through the users.users.<name>.packages.
             home-manager.useGlobalPkgs = true;
@@ -219,13 +220,14 @@ let
             home-manager.sharedModules =
               # include the global modules
               extraGlobalModules
-              # include the home-manager modules
-              ++ extraHomeManagerModules
-              # include Soxin module
-              ++ (singleton self.nixosModule);
+                # include the home-manager modules
+                ++ extraHomeManagerModules
+                # include Soxin module
+                ++ (singleton self.nixosModule);
           });
       };
-  };
+  }
+  // (optionalAttrs withDeploy { inherit deploy; });
 
 in
 utils.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
