@@ -1,4 +1,12 @@
-{ home-manager, self, utils, nixpkgs, nur, unstable, ... }:
+{ deploy-rs
+, home-manager
+, nixpkgs
+, nur
+, self
+, sops-nix
+, unstable
+, utils
+, ... }:
 
 {
   # inputs of your own soxincfg
@@ -143,12 +151,12 @@ let
           ];
 
           nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [
-            sops-nix.packages.${nixpkgs.system}.sops-pgp-hook
+            sops-nix.packages.${system}.sops-pgp-hook
           ];
 
           buildInputs = (oa.buildInputs or [ ]) ++ [
             sops
-            sops-nix.packages.${nixpkgs.system}.ssh-to-pgp
+            sops-nix.packages.${system}.ssh-to-pgp
           ];
 
           shellHook = (oa.shellHook or "") + ''
@@ -162,7 +170,7 @@ let
         # user has enabled deploy-rs support.
         deployShell = sopsShell.overrideAttrs (oa: {
           buildInputs = (oa.buildInputs or [ ]) ++ [
-            deploy-rs.packages.${nixpkgs.system}.deploy-rs
+            deploy-rs.packages.${system}.deploy-rs
           ];
         });
 
