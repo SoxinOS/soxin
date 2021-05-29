@@ -5,27 +5,7 @@ let
   inherit (lib) singleton;
 in
 {
-  imports = [
-    soxincfg.nixosModules.profiles.workstation
-  ];
-
-  # This is an example host.
-
-  soxin = {
-    settings = {
-      keyboard = {
-        layouts = [
-          { x11 = { layout = "us"; }; }
-        ];
-      };
-    };
-  };
-
-  users.users = {
-    nick = {
-      isNormalUser = true;
-    };
-  };
+  imports = [ soxincfg.nixosModules.profiles.workstation ];
 
   # Dummy options so the configuration builds
   fileSystems."/".label = "nixos-root";

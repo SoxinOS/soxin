@@ -1,6 +1,9 @@
-final: prev:
+channels@{ ... }:
 
+let
+  inherit (channels.nixpkgs) callPackage;
+in
 {
-  rbrowser = final.callPackage ./rbrowser { };
-  rofi-i3-support = final.callPackage ./rofi-i3-support { };
+  rbrowser = callPackage ./rbrowser { };
+  rofi-i3-support = callPackage ./rofi-i3-support { };
 }

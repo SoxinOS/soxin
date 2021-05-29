@@ -1,9 +1,10 @@
-{ soxincfg, pkgs, ... }:
+{ lib, soxincfg, pkgs, ... }:
 
+let
+  inherit (lib) singleton;
+in
 {
-  imports = [
-    soxincfg.nixosModules.profiles.workstation
-  ];
+  imports = [ soxincfg.nixosModules.profiles.workstation ];
 
-  home.packages = with pkgs; [ helloSh ];
+  home.packages = singleton soxincfg.helloSh;
 }

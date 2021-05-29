@@ -22,6 +22,15 @@ in
     }
 
     # enable the sandbox on NixOS
-    (optionalAttrs (mode == "NixOS") { nix.useSandbox = true; })
+    (optionalAttrs (mode == "NixOS") {
+      nix.useSandbox = true;
+
+      # configure the users
+      users.users = {
+        nick = {
+          isNormalUser = true;
+        };
+      };
+    })
   ];
 }

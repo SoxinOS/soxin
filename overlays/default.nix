@@ -1,3 +1,1 @@
-{
-  packages = import ../pkgs;
-}
+final: prev: { }

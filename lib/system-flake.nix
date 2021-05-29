@@ -1,4 +1,4 @@
-{ home-manager, self, utils, nixpkgs, unstable, ... }:
+{ home-manager, self, utils, nixpkgs, nur, unstable, ... }:
 
 {
   # inputs of your own soxincfg
@@ -33,6 +33,12 @@
 
   # NixOS specific extra arguments.
 , nixosSpecialArgs ? { }
+
+  # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
+, packagesBuilder ? (_: { })
+
+  # Shared overlays between channels, gets applied to all `channels.<name>.input`
+, sharedOverlays ? [ ]
 , ...
 } @ args:
 
@@ -56,6 +62,8 @@ let
     "globalSpecialArgs"
     "hmSpecialArgs"
     "nixosSpecialArgs"
+    "packagesBuilder"
+    "sharedOverlays"
   ];
 
   hosts' =
@@ -92,6 +100,20 @@ let
     # configure the channels.
     channels.nixpkgs.input = nixpkgs;
     channels.unstable.input = unstable;
+
+    # Overlays which are applied to all channels.
+    sharedOverlays = sharedOverlays ++ [
+      # Overlay imported from this flake
+      self.overlay
+      # Nix User Repository overlay
+      nur.overlay
+    ];
+
+    # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
+    packagesBuilder = channels:
+      recursiveUpdate
+        (import ../pkgs channels)
+        (packagesBuilder channels);
 
     # configure the modules
     hostDefaults.modules =
