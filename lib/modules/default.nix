@@ -1,4 +1,4 @@
-{ nixpkgs, ... }@inputs:
+inputs@{ nixpkgs, ... }:
 
 {
   keyboard = import ./keyboard.nix inputs;
