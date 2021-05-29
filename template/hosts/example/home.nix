@@ -6,5 +6,5 @@ in
 {
   imports = [ soxincfg.nixosModules.profiles.workstation ];
 
-  home.packages = singleton soxincfg.helloSh;
+  home.packages = with soxincfg.packages."${pkgs.system}"; singleton helloSh;
 }

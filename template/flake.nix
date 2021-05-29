@@ -82,7 +82,7 @@
       hosts = import ./hosts inputs;
 
       # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
-      packagesBuilder = channels: (import ./pkgs channels);
+      packagesBuilder = channels: import ./pkgs channels;
 
       # declare the vars that are used only by sops
       vars = optionalAttrs withSops (import ./vars inputs);

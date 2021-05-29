@@ -39,6 +39,9 @@
 
   # Shared overlays between channels, gets applied to all `channels.<name>.input`
 , sharedOverlays ? [ ]
+
+  # Default host settings.
+, hostDefaults ? { }
 , ...
 } @ args:
 
@@ -102,12 +105,14 @@ let
     channels.unstable.input = unstable;
 
     # Overlays which are applied to all channels.
-    sharedOverlays = sharedOverlays ++ [
+    sharedOverlays = [
       # Overlay imported from this flake
       self.overlay
       # Nix User Repository overlay
       nur.overlay
-    ];
+    ]
+    # add the sharedOverlays from soxincfg
+    ++ sharedOverlays;
 
     # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
     packagesBuilder = channels:
@@ -115,97 +120,103 @@ let
         (import ../pkgs channels)
         (packagesBuilder channels);
 
+    # Evaluates to `devShell.<system> = "attributeValue"`
+    devShellBuilder = channels: with channels.nixpkgs;
+      let
+        inherit (lib) optionalAttrs;
+
+        # the base devShell.
+        baseShell = mkShell {
+          name = "soxincfg";
+          buildInputs = [
+            nixpkgs-fmt
+            pre-commit
+          ];
+        };
+
+        # overlay the baseShell with things that are only necessary if the
+        # user has enabled sops support.
+        sopsShell = baseShell.overrideAttrs (oa: {
+          sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
+            "./vars/sops-keys/hosts"
+            "./vars/sops-keys/users"
+          ];
+
+          nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [
+            sops-nix.packages.${nixpkgs.system}.sops-pgp-hook
+          ];
+
+          buildInputs = (oa.buildInputs or [ ]) ++ [
+            sops
+            sops-nix.packages.${nixpkgs.system}.ssh-to-pgp
+          ];
+
+          shellHook = (oa.shellHook or "") + ''
+            sopsPGPHook
+            git config diff.sopsdiffer.textconv "sops -d"
+          '';
+
+        });
+
+        # overlay the baseShell with things that are only necessary if the
+        # user has enabled deploy-rs support.
+        deployShell = sopsShell.overrideAttrs (oa: {
+          buildInputs = (oa.buildInputs or [ ]) ++ [
+            deploy-rs.packages.${nixpkgs.system}.deploy-rs
+          ];
+        });
+
+        # set the final shell to be returned
+        finalShell = deployShell;
+      in
+      finalShell;
+
     # configure the modules
-    hostDefaults.modules =
-      # include the global modules
-      extraGlobalModules
-      # include sane flake defaults from utils which sets sane `nix.*` defaults.
-      # Please refer to implementation/readme in
-      # github:gytis-ivaskevicius/flake-utils-plus for more details.
-      ++ (singleton utils.nixosModules.saneFlakeDefaults)
-      # include the NixOS modules
-      ++ extraNixosModules
-      # include Soxin modules
-      ++ (singleton self.nixosModule)
-      # include home-manager modules
-      ++ (singleton home-manager.nixosModules.home-manager)
-      # configure home-manager
-      ++ (singleton {
-        # tell home-manager to use the global (as in NixOS system-level) pkgs and
-        # install all  user packages through the users.users.<name>.packages.
-        home-manager.useGlobalPkgs = true;
-        home-manager.useUserPackages = true;
-
-        home-manager.extraSpecialArgs = {
-          inherit soxin soxincfg home-manager;
-
-          # the mode allows us to tell at what level we are within the modules.
-          mode = "home-manager";
-        }
-        # include the global special arguments.
-        // globalSpecialArgs
-        # include the home-manager special arguments.
-        // hmSpecialArgs;
-
-        home-manager.sharedModules =
+    hostDefaults =
+      hostDefaults
+      // {
+        modules =
+          # include the modules that are passed in
+          (hostDefaults.modules or [ ])
           # include the global modules
-          extraGlobalModules
-          # include the home-manager modules
-          ++ extraHomeManagerModules
-          # include Soxin module
-          ++ (singleton self.nixosModule);
+          ++ extraGlobalModules
+          # include sane flake defaults from utils which sets sane `nix.*` defaults.
+          # Please refer to implementation/readme in
+          # github:gytis-ivaskevicius/flake-utils-plus for more details.
+          ++ (singleton utils.nixosModules.saneFlakeDefaults)
+          # include the NixOS modules
+          ++ extraNixosModules
+          # include Soxin modules
+          ++ (singleton self.nixosModule)
+          # include home-manager modules
+          ++ (singleton home-manager.nixosModules.home-manager)
+          # configure home-manager
+          ++ (singleton {
+            # tell home-manager to use the global (as in NixOS system-level) pkgs and
+            # install all  user packages through the users.users.<name>.packages.
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
 
-        # Evaluates to `devShell.<system> = "attributeValue"`
-        # devShellBuilder = channels: with channels.nixpkgs;
-        #   let
-        #     inherit (lib) optionalAttrs;
-        #
-        #     # the base devShell.
-        #     baseShell = mkShell {
-        #       name = "soxincfg";
-        #       buildInputs = [
-        #         nixpkgs-fmt
-        #         pre-commit
-        #       ];
-        #     };
-        #
-        #     # overlay the baseShell with things that are only necessary if the
-        #     # user has enabled sops support.
-        #     sopsShell = baseShell.overrideAttrs (oa: {
-        #       sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
-        #         "./vars/sops-keys/hosts"
-        #         "./vars/sops-keys/users"
-        #       ];
-        #
-        #       nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [
-        #         sops-nix.packages.${nixpkgs.system}.sops-pgp-hook
-        #       ];
-        #
-        #       buildInputs = (oa.buildInputs or [ ]) ++ [
-        #         sops
-        #         sops-nix.packages.${nixpkgs.system}.ssh-to-pgp
-        #       ];
-        #
-        #       shellHook = (oa.shellHook or "") + ''
-        #         sopsPGPHook
-        #         git config diff.sopsdiffer.textconv "sops -d"
-        #       '';
-        #
-        #     });
-        #
-        #     # overlay the baseShell with things that are only necessary if the
-        #     # user has enabled deploy-rs support.
-        #     deployShell = sopsShell.overrideAttrs (oa: {
-        #       buildInputs = (oa.buildInputs or [ ]) ++ [
-        #         deploy-rs.packages.${nixpkgs.system}.deploy-rs
-        #       ];
-        #     });
-        #
-        #     # set the final shell to be returned
-        #     finalShell = deployShell;
-        #   in
-        #   finalShell;
-      });
+            home-manager.extraSpecialArgs = {
+              inherit soxin soxincfg home-manager;
+
+              # the mode allows us to tell at what level we are within the modules.
+              mode = "home-manager";
+            }
+            # include the global special arguments.
+            // globalSpecialArgs
+            # include the home-manager special arguments.
+            // hmSpecialArgs;
+
+            home-manager.sharedModules =
+              # include the global modules
+              extraGlobalModules
+              # include the home-manager modules
+              ++ extraHomeManagerModules
+              # include Soxin module
+              ++ (singleton self.nixosModule);
+          });
+      };
   };
 
 in
