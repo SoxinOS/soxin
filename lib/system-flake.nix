@@ -1,7 +1,5 @@
 { home-manager, self, utils, nixpkgs, ... }:
 
-# TODO
-
 {
   # inputs of your own soxincfg
   inputs
