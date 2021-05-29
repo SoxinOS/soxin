@@ -1,6 +1,9 @@
 # NixOS configuration for host `example`
-args@{ soxincfg, ... }:
+{ soxincfg, lib, ... }:
 
+let
+  inherit (lib) singleton;
+in
 {
   imports = [
     soxincfg.nixosModules.profiles.workstation
@@ -28,5 +31,7 @@ args@{ soxincfg, ... }:
   fileSystems."/".label = "nixos-root";
   boot.loader.grub.device = "/dev/sda";
 
-  home-manager.users.nick = import ./home.nix args;
+  home-manager.users.nick = { ... }: {
+    imports = singleton ./home.nix;
+  };
 }

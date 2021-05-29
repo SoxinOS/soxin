@@ -7,9 +7,7 @@ inputs@{ self, deploy-rs, ... }:
     # <name> of the channel to be used. Defaults to `nixpkgs`
     channelName = "nixpkgs";
     # Extra arguments to be passed to the modules.
-    extraArgs = {
-      abc = 123;
-    };
+    extraArgs = { };
     # Host specific configuration.
     modules = [ ./example/configuration.nix ];
 

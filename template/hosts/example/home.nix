@@ -1,4 +1,4 @@
-{ pkgs, soxincfg, ... }:
+{ soxincfg, pkgs, ... }:
 
 {
   imports = [
