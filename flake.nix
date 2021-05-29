@@ -14,7 +14,7 @@
     };
   };
 
-  outputs = { ... } @ inputs:
+  outputs = { self, ... } @ inputs:
     {
       lib = import ./lib inputs;
 
