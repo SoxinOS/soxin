@@ -1,4 +1,4 @@
-{ home-manager, self, utils, nixpkgs, ... }:
+{ home-manager, self, utils, nixpkgs, unstable, ... }:
 
 {
   # inputs of your own soxincfg
@@ -88,6 +88,31 @@ let
 
     # set the hosts
     hosts = hosts';
+
+    # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
+    channels.nixpkgs = {
+      # Channel input to import
+      input = nixpkgs;
+
+      # Channel specific overlays
+      overlaysBuilder = channels: [
+        (final: prev: { })
+      ];
+
+      # Channel specific configuration. Overwrites `channelsConfig` argument
+      config = { };
+    };
+
+    # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
+    channels.unstable = {
+      # Additional channel input
+      input = unstable;
+      # Yep, you see it first folks - you can patch nixpkgs!
+      patches = [ ];
+      overlaysBuilder = channels: [
+        (final: prev: { })
+      ];
+    };
 
     # configure the modules
     hostDefaults.modules =
