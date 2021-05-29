@@ -37,6 +37,25 @@
       inherit (nixpkgs) lib;
       inherit (lib) optionalAttrs recursiveUpdate;
 
+      # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
+      channels = {
+        nixpkgs = {
+          # Channel specific overlays
+          overlaysBuilder = channels: [
+            (final: prev: { })
+          ];
+
+          # Channel specific configuration. Overwrites `channelsConfig` argument
+          config = { };
+        };
+      };
+
+      # Default configuration values for `channels.<name>.config = {...}`
+      channelsConfig = {
+        # allowBroken = true;
+        allowUnfree = true;
+      };
+
       systemFlakeOutput = soxin.lib.systemFlake {
         inherit inputs withDeploy withSops;
 
