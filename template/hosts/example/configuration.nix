@@ -1,5 +1,5 @@
 # NixOS configuration for host `example`
-{ soxincfg, ... }:
+args@{ soxincfg, ... }:
 
 {
   imports = [
@@ -28,5 +28,5 @@
   fileSystems."/".label = "nixos-root";
   boot.loader.grub.device = "/dev/sda";
 
-  home-manager.users.nick = import ./home.nix { inherit soxincfg; };
+  home-manager.users.nick = import ./home.nix args;
 }

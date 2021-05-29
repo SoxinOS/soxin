@@ -8,6 +8,19 @@ in
     # configure the theme
     { soxin.settings.theme = "gruvbox-dark"; }
 
+    # configure the keyboard
+    {
+      soxin = {
+        settings = {
+          keyboard = {
+            layouts = [
+              { x11 = { layout = "us"; variant = "intl"; }; }
+            ];
+          };
+        };
+      };
+    }
+
     # enable the sandbox on NixOS
     (optionalAttrs (mode == "NixOS") { nix.useSandbox = true; })
   ];

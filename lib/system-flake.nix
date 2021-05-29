@@ -17,13 +17,13 @@
 , withSops ? false
 
   # The global modules are included in both NixOS and home-manager.
-, globalModules ? [ ]
+, extraGlobalModules ? [ ]
 
   # Home-manager specific modules.
-, hmModules ? [ ]
+, extraHomeManagerModules ? [ ]
 
   # NixOS specific modules.
-, nixosModules ? [ ]
+, extraNixosModules ? [ ]
 
   # The global extra arguments are included in both NixOS and home-manager.
 , globalSpecialArgs ? { }
@@ -50,9 +50,9 @@ let
     "hosts"
     "withDeploy"
     "withSops"
-    "globalModules"
-    "hmModules"
-    "nixosModules"
+    "extraGlobalModules"
+    "extraHomeManagerModules"
+    "extraNixosModules"
     "globalSpecialArgs"
     "hmSpecialArgs"
     "nixosSpecialArgs"
@@ -96,13 +96,13 @@ let
     # configure the modules
     hostDefaults.modules =
       # include the global modules
-      globalModules
+      extraGlobalModules
       # include sane flake defaults from utils which sets sane `nix.*` defaults.
       # Please refer to implementation/readme in
       # github:gytis-ivaskevicius/flake-utils-plus for more details.
       ++ (singleton utils.nixosModules.saneFlakeDefaults)
       # include the NixOS modules
-      ++ nixosModules
+      ++ extraNixosModules
       # include Soxin modules
       ++ (singleton self.nixosModule)
       # include home-manager modules
@@ -127,9 +127,9 @@ let
 
         home-manager.sharedModules =
           # include the global modules
-          globalModules
+          extraGlobalModules
           # include the home-manager modules
-          ++ hmModules
+          ++ extraHomeManagerModules
           # include Soxin module
           ++ (singleton self.nixosModule);
 

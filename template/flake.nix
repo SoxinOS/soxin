@@ -35,7 +35,7 @@
       withSops = true;
 
       inherit (nixpkgs) lib;
-      inherit (lib) optionalAttrs recursiveUpdate;
+      inherit (lib) optionalAttrs recursiveUpdate singleton;
 
       # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
       channels = {
@@ -59,36 +59,30 @@
         allowUnfree = true;
       };
 
-      systemFlakeOutput = soxin.lib.systemFlake {
-        inherit inputs withDeploy withSops;
-
-        # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
-        supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
-
-        # Default host settings.
-        # Full documentation: https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/master/examples/fully-featured/flake.nix#L33
-        # hostDefaults = {
-        #   # Default architecture to be used for `hosts` defaults to "x86_64-linux"
-        #   system = "x86_64-linux";
-        #   # Default channel to be used for `hosts` defaults to "nixpkgs"
-        #   channelName = "unstable";
-        #   # Extra arguments to be passed to modules. Merged with host's extraArgs
-        #   extraArgs = { };
-        #   # Default modules to be passed to all hosts.
-        #   modules = [ ];
-        # };
-
-        # pull in all hosts
-        hosts = import ./hosts inputs;
-
-        # TODO: add support for customizing the devShellBuilder
+      nixosModules = (import ./modules) // {
+        soxincfg = import ./modules/soxincfg.nix;
+        profiles = import ./profiles;
       };
+
+      nixosModule = nixosModules.soxincfg;
 
     in
-    recursiveUpdate
-      systemFlakeOutput
-      {
-        nixosModules = recursiveUpdate (import ./modules) { profiles = import ./profiles; };
-        vars = optionalAttrs withSops (import ./vars inputs);
-      };
+    soxin.lib.systemFlake {
+      inherit inputs withDeploy withSops nixosModules nixosModule;
+
+      # add Soxin's main module to all builders
+      extraGlobalModules = singleton nixosModule;
+
+      # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+
+      # include the core profiles as a global module that applies to all configurations
+      globalModules = [ nixosModules.profiles.core ];
+
+      # pull in all hosts
+      hosts = import ./hosts inputs;
+
+      # declare the vars that are used only by sops
+      vars = optionalAttrs withSops (import ./vars inputs);
+    };
 }

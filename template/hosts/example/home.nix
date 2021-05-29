@@ -1,23 +1,9 @@
-# home-manager configuration for user `nick`
-{ soxincfg }:
-{ pkgs, ... }:
+{ pkgs, soxincfg, ... }:
 
 {
   imports = [
     soxincfg.nixosModules.profiles.workstation
   ];
 
-  soxin = {
-    settings = {
-      keyboard = {
-        layouts = [
-          { x11 = { layout = "us"; variant = "intl"; }; }
-        ];
-      };
-    };
-  };
-
-  home.packages = with pkgs; [
-    helloSh
-  ];
+  home.packages = with pkgs; [ helloSh ];
 }
