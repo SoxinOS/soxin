@@ -85,10 +85,7 @@
     recursiveUpdate
       systemFlakeOutput
       {
-        nixosModules = recursiveUpdate (import ./modules) {
-          profiles = import ./profiles;
-        };
-
-        vars = if withSops then import ./vars inputs else null;
+        nixosModules = recursiveUpdate (import ./modules) { profiles = import ./profiles; };
+        vars = optionalAttrs withSops (import ./vars inputs);
       };
 }
