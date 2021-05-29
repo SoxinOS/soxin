@@ -13,25 +13,31 @@
     };
 
     soxin = {
-      url = "github:SoxinOS/soxin";
+      url = path:../.;
       inputs = {
-        nixpkgs.follows = "nixos";
+        nixpkgs.follows = "nixpkgs";
+        unstable.follows = "unstable";
         home-manager.follows = "home-manager";
         utils.follows = "utils";
       };
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, unstable, nur, utils, home-manager, soxin }:
+  outputs = inputs@{ self, soxin, ... }:
     soxin.lib.systemFlake {
-      deploy-rs.eanble = true;
+      inherit inputs;
 
-      sops.enable = true;
+      # Enable deploy-rs support
+      withDeploy = true;
+
+      # Enable sops support
+      withSops = true;
 
       # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
 
       # Default host settings.
+      # Full documentation: https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/master/examples/fully-featured/flake.nix#L33
       hostDefaults = {
         # Default architecture to be used for `hosts` defaults to "x86_64-linux"
         system = "x86_64-linux";
@@ -43,6 +49,6 @@
         modules = [ ];
       };
 
-      hosts = import ./hosts { inherit inputs; };
+      hosts = import ./hosts inputs;
     };
 }

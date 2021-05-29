@@ -6,12 +6,17 @@
   # inputs of your own soxincfg
   inputs
 
-  # set this to the self of your soxincfg
-, soxincfg
-
   # attr attribute set of hosts
   # See https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/e7ae270a23695b50fbb6b72759a7fb1e3340ca86/examples/fully-featured/flake.nix#L101-L112
 , hosts
+
+  # Deploy-rs support
+  # TODO: implement
+, withDeploy ? false
+
+  # Sops-nix support
+  # TODO: implement
+, withSops ? false
 
   # The global modules are included in both NixOS and home-manager.
 , globalModules ? [ ]
@@ -34,19 +39,21 @@
 } @ args:
 
 let
+  soxin = self;
+  soxincfg = inputs.self;
+
   inherit (nixpkgs) lib;
   inherit (lib) mapAttrs recursiveUpdate singleton;
   inherit (builtins) removeAttrs;
 
   otherArguments = removeAttrs args [
     "inputs"
-    "self"
     "hosts"
-
+    "withDeploy"
+    "withSops"
     "globalModules"
     "hmModules"
     "nixosModules"
-
     "globalSpecialArgs"
     "hmSpecialArgs"
     "nixosSpecialArgs"
@@ -57,14 +64,10 @@ let
       # inject the special args
       {
         specialArgs = {
-          # send home-manager down to the NixOS modules
-          inherit home-manager;
+          inherit soxin soxincfg home-manager;
 
           # the mode allows us to tell at what level we are within the modules.
           mode = "NixOS";
-
-          # send soxin down to NixOS.
-          soxin = self;
         }
         # include the global special arguments.
         // globalSpecialArgs
@@ -79,7 +82,7 @@ let
 in
 utils.lib.systemFlake (recursiveUpdate [
   # inherit the required fields as-is
-  { inherit self inputs utils; }
+  { inherit inputs utils; }
 
   # send self as soxincfg
   { self = soxincfg; }
@@ -112,13 +115,10 @@ utils.lib.systemFlake (recursiveUpdate [
         home-manager.useUserPackages = true;
 
         home-manager.extraSpecialArgs = {
-          # send home-manager down to the home-manager modules
-          inherit home-manager;
+          inherit soxin soxincfg home-manager;
 
           # the mode allows us to tell at what level we are within the modules.
           mode = "home-manager";
-          # send soxin down to home-manager.
-          soxin = self;
         }
         # include the global special arguments.
         // globalSpecialArgs

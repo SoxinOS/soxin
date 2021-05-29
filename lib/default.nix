@@ -1,4 +1,4 @@
-{ self, home-manager, utils, nixpkgs, ... }@inputs:
+{ ... }@inputs:
 
 rec {
   mkSoxinModule = import ./mk-soxin-module.nix inputs;

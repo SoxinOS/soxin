@@ -2,6 +2,7 @@
 
 let
   inherit (self.lib.modules) neovim zsh;
+
   inherit (nixpkgs) lib;
   inherit (lib)
     mkOption

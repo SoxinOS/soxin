@@ -1,4 +1,4 @@
-{ inputs }:
+inputs@{ self, deploy-rs, ... }:
 
 {
   example = {
@@ -12,5 +12,14 @@
     };
     # Host specific configuration.
     modules = [ ./example/configuration.nix ];
+
+    deploy = {
+      hostname = "host.example.com";
+      profiles.system = {
+        sshUser = "root";
+        user = "root";
+        path = deploy-rs.lib.aarch64-linux.activate.nixos self.nixosConfigurations.example;
+      };
+    };
   };
 }
