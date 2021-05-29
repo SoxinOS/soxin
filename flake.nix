@@ -6,7 +6,7 @@
     nixpkgs.url = github:NixOS/nixpkgs/release-21.05;
     sops-nix.url = "github:Mic92/sops-nix";
     unstable.url = github:NixOS/nixpkgs/nixos-unstable;
-    utils.url = path:../../gytis-ivaskevicius/flake-utils-plus;
+    utils.url = github:gytis-ivaskevicius/flake-utils-plus/v1.1.0;
 
     home-manager = {
       url = "github:nix-community/home-manager";
