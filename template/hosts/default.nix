@@ -5,7 +5,7 @@ inputs@{ self, deploy-rs, ... }:
     # System architecture.
     system = "x86_64-linux";
     # <name> of the channel to be used. Defaults to `nixpkgs`
-    channelName = "unstable";
+    channelName = "nixpkgs";
     # Extra arguments to be passed to the modules.
     extraArgs = {
       abc = 123;

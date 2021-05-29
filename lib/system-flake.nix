@@ -57,26 +57,26 @@ let
     "nixosSpecialArgs"
   ];
 
-  hosts' = mapAttrs
-    (hostname: configuration: (recursiveUpdate [
-      # inject the special args
-      {
-        specialArgs = {
-          inherit soxin soxincfg home-manager;
+  hosts' =
+    mapAttrs
+      (hostname: host: (recursiveUpdate
+        {
+          specialArgs = {
+            inherit soxin soxincfg home-manager;
 
-          # the mode allows us to tell at what level we are within the modules.
-          mode = "NixOS";
+            # the mode allows us to tell at what level we are within the modules.
+            mode = "NixOS";
+          }
+          # include the global special arguments.
+          // globalSpecialArgs
+          # include the NixOS special arguments.
+          // nixosSpecialArgs;
         }
-        # include the global special arguments.
-        // globalSpecialArgs
-        # include the NixOS special arguments.
-        // nixosSpecialArgs;
-      }
 
-      # pass along the passed-in configuration
-      configuration
-    ]))
-    hosts;
+        # pass along the hosts minus the deploy key that's specific to soxin.
+        (removeAttrs host [ "deploy" ])
+      ))
+      hosts;
 in
 utils.lib.systemFlake (recursiveUpdate
   {
