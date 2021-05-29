@@ -1,13 +1,14 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, mode, ... }:
 
+let
+  inherit (lib) mkMerge optionalAttrs;
+in
 {
-  nix = {
-    package = pkgs.nixFlakes;
+  config = mkMerge [
+    # configure the theme
+    { soxin.settings.theme = "gruvbox-dark"; }
 
-    useSandbox = true;
-
-    extraOptions = ''
-      experimental-features = nix-command flakes ca-references
-    '';
-  };
+    # enable the sandbox on NixOS
+    (optionalAttrs (mode == "NixOS") { nix.useSandbox = true; })
+  ];
 }

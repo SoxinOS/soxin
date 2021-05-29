@@ -89,30 +89,9 @@ let
     # set the hosts
     hosts = hosts';
 
-    # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
-    channels.nixpkgs = {
-      # Channel input to import
-      input = nixpkgs;
-
-      # Channel specific overlays
-      overlaysBuilder = channels: [
-        (final: prev: { })
-      ];
-
-      # Channel specific configuration. Overwrites `channelsConfig` argument
-      config = { };
-    };
-
-    # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
-    channels.unstable = {
-      # Additional channel input
-      input = unstable;
-      # Yep, you see it first folks - you can patch nixpkgs!
-      patches = [ ];
-      overlaysBuilder = channels: [
-        (final: prev: { })
-      ];
-    };
+    # configure the channels.
+    channels.nixpkgs.input = nixpkgs;
+    channels.unstable.input = unstable;
 
     # configure the modules
     hostDefaults.modules =
@@ -128,8 +107,6 @@ let
       ++ (singleton self.nixosModule)
       # include home-manager modules
       ++ (singleton home-manager.nixosModules.home-manager)
-      # configure Nix registry so users can find soxin
-      ++ singleton { nix.registry.soxin.flake = self; }
       # configure home-manager
       ++ (singleton {
         # tell home-manager to use the global (as in NixOS system-level) pkgs and
@@ -157,49 +134,55 @@ let
           ++ (singleton self.nixosModule);
 
         # Evaluates to `devShell.<system> = "attributeValue"`
-        devShellBuilder = channels: with channels.nixpkgs;
-          let
-            inherit (lib) optionalAttrs;
-
-            baseShell = mkShell {
-              name = "soxincfg";
-              buildInputs = [
-                nixpkgs-fmt
-                pre-commit
-              ];
-            };
-
-            sopsShell = baseShell.overrideAttrs (oa: {
-              sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
-                "./vars/sops-keys/hosts"
-                "./vars/sops-keys/users"
-              ];
-
-              nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [
-                sops-nix.packages.${nixpkgs.system}.sops-pgp-hook
-              ];
-
-              buildInputs = (oa.buildInputs or [ ]) ++ [
-                sops
-                sops-nix.packages.${nixpkgs.system}.ssh-to-pgp
-              ];
-
-              shellHook = (oa.shellHook or "") + ''
-                sopsPGPHook
-                git config diff.sopsdiffer.textconv "sops -d"
-              '';
-
-            });
-
-            deployShell = sopsShell.overrideAttrs (oa: {
-              buildInputs = (oa.buildInputs or [ ]) ++ [
-                deploy-rs.packages.${nixpkgs.system}.deploy-rs
-              ];
-            });
-
-            finalShell = deployShell;
-          in
-          finalShell;
+        # devShellBuilder = channels: with channels.nixpkgs;
+        #   let
+        #     inherit (lib) optionalAttrs;
+        #
+        #     # the base devShell.
+        #     baseShell = mkShell {
+        #       name = "soxincfg";
+        #       buildInputs = [
+        #         nixpkgs-fmt
+        #         pre-commit
+        #       ];
+        #     };
+        #
+        #     # overlay the baseShell with things that are only necessary if the
+        #     # user has enabled sops support.
+        #     sopsShell = baseShell.overrideAttrs (oa: {
+        #       sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
+        #         "./vars/sops-keys/hosts"
+        #         "./vars/sops-keys/users"
+        #       ];
+        #
+        #       nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [
+        #         sops-nix.packages.${nixpkgs.system}.sops-pgp-hook
+        #       ];
+        #
+        #       buildInputs = (oa.buildInputs or [ ]) ++ [
+        #         sops
+        #         sops-nix.packages.${nixpkgs.system}.ssh-to-pgp
+        #       ];
+        #
+        #       shellHook = (oa.shellHook or "") + ''
+        #         sopsPGPHook
+        #         git config diff.sopsdiffer.textconv "sops -d"
+        #       '';
+        #
+        #     });
+        #
+        #     # overlay the baseShell with things that are only necessary if the
+        #     # user has enabled deploy-rs support.
+        #     deployShell = sopsShell.overrideAttrs (oa: {
+        #       buildInputs = (oa.buildInputs or [ ]) ++ [
+        #         deploy-rs.packages.${nixpkgs.system}.deploy-rs
+        #       ];
+        #     });
+        #
+        #     # set the final shell to be returned
+        #     finalShell = deployShell;
+        #   in
+        #   finalShell;
       });
   };
 

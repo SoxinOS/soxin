@@ -47,6 +47,9 @@
 
           # Channel specific configuration. Overwrites `channelsConfig` argument
           config = { };
+
+          # Yep, you see it first folks - you can patch nixpkgs!
+          patches = [ ];
         };
       };
 
@@ -64,16 +67,16 @@
 
         # Default host settings.
         # Full documentation: https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/master/examples/fully-featured/flake.nix#L33
-        hostDefaults = {
-          # Default architecture to be used for `hosts` defaults to "x86_64-linux"
-          system = "x86_64-linux";
-          # Default channel to be used for `hosts` defaults to "nixpkgs"
-          channelName = "unstable";
-          # Extra arguments to be passed to modules. Merged with host's extraArgs
-          extraArgs = { };
-          # Default modules to be passed to all hosts.
-          modules = [ ];
-        };
+        # hostDefaults = {
+        #   # Default architecture to be used for `hosts` defaults to "x86_64-linux"
+        #   system = "x86_64-linux";
+        #   # Default channel to be used for `hosts` defaults to "nixpkgs"
+        #   channelName = "unstable";
+        #   # Extra arguments to be passed to modules. Merged with host's extraArgs
+        #   extraArgs = { };
+        #   # Default modules to be passed to all hosts.
+        #   modules = [ ];
+        # };
 
         # pull in all hosts
         hosts = import ./hosts inputs;
