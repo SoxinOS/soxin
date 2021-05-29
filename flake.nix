@@ -11,9 +11,8 @@
     utils.url = path:../../gytis-ivaskevicius/flake-utils-plus;
   };
 
-  outputs = { self, nixpkgs, home-manager, futils } @ inputs:
+  outputs = { ... } @ inputs:
     {
-
-      # TODO: need to export lib
+      lib = import ./lib inputs;
     };
 }

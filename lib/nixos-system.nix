@@ -1,3 +1,5 @@
+# TODO: Scheduled for removal!!
+
 { self, lib, home-manager }:
 
 with lib;

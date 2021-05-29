@@ -1,3 +1,5 @@
+# TODO: Get this merged into systemFlake
+
 { self, lib, home-manager }:
 
 with lib;

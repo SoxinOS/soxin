@@ -1,4 +1,4 @@
-{ home-manager, lib, modules, utils }:
+{ home-manager, self, utils, nixpkgs, ... }:
 
 # TODO
 
@@ -6,8 +6,8 @@
   # inputs of your own soxincfg
   inputs
 
-  # self should be your own soxincfg
-, self
+  # set this to the self of your soxincfg
+, soxincfg
 
   # attr attribute set of hosts
   # See https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/e7ae270a23695b50fbb6b72759a7fb1e3340ca86/examples/fully-featured/flake.nix#L101-L112
@@ -34,6 +34,7 @@
 } @ args:
 
 let
+  inherit (nixpkgs) lib;
   inherit (lib) mapAttrs recursiveUpdate singleton;
   inherit (builtins) removeAttrs;
 
@@ -79,6 +80,9 @@ in
 utils.lib.systemFlake (recursiveUpdate [
   # inherit the required fields as-is
   { inherit self inputs utils; }
+
+  # send self as soxincfg
+  { self = soxincfg; }
 
   # set the hosts
   { hosts = hosts'; }

@@ -1,6 +1,7 @@
-{ lib, modules }:
+{ nixpkgs, modules, ... }:
 
 let
+  inherit (nixpkgs) lib;
   inherit (lib)
     optionalAttrs
     mkEnableOption

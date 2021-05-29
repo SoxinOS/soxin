@@ -1,12 +1,12 @@
 {
   "nodes": {
-    "futils": {
+    "flake-utils": {
       "locked": {
-        "lastModified": 1620759905,
-        "narHash": "sha256-WiyWawrgmyN0EdmiHyG2V+fqReiVi8bM9cRdMaKQOFg=",
+        "lastModified": 1618217525,
+        "narHash": "sha256-WGrhVczjXTiswQaoxQ+0PTfbLNeOQM6M36zvLn78AYg=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "b543720b25df6ffdfcf9227afafc5b8c1fabfae8",
+        "rev": "c6169a2772643c4a93a0b5ac1c61e296cba68544",
         "type": "github"
       },
       "original": {
@@ -37,24 +37,56 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1621294190,
-        "narHash": "sha256-8fBxLnwgBRXcIdjPw95Htjw5/MsZPQUuUD5K+xP3Rq0=",
-        "owner": "NixOS",
+        "lastModified": 1622252957,
+        "narHash": "sha256-CLXKNx3n/l9wpyP3UCHE245gwk5wWnhcafdNoRIpiC0=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "17e3fb2e23fe147f93c301e7515214b73520415d",
+        "rev": "6ca6be2bbf2306fb38550bb67224acfecd89946d",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
+        "owner": "nixos",
+        "ref": "release-21.05",
         "repo": "nixpkgs",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
-        "futils": "futils",
         "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "unstable": "unstable",
+        "utils": "utils"
+      }
+    },
+    "unstable": {
+      "locked": {
+        "lastModified": 1622194753,
+        "narHash": "sha256-76qtvFp/vFEz46lz5iZMJ0mnsWQYmuGYlb0fHgKqqMg=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "540dccb2aeaffa9dc69bfdc41c55abd7ccc6baa3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "utils": {
+      "inputs": {
+        "flake-utils": "flake-utils"
+      },
+      "locked": {
+        "narHash": "sha256-Ayp3/TgQs41VSSiUzudeWkw/fsskkssWEGVzDU3xx/U=",
+        "path": "../../gytis-ivaskevicius/flake-utils-plus",
+        "type": "path"
+      },
+      "original": {
+        "path": "../../gytis-ivaskevicius/flake-utils-plus",
+        "type": "path"
       }
     }
   },
