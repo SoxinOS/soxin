@@ -40,14 +40,7 @@
         # Extra arguments to be passed to modules. Merged with host's extraArgs
         extraArgs = { inherit utils inputs; };
         # Default modules to be passed to all hosts.
-        modules = [
-          home-manager.nixosModules.home-manager
-          (import ./modules)
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-        ];
+        modules = [ ];
 
       };
 

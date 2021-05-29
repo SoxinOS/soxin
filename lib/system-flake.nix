@@ -50,36 +50,38 @@ let
     "hmSpecialArgs"
     "nixosSpecialArgs"
   ];
+
+  hosts' = mapAttrs
+    (hostname: configuration: (recursiveUpdate [
+      # inject the special args
+      {
+        specialArgs = {
+          # send home-manager down to the NixOS modules
+          inherit home-manager;
+
+          # the mode allows us to tell at what level we are within the modules.
+          mode = "NixOS";
+
+          # send soxin down to NixOS.
+          soxin = self;
+        }
+        # include the global special arguments.
+        // globalSpecialArgs
+        # include the NixOS special arguments.
+        // nixosSpecialArgs;
+      }
+
+      # pass along the passed-in configuration
+      configuration
+    ]))
+    hosts;
 in
 utils.lib.systemFlake (recursiveUpdate [
   # inherit the required fields as-is
   { inherit self inputs; }
 
-  # inject the special args
-  {
-    hosts = mapAttrs
-      (n: v: (recursiveUpdate [
-        {
-          specialArgs = {
-            # send home-manager down to the NixOS modules
-            inherit home-manager;
-
-            # the mode allows us to tell at what level we are within the modules.
-            mode = "NixOS";
-
-            # send soxin down to NixOS.
-            soxin = self;
-          }
-          # include the global special arguments.
-          // globalSpecialArgs
-          # include the NixOS special arguments.
-          // nixosSpecialArgs;
-        }
-
-        v
-      ]))
-      hosts;
-  }
+  # set the hosts
+  { hosts = hosts'; }
 
   # configure the modules
   {
