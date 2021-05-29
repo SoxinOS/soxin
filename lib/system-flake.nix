@@ -45,6 +45,7 @@ let
   inherit (builtins) removeAttrs;
 
   otherArguments = removeAttrs args [
+    "self"
     "inputs"
     "hosts"
     "withDeploy"
@@ -77,9 +78,8 @@ let
         (removeAttrs host [ "deploy" ])
       ))
       hosts;
-in
-utils.lib.systemFlake (recursiveUpdate
-  {
+
+  soxinSystemFlake = {
     # inherit the required fields as-is
     inherit inputs utils;
 
@@ -130,8 +130,53 @@ utils.lib.systemFlake (recursiveUpdate
           ++ hmModules
           # include Soxin module
           ++ (singleton self.nixosModule);
-      });
-  }
 
-  # the rest of the arguments
-  otherArguments)
+        # Evaluates to `devShell.<system> = "attributeValue"`
+        devShellBuilder = channels: with channels.nixpkgs;
+          let
+            inherit (lib) optionalAttrs;
+
+            baseShell = mkShell {
+              name = "soxincfg";
+              buildInputs = [
+                nixpkgs-fmt
+                pre-commit
+              ];
+            };
+
+            sopsShell = baseShell.overrideAttrs (oa: {
+              sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
+                "./vars/sops-keys/hosts"
+                "./vars/sops-keys/users"
+              ];
+
+              nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [
+                sops-nix.packages.${nixpkgs.system}.sops-pgp-hook
+              ];
+
+              buildInputs = (oa.buildInputs or [ ]) ++ [
+                sops
+                sops-nix.packages.${nixpkgs.system}.ssh-to-pgp
+              ];
+
+              shellHook = (oa.shellHook or "") + ''
+                sopsPGPHook
+                git config diff.sopsdiffer.textconv "sops -d"
+              '';
+
+            });
+
+            deployShell = sopsShell.overrideAttrs (oa: {
+              buildInputs = (oa.buildInputs or [ ]) ++ [
+                deploy-rs.packages.${nixpkgs.system}.deploy-rs
+              ];
+            });
+
+            finalShell = deployShell;
+          in
+          finalShell;
+      });
+  };
+
+in
+utils.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)

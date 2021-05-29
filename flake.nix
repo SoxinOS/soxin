@@ -2,9 +2,9 @@
   description = "soxin: opiniated configs for everyone";
 
   inputs = {
-    deploy-rs.url = "github:serokell/deploy-rs";
+    deploy-rs.url = github:serokell/deploy-rs;
     nixpkgs.url = github:NixOS/nixpkgs/release-21.05;
-    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.url = github:Mic92/sops-nix;
     unstable.url = github:NixOS/nixpkgs/nixos-unstable;
     utils.url = github:gytis-ivaskevicius/flake-utils-plus/v1.1.0;
 

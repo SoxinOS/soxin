@@ -2,9 +2,9 @@
   description = "Soxin template flake";
 
   inputs = {
-    deploy-rs.url = "github:serokell/deploy-rs";
+    deploy-rs.url = github:serokell/deploy-rs;
     nixpkgs.url = github:NixOS/nixpkgs/release-21.05;
-    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.url = github:Mic92/sops-nix;
     unstable.url = github:NixOS/nixpkgs/nixos-unstable;
     utils.url = github:gytis-ivaskevicius/flake-utils-plus/v1.1.0;
 
@@ -26,32 +26,44 @@
     };
   };
 
-  outputs = inputs@{ self, soxin, ... }:
-    soxin.lib.systemFlake {
-      inherit inputs;
-
+  outputs = inputs@{ self, soxin, nixpkgs, ... }:
+    let
       # Enable deploy-rs support
       withDeploy = true;
 
       # Enable sops support
       withSops = true;
 
-      # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
-      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+      inherit (nixpkgs) lib;
+      inherit (lib) optionalAttrs recursiveUpdate;
 
-      # Default host settings.
-      # Full documentation: https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/master/examples/fully-featured/flake.nix#L33
-      hostDefaults = {
-        # Default architecture to be used for `hosts` defaults to "x86_64-linux"
-        system = "x86_64-linux";
-        # Default channel to be used for `hosts` defaults to "nixpkgs"
-        channelName = "unstable";
-        # Extra arguments to be passed to modules. Merged with host's extraArgs
-        extraArgs = { };
-        # Default modules to be passed to all hosts.
-        modules = [ ];
+      systemFlakeOutput = soxin.lib.systemFlake {
+        inherit inputs withDeploy withSops;
+
+        # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
+        supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+
+        # Default host settings.
+        # Full documentation: https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/master/examples/fully-featured/flake.nix#L33
+        hostDefaults = {
+          # Default architecture to be used for `hosts` defaults to "x86_64-linux"
+          system = "x86_64-linux";
+          # Default channel to be used for `hosts` defaults to "nixpkgs"
+          channelName = "unstable";
+          # Extra arguments to be passed to modules. Merged with host's extraArgs
+          extraArgs = { };
+          # Default modules to be passed to all hosts.
+          modules = [ ];
+        };
+
+        # pull in all hosts
+        hosts = import ./hosts inputs;
+
+        # TODO: add support for customizing the devShellBuilder
       };
 
-      hosts = import ./hosts inputs;
-    };
+    in
+    recursiveUpdate
+      (optionalAttrs withSops { vars = import ./vars inputs; })
+      systemFlakeOutput;
 }
