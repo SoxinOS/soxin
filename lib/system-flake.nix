@@ -78,7 +78,7 @@ let
 in
 utils.lib.systemFlake (recursiveUpdate [
   # inherit the required fields as-is
-  { inherit self inputs; }
+  { inherit self inputs utils; }
 
   # set the hosts
   { hosts = hosts'; }

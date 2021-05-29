@@ -38,10 +38,9 @@
         # Default channel to be used for `hosts` defaults to "nixpkgs"
         channelName = "unstable";
         # Extra arguments to be passed to modules. Merged with host's extraArgs
-        extraArgs = { inherit utils inputs; };
+        extraArgs = { };
         # Default modules to be passed to all hosts.
         modules = [ ];
-
       };
 
       hosts = import ./hosts { inherit inputs; };
