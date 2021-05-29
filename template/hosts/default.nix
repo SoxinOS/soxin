@@ -1,7 +1,7 @@
 inputs@{ self, deploy-rs, ... }:
 
 {
-  example = {
+  example = rec {
     # System architecture.
     system = "x86_64-linux";
     # <name> of the channel to be used. Defaults to `nixpkgs`
@@ -16,7 +16,7 @@ inputs@{ self, deploy-rs, ... }:
       profiles.system = {
         sshUser = "root";
         user = "root";
-        path = deploy-rs.lib.aarch64-linux.activate.nixos self.nixosConfigurations.example;
+        path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.example;
       };
     };
   };
