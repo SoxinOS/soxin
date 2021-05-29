@@ -2,80 +2,55 @@
   description = "Soxin template flake";
 
   inputs = {
-    nixos.url = "nixpkgs/nixos-20.09";
-    master.url = "nixpkgs/master";
+    nixpkgs.url = github:nixos/nixpkgs/release-21.05;
+    unstable.url = github:nixos/nixpkgs/nixos-unstable;
+    nur.url = github:nix-community/NUR;
+    utils.url = path:../../../gytis-ivaskevicius/flake-utils-plus;
+
     home-manager = {
-      url = "github:nix-community/home-manager/release-20.09";
-      inputs.nixpkgs.follows = "nixos";
+      url = github:nix-community/home-manager/release-21.05;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
+
     soxin = {
       url = "github:SoxinOS/soxin";
       inputs = {
         nixpkgs.follows = "nixos";
         home-manager.follows = "home-manager";
+        utils.follows = "utils";
       };
     };
-    futils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixos, master, home-manager, soxin, futils } @ inputs:
-    let
-      inherit (nixos) lib;
-      inherit (nixos.lib) recursiveUpdate;
-      inherit (futils.lib) eachDefaultSystem;
+  outputs = inputs@{ self, nixpkgs, unstable, nur, utils, home-manager, soxin }:
+    soxin.lib.systemFlake {
+      deploy-rs.eanble = true;
 
-      pkgImport = pkgs: system:
-        import pkgs {
-          inherit system;
-          overlays = lib.attrValues self.overlays;
-          config = { allowUnfree = true; };
-        };
+      sops.enable = true;
 
-      pkgset = system: {
-        nixos = pkgImport nixos system;
-        master = pkgImport master system;
+      # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+
+      # Default host settings.
+      hostDefaults = {
+        # Default architecture to be used for `hosts` defaults to "x86_64-linux"
+        system = "x86_64-linux";
+        # Default channel to be used for `hosts` defaults to "nixpkgs"
+        channelName = "unstable";
+        # Extra arguments to be passed to modules. Merged with host's extraArgs
+        extraArgs = { inherit utils inputs; };
+        # Default modules to be passed to all hosts.
+        modules = [
+          home-manager.nixosModules.home-manager
+          (import ./modules)
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+
       };
 
-      multiSystemOutputs = eachDefaultSystem (system:
-        let
-          pkgset' = pkgset system;
-          osPkgs = pkgset'.nixos;
-          pkgs = pkgset'.master;
-        in
-        {
-          devShell = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              git
-              nixpkgs-fmt
-              pre-commit
-            ];
-          };
-
-          packages = soxin.lib.overlaysToPkgs self.overlays pkgs;
-        }
-      );
-
-      outputs = {
-        overlay = self.overlays.packages;
-
-        overlays = import ./overlays;
-
-        nixosModules = recursiveUpdate (import ./modules) {
-          profiles = import ./profiles;
-        };
-
-        nixosConfigurations =
-          let
-            system = "x86_64-linux";
-            pkgset' = pkgset system;
-          in
-          import ./hosts (
-            recursiveUpdate inputs {
-              inherit lib system;
-              pkgset = pkgset';
-            }
-          );
-      };
-    in
-    recursiveUpdate multiSystemOutputs outputs;
+      hosts = import ./hosts { inherit inputs; };
+    };
 }
