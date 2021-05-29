@@ -78,18 +78,18 @@ let
     ]))
     hosts;
 in
-utils.lib.systemFlake (recursiveUpdate [
-  # inherit the required fields as-is
-  { inherit inputs utils; }
-
-  # send self as soxincfg
-  { self = soxincfg; }
-
-  # set the hosts
-  { hosts = hosts'; }
-
-  # configure the modules
+utils.lib.systemFlake (recursiveUpdate
   {
+    # inherit the required fields as-is
+    inherit inputs utils;
+
+    # send self as soxincfg
+    self = soxincfg;
+
+    # set the hosts
+    hosts = hosts';
+
+    # configure the modules
     hostDefaults.modules =
       # include the global modules
       globalModules
@@ -134,5 +134,4 @@ utils.lib.systemFlake (recursiveUpdate [
   }
 
   # the rest of the arguments
-  otherArguments
-])
+  otherArguments)

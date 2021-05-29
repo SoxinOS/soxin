@@ -2,23 +2,26 @@
   description = "Soxin template flake";
 
   inputs = {
-    nixpkgs.url = github:nixos/nixpkgs/release-21.05;
-    unstable.url = github:nixos/nixpkgs/nixos-unstable;
-    nur.url = github:nix-community/NUR;
-    utils.url = path:../../../gytis-ivaskevicius/flake-utils-plus;
+    deploy-rs.url = "github:serokell/deploy-rs";
+    nixpkgs.url = github:NixOS/nixpkgs/release-21.05;
+    sops-nix.url = "github:Mic92/sops-nix";
+    unstable.url = github:NixOS/nixpkgs/nixos-unstable;
+    utils.url = path:../../gytis-ivaskevicius/flake-utils-plus;
 
     home-manager = {
-      url = github:nix-community/home-manager/release-21.05;
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     soxin = {
       url = path:../.;
       inputs = {
+        deploy-rs.follows = "deploy-rs";
         nixpkgs.follows = "nixpkgs";
+        sops-nix.follows = "sops-nix";
         unstable.follows = "unstable";
-        home-manager.follows = "home-manager";
         utils.follows = "utils";
+        home-manager.follows = "home-manager";
       };
     };
   };
