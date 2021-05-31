@@ -101,6 +101,9 @@ let
       ))
       hosts;
 
+  # Generate the deployment nodes.
+  deploy.nodes = mapAttrs (hostname: host: host.deploy) hosts;
+
   soxinSystemFlake = {
     # inherit the required fields as-is
     inherit inputs utils;
@@ -234,11 +237,10 @@ let
       };
   }
   // (optionalAttrs withDeploy {
-    # Generate the deployment nodes.
-    deploy.nodes = mapAttrs (hostname: host: host.deploy) hosts;
+    inherit deploy;
 
     # add the deploy-rs checks
-    checks = mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
+    checks = mapAttrs (system: deployLib: deployLib.deployChecks deploy) deploy-rs.lib;
   });
 
 in
