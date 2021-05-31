@@ -19,7 +19,7 @@
     let
       inherit (nixpkgs) lib;
       inherit (lib) recurseIntoAttrs recursiveUpdate;
-      inherit (utils.lib) eachDefaultSystem;
+      inherit (utils.lib) eachDefaultSystem flattenTree;
 
       anySystemOutputs = {
         defaultTemplate = {
@@ -49,7 +49,7 @@
             ];
           };
 
-          packages = import ./pkgs { inherit callPackage; };
+          packages = flattenTree (import ./pkgs { inherit callPackage; });
 
         }
       );
