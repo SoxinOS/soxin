@@ -63,7 +63,7 @@
 
     in
     soxin.lib.systemFlake {
-      inherit channels inputs withDeploy withSops nixosModules nixosModule;
+      inherit channels channelsConfig inputs withDeploy withSops nixosModules nixosModule;
 
       # add Soxin's main module to all builders
       extraGlobalModules = [ nixosModule nixosModules.profiles.core ];
