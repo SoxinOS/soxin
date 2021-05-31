@@ -50,7 +50,6 @@
           };
 
           packages = flattenTree (import ./pkgs { inherit callPackage; });
-
         }
       );
     in

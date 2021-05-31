@@ -28,6 +28,7 @@
 
       inherit (nixpkgs) lib;
       inherit (lib) optionalAttrs recursiveUpdate singleton;
+      inherit (utils.lib) flattenTree;
 
       # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
       channels = {
@@ -75,7 +76,7 @@
       home-managers = import ./home-managers inputs;
 
       # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
-      packagesBuilder = channels: import ./pkgs channels;
+      packagesBuilder = channels: flattenTree (import ./pkgs channels);
 
       # declare the vars that are used only by sops
       vars = optionalAttrs withSops (import ./vars inputs);
