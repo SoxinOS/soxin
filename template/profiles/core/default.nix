@@ -29,6 +29,7 @@ in
       users.users = {
         nick = {
           isNormalUser = true;
+          shell = pkgs.zsh;
         };
       };
     })
