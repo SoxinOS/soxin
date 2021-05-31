@@ -14,7 +14,7 @@ in
         settings = {
           keyboard = {
             layouts = [
-              { x11 = { layout = "us"; variant = "intl"; }; }
+              { x11 = { layout = "us"; }; }
             ];
           };
         };
@@ -26,10 +26,17 @@ in
       nix.useSandbox = true;
 
       # configure the users
+      users.mutableUsers = false; # do not allow runtime mods to the users
       users.users = {
         nick = {
+          extraGroups = [ "wheel" ];
           isNormalUser = true;
+          password = "nick";
           shell = pkgs.zsh;
+        };
+
+        root = {
+          password = "toor";
         };
       };
     })
