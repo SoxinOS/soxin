@@ -1,0 +1,23 @@
+inputs@{ self, deploy-rs, nixpkgs, ... }:
+
+{
+  example = rec {
+    # System architecture.
+    system = "x86_64-linux";
+    # <name> of the channel to be used. Defaults to `nixpkgs`
+    channelName = "nixpkgs";
+    # Extra arguments to be passed to the modules.
+    extraArgs = { };
+    # Host specific configuration.
+    modules = [ ./example/configuration.nix ];
+
+    deploy = {
+      hostname = "host.example.com";
+      profiles.system = {
+        sshUser = "root";
+        user = "root";
+        path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.example;
+      };
+    };
+  };
+}

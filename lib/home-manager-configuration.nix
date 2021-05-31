@@ -6,7 +6,8 @@
 let
   inherit (nixpkgs) lib;
   inherit (lib) singleton removeAttrs recursiveUpdate;
-in{
+in
+{
   # The configuration to build with home-manager.
   configuration
 
