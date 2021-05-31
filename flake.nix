@@ -38,7 +38,6 @@
       specificSystemOutputs = eachDefaultSystem (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          inherit (pkgs) callPackage;
         in
         {
           devShell = pkgs.mkShell {
@@ -49,7 +48,7 @@
             ];
           };
 
-          packages = flattenTree (import ./pkgs { inherit callPackage; });
+          packages = flattenTree (import ./pkgs pkgs);
         }
       );
     in
