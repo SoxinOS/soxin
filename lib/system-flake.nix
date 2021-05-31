@@ -175,15 +175,11 @@ let
         # overlay the baseShell with things that are only necessary if the
         # user has enabled deploy-rs support.
         deployShell = sopsShell.overrideAttrs (oa: optionalAttrs withDeploy {
-          buildInputs = (oa.buildInputs or [ ]) ++ [
-            deploy-rs.packages.${system}.deploy-rs
-          ];
+          buildInputs = (oa.buildInputs or [ ]) ++ [ deploy-rs.packages.${system}.deploy-rs ];
         });
 
         homeManagerShell = deployShell.overrideAttrs (oa: optionalAttrs (home-managers != { }) {
-          buildInputs = (oa.buildInputs or [ ]) ++ [
-            home-manager.packages.${system}.home-manager
-          ];
+          buildInputs = (oa.buildInputs or [ ]) ++ [ home-manager.packages.${system}.home-manager ];
         });
 
         # set the final shell to be returned
