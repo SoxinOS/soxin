@@ -169,7 +169,6 @@ let
             sopsPGPHook
             git config diff.sopsdiffer.textconv "sops -d"
           '';
-
         });
 
         # overlay the baseShell with things that are only necessary if the
