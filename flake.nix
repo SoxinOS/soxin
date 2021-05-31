@@ -15,18 +15,44 @@
     };
   };
 
-  outputs = { self, ... } @ inputs:
-    {
-      defaultTemplate = {
-        path = ./template;
-        description = "Template for a personal soxincfg repository.";
+  outputs = { nixpkgs, self, utils, ... } @ inputs:
+    let
+      inherit (nixpkgs) lib;
+      inherit (lib) recurseIntoAttrs recursiveUpdate;
+      inherit (utils.lib) eachDefaultSystem;
+
+      anySystemOutputs = {
+        defaultTemplate = {
+          path = ./template;
+          description = "Template for a personal soxincfg repository.";
+        };
+
+        lib = import ./lib inputs;
+
+        nixosModules = (import ./modules) // { soxin = import ./modules/soxin.nix; };
+        nixosModule = self.nixosModules.soxin;
+
+        overlay = import ./overlays;
       };
 
-      lib = import ./lib inputs;
+      specificSystemOutputs = eachDefaultSystem (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          inherit (pkgs) callPackage;
+        in
+        {
+          devShell = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              git
+              nixpkgs-fmt
+              pre-commit
+            ];
+          };
 
-      nixosModules = (import ./modules) // { soxin = import ./modules/soxin.nix; };
-      nixosModule = self.nixosModules.soxin;
+          packages = import ./pkgs { inherit callPackage; };
 
-      overlay = import ./overlays;
-    };
+        }
+      );
+    in
+    recursiveUpdate anySystemOutputs specificSystemOutputs;
 }

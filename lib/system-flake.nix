@@ -127,8 +127,11 @@ let
 
     # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
     packagesBuilder = channels:
+      let
+        inherit (channels.nixpkgs) callPackage;
+      in
       recursiveUpdate
-        (import ../pkgs channels)
+        (import ../pkgs { inherit callPackage; })
         (packagesBuilder channels);
 
     # Evaluates to `devShell.<system> = "attributeValue"`
