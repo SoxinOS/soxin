@@ -59,11 +59,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1622407737,
-        "narHash": "sha256-nmPEv1khCD7x1DIJPmTG6HBsqAgga6P/kpOx2yPQfxM=",
+        "lastModified": 1622145920,
+        "narHash": "sha256-/tt6IApLuVcGP5auy4zjLzfm5+MBHYLS3Nauvv2U2EQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "0e329cee4c17fa0b7df32233513b9cb2236d382b",
+        "rev": "0e6c61a44092e98ba1d75b41f4f947843dc7814d",
         "type": "github"
       },
       "original": {
@@ -159,13 +159,10 @@
     "root": {
       "inputs": {
         "deploy-rs": "deploy-rs",
-        "home-manager": "home-manager",
         "nixpkgs": "nixpkgs_2",
         "nur": "nur",
-        "sops-nix": "sops-nix",
         "soxin": "soxin",
-        "unstable": "unstable",
-        "utils": "utils_2"
+        "unstable": "unstable"
       }
     },
     "sops-nix": {
@@ -191,27 +188,21 @@
         "deploy-rs": [
           "deploy-rs"
         ],
-        "home-manager": [
-          "home-manager"
-        ],
+        "home-manager": "home-manager",
         "nixpkgs": [
           "nixpkgs"
         ],
         "nur": [
           "nur"
         ],
-        "sops-nix": [
-          "sops-nix"
-        ],
+        "sops-nix": "sops-nix",
         "unstable": [
           "unstable"
         ],
-        "utils": [
-          "utils"
-        ]
+        "utils": "utils_2"
       },
       "locked": {
-        "narHash": "sha256-vrDQL3Pt+a6liVVcqdY2NT3RBWyib0bDZAWdNS3/mAI=",
+        "narHash": "sha256-Bw1/E1D/Obb5N1piK+uJAQRP4M3+Z/AfrgXnnigJ07k=",
         "path": "../.",
         "type": "path"
       },

@@ -5,25 +5,15 @@
     deploy-rs.url = github:serokell/deploy-rs;
     nixpkgs.url = github:NixOS/nixpkgs/release-21.05;
     nur.url = github:nix-community/NUR;
-    sops-nix.url = github:Mic92/sops-nix;
     unstable.url = github:NixOS/nixpkgs/nixos-unstable;
-    utils.url = github:gytis-ivaskevicius/flake-utils-plus/v1.1.0;
-
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     soxin = {
       url = path:../.;
       inputs = {
-        deploy-rs.follows = "deploy-rs";
-        home-manager.follows = "home-manager";
+    deploy-rs.follows = "deploy-rs";
         nixpkgs.follows = "nixpkgs";
         nur.follows = "nur";
-        sops-nix.follows = "sops-nix";
         unstable.follows = "unstable";
-        utils.follows = "utils";
       };
     };
   };
