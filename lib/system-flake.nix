@@ -208,7 +208,7 @@ let
             # include the NixOS modules
             ++ extraNixosModules
             # include Soxin modules
-            ++ (singleton self.nixosModule)
+            ++ (singleton soxin.nixosModule)
             # include home-manager modules
             ++ (singleton home-manager.nixosModules.home-manager)
             # configure home-manager
@@ -235,7 +235,7 @@ let
                 # include the home-manager modules
                 ++ extraHomeManagerModules
                 # include Soxin module
-                ++ (singleton self.nixosModule);
+                ++ (singleton soxin.nixosModule);
           });
       };
   }
@@ -249,5 +249,14 @@ utils.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
 
   # TODO: Can this be merged into systemFlake?
   // {
-  homeConfigurations = (mapAttrs (hostname: host: self.lib.homeManagerConfiguration (host // { inherit inputs; })) home-managers);
+  homeConfigurations = (mapAttrs
+    (hostname: host: soxin.lib.homeManagerConfiguration (host // {
+      inherit inputs;
+      hmModules =
+        # include the global modules
+        extraGlobalModules
+        # include the home-manager modules
+        ++ extraHomeManagerModules;
+    }))
+    home-managers);
 }

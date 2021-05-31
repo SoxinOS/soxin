@@ -28,6 +28,9 @@ let
   inherit (lib) singleton recursiveUpdate;
   inherit (nixpkgs) lib;
 
+  soxin = self;
+  soxincfg = inputs.self;
+
   otherArguments = removeAttrs args [
     "inputs"
     "hmSpecialArgs"
@@ -38,11 +41,9 @@ in
 home-manager.lib.homeManagerConfiguration (recursiveUpdate
   {
     extraSpecialArgs = {
-      inherit inputs;
+      inherit inputs soxin soxincfg;
 
       mode = "home-manager";
-      soxin = self;
-      soxincfg = inputs.self;
     }
     # include the home-manager special arguments.
     // hmSpecialArgs;
@@ -51,6 +52,8 @@ home-manager.lib.homeManagerConfiguration (recursiveUpdate
       # include the home-manager modules
       hmModules
       # include Soxin module
-      ++ (singleton self.nixosModules.soxin);
+      ++ (singleton soxin.nixosModules.soxin)
+      # include SoxinCFG module
+      ++ (singleton soxincfg.nixosModules.soxincfg);
   }
   otherArguments)
