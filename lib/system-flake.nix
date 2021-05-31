@@ -24,7 +24,6 @@
 , withDeploy ? false
 
   # Sops-nix support
-  # TODO: implement
 , withSops ? false
 
   # The global modules are included in both NixOS and home-manager.
@@ -61,7 +60,7 @@ let
   soxincfg = inputs.self;
 
   inherit (nixpkgs) lib;
-  inherit (lib) asserts mapAttrs optionalAttrs recursiveUpdate singleton;
+  inherit (lib) asserts mapAttrs optionalAttrs optionals recursiveUpdate singleton;
   inherit (builtins) removeAttrs;
 
   otherArguments = removeAttrs args [
@@ -199,6 +198,8 @@ let
         modules =
           # include the modules that are passed in
           (hostDefaults.modules or [ ])
+            # include sops
+            ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
             # include the global modules
             ++ extraGlobalModules
             # include sane flake defaults from utils which sets sane `nix.*` defaults.
