@@ -8,7 +8,7 @@
     unstable.url = github:NixOS/nixpkgs/nixos-unstable;
 
     soxin = {
-      url = path:../.;
+      url = github:SoxinOS/soxin;
       inputs = {
         deploy-rs.follows = "deploy-rs";
         nixpkgs.follows = "nixpkgs";
