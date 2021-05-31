@@ -150,6 +150,9 @@ let
           buildInputs = [
             nixpkgs-fmt
             pre-commit
+
+            # Source: https://github.com/chvp/nixos-config/blob/51b76511816d03e94b87cdc8096ce437ec43756b/flake.nix#L46
+            (pkgs.writeShellScriptBin "fetchpatch" "curl -L https://github.com/NixOS/nixpkgs/pull/$1.patch -o patches/$1.patch")
           ];
         };
 
