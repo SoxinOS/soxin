@@ -6,6 +6,7 @@
     nixpkgs.url = github:NixOS/nixpkgs/release-21.05;
     nur.url = github:nix-community/NUR;
     unstable.url = github:NixOS/nixpkgs/nixos-unstable;
+    utils.url = github:gytis-ivaskevicius/flake-utils-plus/v1.1.0;
 
     soxin = {
       url = github:SoxinOS/soxin;
@@ -14,11 +15,12 @@
         nixpkgs.follows = "nixpkgs";
         nur.follows = "nur";
         unstable.follows = "unstable";
+        utils.follows = "utils";
       };
     };
   };
 
-  outputs = inputs@{ self, soxin, nixpkgs, ... }:
+  outputs = inputs@{ self, soxin, nixpkgs, utils, ... }:
     let
       # Enable deploy-rs support
       withDeploy = true;
@@ -61,7 +63,7 @@
 
     in
     soxin.lib.systemFlake {
-      inherit inputs withDeploy withSops nixosModules nixosModule;
+      inherit channels inputs withDeploy withSops nixosModules nixosModule;
 
       # add Soxin's main module to all builders
       extraGlobalModules = [ nixosModule nixosModules.profiles.core ];
