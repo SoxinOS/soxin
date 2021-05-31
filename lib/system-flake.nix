@@ -164,19 +164,9 @@ let
         # overlay the baseShell with things that are only necessary if the
         # user has enabled sops support.
         sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
-          sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
-            "./vars/sops-keys/hosts"
-            "./vars/sops-keys/users"
-          ];
-
-          nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [
-            sops-nix.packages.${system}.sops-pgp-hook
-          ];
-
-          buildInputs = (oa.buildInputs or [ ]) ++ [
-            sops
-            sops-nix.packages.${system}.ssh-to-pgp
-          ];
+          buildInputs = (oa.buildInputs or [ ]) ++ [ sops sops-nix.packages.${system}.ssh-to-pgp ];
+          nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-nix.packages.${system}.sops-pgp-hook ];
+          sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [ "./vars/sops-keys/hosts" "./vars/sops-keys/users" ];
 
           shellHook = (oa.shellHook or "") + ''
             sopsPGPHook
