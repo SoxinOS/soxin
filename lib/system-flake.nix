@@ -60,7 +60,7 @@ let
   soxincfg = inputs.self;
 
   inherit (nixpkgs) lib;
-  inherit (lib) asserts mapAttrs optionalAttrs optionals recursiveUpdate singleton;
+  inherit (lib) asserts filterAttrs mapAttrs optionalAttrs optionals recursiveUpdate singleton;
   inherit (builtins) removeAttrs;
 
   otherArguments = removeAttrs args [
@@ -102,7 +102,11 @@ let
       hosts;
 
   # Generate the deployment nodes.
-  deploy.nodes = mapAttrs (hostname: host: host.deploy) hosts;
+  deploy.nodes =
+    let
+      deploy-hosts = filterAttrs (n: v: (v.deploy or { }) != { }) hosts;
+    in
+    mapAttrs (hostname: host: host.deploy) deploy-hosts;
 
   soxinSystemFlake = {
     # inherit the required fields as-is
