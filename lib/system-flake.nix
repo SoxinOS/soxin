@@ -248,7 +248,7 @@ assert asserts.assertMsg (hosts != { } || home-managers != { }) "At least hosts 
 
 utils.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
 
-  # TODO: Can this be merged into systemFlake?
+  # TODO: Let utils.lib.systemFlake handle the home-managers by using the host's builder function
   // {
   homeConfigurations = (mapAttrs
     (hostname: host: soxin.lib.homeManagerConfiguration (host // {
