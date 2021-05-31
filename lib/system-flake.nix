@@ -80,6 +80,8 @@ let
     "sharedOverlays"
   ];
 
+  # generate each host by injecting special arguments and the given host
+  # without certain soxin-only attributes.
   hosts' =
     mapAttrs
       (hostname: host: (recursiveUpdate
@@ -104,6 +106,7 @@ let
   # Generate the deployment nodes.
   deploy.nodes =
     let
+      # filter out hosts without a deploy attribute.
       deploy-hosts = filterAttrs (n: v: (v.deploy or { }) != { }) hosts;
     in
     mapAttrs (hostname: host: host.deploy) deploy-hosts;
@@ -129,7 +132,7 @@ let
       # Nix User Repository overlay
       nur.overlay
     ]
-    # add the sharedOverlays from soxincfg
+    # pass along the sharedModules
     ++ sharedOverlays;
 
     # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
@@ -138,7 +141,9 @@ let
         inherit (channels) nixpkgs;
       in
       recursiveUpdate
+        # these packages construct themselves if and only if the system is supported.
         (import ../pkgs nixpkgs)
+        # pass along the packagesBuilder
         (packagesBuilder channels);
 
     # Evaluates to `devShell.<system> = "attributeValue"`
