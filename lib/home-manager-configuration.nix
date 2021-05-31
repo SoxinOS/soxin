@@ -1,10 +1,12 @@
 # TODO: Get this merged into systemFlake
 
-{ self, lib, home-manager }:
+{ self, nixpkgs, home-manager }:
 
-with lib;
 
-{
+let
+  inherit (nixpkgs) lib;
+  inherit (lib) singleton removeAttrs recursiveUpdate;
+in{
   # The configuration to build with home-manager.
   configuration
 
@@ -24,7 +26,7 @@ with lib;
 , ...
 } @ args:
 
-home-manager.lib.homeManagerConfiguration (lib.recursiveUpdate (removeAttrs args [ "hmSpecialArgs" "hmModules" ]) {
+home-manager.lib.homeManagerConfiguration (recursiveUpdate (removeAttrs args [ "hmSpecialArgs" "hmModules" ]) {
   extraSpecialArgs = {
     mode = "home-manager";
     soxin = self;
