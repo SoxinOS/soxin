@@ -10,7 +10,7 @@
     soxin = {
       url = path:../.;
       inputs = {
-    deploy-rs.follows = "deploy-rs";
+        deploy-rs.follows = "deploy-rs";
         nixpkgs.follows = "nixpkgs";
         nur.follows = "nur";
         unstable.follows = "unstable";
@@ -70,6 +70,9 @@
 
       # pull in all hosts
       hosts = import ./hosts inputs;
+
+      # create all home-managers
+      home-managers = import ./home-managers inputs;
 
       # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
       packagesBuilder = channels: import ./pkgs channels;

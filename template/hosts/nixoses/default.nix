@@ -1,7 +1,7 @@
-inputs@{ self, deploy-rs, nixpkgs, ... }:
+inputs@{ self, deploy-rs, ... }:
 
 {
-  minimal =
+  minimal-nixos-system =
     let
       system = "x86_64-linux";
     in
@@ -13,14 +13,14 @@ inputs@{ self, deploy-rs, nixpkgs, ... }:
       # Extra arguments to be passed to the modules.
       extraArgs = { };
       # Host specific configuration.
-      modules = [ ./minimal/configuration.nix ];
+      modules = [ ./minimal-nixos-system/configuration.nix ];
 
       deploy = {
-        hostname = "host.minimal.com";
+        hostname = "host.minimal-nixos-system.com";
         profiles.system = {
           sshUser = "root";
           user = "root";
-          path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.minimal;
+          path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.minimal-nixos-system;
         };
       };
     };

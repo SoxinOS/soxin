@@ -1,5 +1,4 @@
-inputs@{ self, deploy-rs, nixpkgs, ... }:
+inputs@{ ... }:
 
 (import ./nixoses inputs) //
-(import ./darwins inputs) //
-(import ./home-managers inputs)
+(import ./darwins inputs)

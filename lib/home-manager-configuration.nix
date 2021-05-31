@@ -1,15 +1,11 @@
-# TODO: Get this merged into systemFlake
+{ self, nixpkgs, home-manager, ... }:
 
-{ self, nixpkgs, home-manager }:
-
-
-let
-  inherit (nixpkgs) lib;
-  inherit (lib) singleton removeAttrs recursiveUpdate;
-in
 {
+  # inputs of your own soxincfg
+  inputs
+
   # The configuration to build with home-manager.
-  configuration
+, configuration
 
   # The username and the absolute path to their home directory.
 , username
@@ -27,17 +23,34 @@ in
 , ...
 } @ args:
 
-home-manager.lib.homeManagerConfiguration (recursiveUpdate (removeAttrs args [ "hmSpecialArgs" "hmModules" ]) {
-  extraSpecialArgs = {
-    mode = "home-manager";
-    soxin = self;
-  }
-  # include the home-manager special arguments.
-  // hmSpecialArgs;
+let
+  inherit (builtins) removeAttrs;
+  inherit (lib) singleton recursiveUpdate;
+  inherit (nixpkgs) lib;
 
-  extraModules =
-    # include the home-manager modules
-    hmModules
-    # include Soxin module
-    ++ (singleton self.nixosModules.soxin);
-})
+  otherArguments = removeAttrs args [
+    "inputs"
+    "hmSpecialArgs"
+    "hmModules"
+  ];
+
+in
+home-manager.lib.homeManagerConfiguration (recursiveUpdate
+  {
+    extraSpecialArgs = {
+      inherit inputs;
+
+      mode = "home-manager";
+      soxin = self;
+      soxincfg = inputs.self;
+    }
+    # include the home-manager special arguments.
+    // hmSpecialArgs;
+
+    extraModules =
+      # include the home-manager modules
+      hmModules
+      # include Soxin module
+      ++ (singleton self.nixosModules.soxin);
+  }
+  otherArguments)

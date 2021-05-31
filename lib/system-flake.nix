@@ -15,7 +15,9 @@
 
   # attr attribute set of hosts
   # See https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/e7ae270a23695b50fbb6b72759a7fb1e3340ca86/examples/fully-featured/flake.nix#L101-L112
-, hosts
+, hosts ? { }
+
+, home-managers ? { }
 
   # Deploy-rs support
   # TODO: implement
@@ -59,13 +61,14 @@ let
   soxincfg = inputs.self;
 
   inherit (nixpkgs) lib;
-  inherit (lib) mapAttrs optionalAttrs recursiveUpdate singleton;
+  inherit (lib) asserts mapAttrs optionalAttrs recursiveUpdate singleton;
   inherit (builtins) removeAttrs;
 
   otherArguments = removeAttrs args [
     "self"
     "inputs"
     "hosts"
+    "home-managers"
     "withDeploy"
     "withSops"
     "extraGlobalModules"
@@ -148,7 +151,7 @@ let
 
         # overlay the baseShell with things that are only necessary if the
         # user has enabled sops support.
-        sopsShell = baseShell.overrideAttrs (oa: {
+        sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
           sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
             "./vars/sops-keys/hosts"
             "./vars/sops-keys/users"
@@ -172,14 +175,20 @@ let
 
         # overlay the baseShell with things that are only necessary if the
         # user has enabled deploy-rs support.
-        deployShell = sopsShell.overrideAttrs (oa: {
+        deployShell = sopsShell.overrideAttrs (oa: optionalAttrs withDeploy {
           buildInputs = (oa.buildInputs or [ ]) ++ [
             deploy-rs.packages.${system}.deploy-rs
           ];
         });
 
+        homeManagerShell = deployShell.overrideAttrs (oa: optionalAttrs (home-managers != { }) {
+          buildInputs = (oa.buildInputs or [ ]) ++ [
+            home-manager.packages.${system}.home-manager
+          ];
+        });
+
         # set the final shell to be returned
-        finalShell = deployShell;
+        finalShell = homeManagerShell;
       in
       finalShell;
 
@@ -233,4 +242,12 @@ let
   // (optionalAttrs withDeploy { inherit deploy; });
 
 in
+
+assert asserts.assertMsg (hosts != { } || home-managers != { }) "At least hosts or home-managers must be set";
+
 utils.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
+
+  # TODO: Can this be merged into systemFlake?
+  // {
+  homeConfigurations = (mapAttrs (hostname: host: self.lib.homeManagerConfiguration (host // { inherit inputs; })) home-managers);
+}
