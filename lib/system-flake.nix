@@ -52,7 +52,6 @@
 
   # Default host settings.
 , hostDefaults ? { }
-
 , ...
 } @ args:
 
@@ -147,19 +146,7 @@ let
         # pass along the packagesBuilder
         (packagesBuilder channels);
 
-    # Evaluates to `checks.<system>.attributeKey = "attributeValue"`
-    checksBuilder = channels:
-      let
-        inherit (channels) nixpkgs;
-        inherit (nixpkgs) system;
-
-        systemDeploy = deploy // { nodes = filterAttrs (n: v: v.system == system) deploy.nodes; };
-        finalChecks = optionalAttrs withDeploy deploy-rs.lib.${system}.deployChecks systemDeploy;
-      in
-      finalChecks;
-
     # Evaluates to `devShell.<system> = "attributeValue"`
-    # TODO: allow soxincfg to override this shell.
     devShellBuilder = channels: with channels.nixpkgs;
       let
         # the base devShell.
@@ -251,7 +238,12 @@ let
           });
       };
   }
-  // (optionalAttrs withDeploy { inherit deploy; });
+  // (optionalAttrs withDeploy {
+    inherit deploy;
+
+    # add the deploy-rs checks
+    checks = mapAttrs (system: deployLib: deployLib.deployChecks deploy) deploy-rs.lib;
+  });
 
 in
 
