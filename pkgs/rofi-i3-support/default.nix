@@ -1,5 +1,6 @@
 { i3
 , jq
+, lib
 , stdenvNoCC
 , withSwm ? false
   # TODO: once swm is packaged in Soxin, add it as a dependency
@@ -42,7 +43,7 @@ stdenvNoCC.mkDerivation rec {
     chmod 755 $out/bin/*
   '';
 
-  meta = with stdenvNoCC.lib; {
+  meta = with lib; {
     platforms = lists.intersectLists i3.meta.platforms jq.meta.platforms;
     description = "Rofi support for i3.";
     maintainers = with maintainers; [ kalbasit ];
