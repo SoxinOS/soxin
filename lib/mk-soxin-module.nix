@@ -50,9 +50,10 @@ recursiveUpdate
     type = with types; listOf [ str modules.programmingLanguages.programmingLanguagesModule ];
     default = config.soxin.settings.programmingLanguages;
     description = "Programming language to use for ${name}.";
-    apply = value:
-      if builtins.isString value then config.soxin.programmingLanguages.${value}.${name}
-      else value.${name};
+    apply = value: map (v:
+      if builtins.isString v then config.soxin.programmingLanguages.${v}.${name}
+      else v.${name}
+    ) value;
   });
 }
   extraOptions
