@@ -38,16 +38,16 @@ recursiveUpdate
   });
 
   tool = optionalAttrs includeTool (mkOption {
-    type = with types; oneOf [ str modules.tools.toolsModule ];
+    type = with types; listOf [ str modules.tools.toolsModule ];
     default = config.soxin.settings.tools;
     description = "Tool to use for ${name}.";
     apply = value:
-      if builtins.isString value then config.soxin.themes.${value}.${name}
+      if builtins.isString value then config.soxin.tools.${value}.${name}
       else value.${name};
   });
 
   programmingLanguage = optionalAttrs includeprogrammingLanguage (mkOption {
-    type = with types; oneOf [ str modules.programmingLanguages.programmingLanguagesModule ];
+    type = with types; listOf [ str modules.programmingLanguages.programmingLanguagesModule ];
     default = config.soxin.settings.programmingLanguages;
     description = "Programming language to use for ${name}.";
     apply = value:
