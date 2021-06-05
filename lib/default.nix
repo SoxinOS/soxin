@@ -1,6 +1,7 @@
-{ lib, self, home-manager, ... }:
+{ lib, self, darwin, home-manager, ... }:
 
 rec {
+  darwinSystem = import ./darwin-system.nix { inherit self lib darwin home-manager; };
   homeManagerConfiguration = import ./home-manager-configuration.nix { inherit self lib home-manager; };
   mkSoxinModule = import ./mk-soxin-module.nix { inherit lib modules; };
   modules = import ./modules { inherit lib; };

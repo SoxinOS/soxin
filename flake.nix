@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -10,7 +14,7 @@
     futils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, home-manager, futils } @ inputs:
+  outputs = { self, nixpkgs, darwin, home-manager, futils } @ inputs:
     let
       inherit (nixpkgs) lib;
       inherit (lib) recursiveUpdate;
@@ -42,6 +46,9 @@
 
         nixosModules = (import ./modules) // { soxin = import ./modules/soxin.nix; };
         nixosModule = self.nixosModules.soxin;
+        /* For now they are the same. */
+        darwinModules = self.nixosModules;
+        darwinModule = self.darwinModules.soxin;
 
         defaultTemplate = {
           path = ./template;
