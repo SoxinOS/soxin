@@ -1,5 +1,6 @@
 { i3
 , jq
+, lib
 , stdenvNoCC
 , withSwm ? false
   # TODO: once swm is packaged in Soxin, add it as a dependency
@@ -42,7 +43,7 @@ stdenvNoCC.mkDerivation rec {
     chmod 755 $out/bin/*
   '';
 
-  meta = with stdenvNoCC.lib; {
+  meta = with lib; {
     # TODO: For some reason i3's platform is set to all of them.
     # platforms = lists.intersectLists i3.meta.platforms jq.meta.platforms;
     platforms = platforms.linux;

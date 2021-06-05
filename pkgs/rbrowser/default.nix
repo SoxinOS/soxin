@@ -18,7 +18,7 @@ let
   # What are the supported browsers by Rbrowser?
   supportedBrowsers = [ "brave" "chromium" "firefox" ];
 
-  inherit (stdenvNoCC.lib) foldl intersectLists optional optionalString;
+  inherit (lib) foldl intersectLists optional optionalString;
 
   # compute what browser we need
   withBrowser =
@@ -296,13 +296,13 @@ stdenvNoCC.mkDerivation rec {
       browsersPlatforms = (optional withBrave bravePlatforms)
         ++ (optional withChromium chromiumPlatforms)
         ++ (optional withFirefox firefoxPlatforms);
-      mkPlatforms = foldl (lhs: rhs: intersectLists lhs rhs) stdenvNoCC.lib.platforms.unix;
+      mkPlatforms = foldl (lhs: rhs: intersectLists lhs rhs) lib.platforms.unix;
       platforms = mkPlatforms browsersPlatforms;
     in
     {
       inherit platforms;
 
       description = "A rofi-based browser picker that supports the following browsers: ${builtins.concatStringsSep " " supportedBrowsers}.";
-      maintainers = with stdenvNoCC.lib.maintainers; [ kalbasit ];
+      maintainers = with lib.maintainers; [ kalbasit ];
     };
 }
