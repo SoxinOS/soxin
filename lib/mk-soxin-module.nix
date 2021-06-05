@@ -41,9 +41,10 @@ recursiveUpdate
     type = with types; listOf [ str modules.tools.toolsModule ];
     default = config.soxin.settings.tools;
     description = "Tool to use for ${name}.";
-    apply = value:
-      if builtins.isString value then config.soxin.tools.${value}.${name}
-      else value.${name};
+    apply = value: map (v:
+      if builtins.isString v then config.soxin.tools.${v}.${name}
+      else v.${name}
+    ) value;
   });
 
   programmingLanguage = optionalAttrs includeprogrammingLanguage (mkOption {
