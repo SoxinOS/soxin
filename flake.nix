@@ -15,7 +15,7 @@
     };
   };
 
-  outputs = { nixpkgs, self, flake-utils-plus, ... } @ inputs:
+  outputs = { flake-utils-plus, nixpkgs, self, ... } @ inputs:
     let
       inherit (nixpkgs) lib;
       inherit (lib) recurseIntoAttrs recursiveUpdate;

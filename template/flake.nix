@@ -20,7 +20,7 @@
     };
   };
 
-  outputs = inputs@{ self, soxin, nixpkgs, flake-utils-plus, ... }:
+  outputs = inputs@{ flake-utils-plus, nixpkgs, self, soxin, ... }:
     let
       # Enable deploy-rs support
       withDeploy = true;
