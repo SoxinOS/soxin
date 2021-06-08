@@ -1,11 +1,11 @@
 { deploy-rs
 , home-manager
+, flake-utils-plus
 , nixpkgs
+, nixpkgs-unstable
 , nur
 , self
 , sops-nix
-, unstable
-, flake-utils-plus
 , ...
 }:
 
@@ -123,7 +123,7 @@ let
 
     # configure the channels.
     channels.nixpkgs.input = nixpkgs;
-    channels.unstable.input = unstable;
+    channels.unstable.input = nixpkgs-unstable;
 
     # Overlays which are applied to all channels.
     sharedOverlays = [

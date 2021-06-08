@@ -3,19 +3,19 @@
 
   inputs = {
     deploy-rs.url = "github:serokell/deploy-rs";
+    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/release-21.05";
     nur.url = "github:nix-community/NUR";
-    unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
 
     soxin = {
       url = "github:SoxinOS/soxin";
       inputs = {
         deploy-rs.follows = "deploy-rs";
+        flake-utils-plus.follows = "flake-utils-plus";
+        nixpkgs-unstable.follows = "nixpkgs-unstable";
         nixpkgs.follows = "nixpkgs";
         nur.follows = "nur";
-        unstable.follows = "unstable";
-        flake-utils-plus.follows = "flake-utils-plus";
       };
     };
   };
