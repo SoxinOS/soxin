@@ -5,7 +5,7 @@
 , self
 , sops-nix
 , unstable
-, utils
+, flake-utils-plus
 , ...
 }:
 
@@ -113,7 +113,7 @@ let
 
   soxinSystemFlake = {
     # inherit the required fields as-is
-    inherit inputs utils;
+    inherit inputs flake-utils-plus;
 
     # send self as soxincfg
     self = soxincfg;
@@ -203,10 +203,10 @@ let
             ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
             # include the global modules
             ++ extraGlobalModules
-            # include sane flake defaults from utils which sets sane `nix.*` defaults.
+            # include sane flake defaults from flake-utils-plus which sets sane `nix.*` defaults.
             # Please refer to implementation/readme in
             # github:gytis-ivaskevicius/flake-utils-plus for more details.
-            ++ (singleton utils.nixosModules.saneFlakeDefaults)
+            ++ (singleton flake-utils-plus.nixosModules.saneFlakeDefaults)
             # include the NixOS modules
             ++ extraNixosModules
             # include Soxin modules
@@ -252,9 +252,9 @@ in
 
 assert asserts.assertMsg (hosts != { } || home-managers != { }) "At least hosts or home-managers must be set";
 
-utils.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
+flake-utils-plus.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
 
-  # TODO: Let utils.lib.systemFlake handle the home-managers by using the host's builder function
+  # TODO: Let flake-utils-plus.lib.systemFlake handle the home-managers by using the host's builder function
   // {
   homeConfigurations = (mapAttrs
     (hostname: host: soxin.lib.homeManagerConfiguration (host // {

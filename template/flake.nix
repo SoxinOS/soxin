@@ -2,25 +2,25 @@
   description = "Soxin template flake";
 
   inputs = {
-    deploy-rs.url = github:serokell/deploy-rs;
-    nixpkgs.url = github:NixOS/nixpkgs/release-21.05;
-    nur.url = github:nix-community/NUR;
-    unstable.url = github:NixOS/nixpkgs/nixos-unstable;
-    utils.url = github:gytis-ivaskevicius/flake-utils-plus/v1.1.0;
+    deploy-rs.url = "github:serokell/deploy-rs";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-21.05";
+    nur.url = "github:nix-community/NUR";
+    unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
 
     soxin = {
-      url = github:SoxinOS/soxin;
+      url = "github:SoxinOS/soxin";
       inputs = {
         deploy-rs.follows = "deploy-rs";
         nixpkgs.follows = "nixpkgs";
         nur.follows = "nur";
         unstable.follows = "unstable";
-        utils.follows = "utils";
+        flake-utils-plus.follows = "flake-utils-plus";
       };
     };
   };
 
-  outputs = inputs@{ self, soxin, nixpkgs, utils, ... }:
+  outputs = inputs@{ self, soxin, nixpkgs, flake-utils-plus, ... }:
     let
       # Enable deploy-rs support
       withDeploy = true;
@@ -30,7 +30,7 @@
 
       inherit (nixpkgs) lib;
       inherit (lib) optionalAttrs recursiveUpdate singleton;
-      inherit (utils.lib) flattenTree;
+      inherit (flake-utils-plus.lib) flattenTree;
 
       # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
       channels = {
