@@ -123,7 +123,7 @@ let
 
     # configure the channels.
     channels.nixpkgs.input = nixpkgs;
-    channels.unstable.input = nixpkgs-unstable;
+    channels.nixpkgs-unstable.input = nixpkgs-unstable;
 
     # Overlays which are applied to all channels.
     sharedOverlays = [
