@@ -133,7 +133,9 @@ let
       nur.overlay
     ]
     # pass along the sharedModules
-    ++ sharedOverlays;
+    ++ sharedOverlays
+    # pass along sops-nix overlay.
+    ++ optionals withSops (singleton sops-nix.overlay);
 
     # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
     packagesBuilder = channels:
@@ -165,8 +167,8 @@ let
         # overlay the baseShell with things that are only necessary if the
         # user has enabled sops support.
         sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
-          buildInputs = (oa.buildInputs or [ ]) ++ [ sops sops-nix.packages.${system}.ssh-to-pgp ];
-          nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-nix.packages.${system}.sops-pgp-hook ];
+          buildInputs = (oa.buildInputs or [ ]) ++ [ sops ssh-to-pgp ];
+          nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-pgp-hook ];
           sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [ "./vars/sops-keys/hosts" "./vars/sops-keys/users" ];
 
           shellHook = (oa.shellHook or "") + ''
