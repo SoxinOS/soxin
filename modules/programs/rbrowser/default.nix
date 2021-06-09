@@ -4,7 +4,7 @@ with lib;
 let
   cfg = config.soxin.programs.rbrowser;
 
-  inherit (soxin.packages.${pkgs.system}) rbrowser;
+  inherit (pkgs.soxin) rbrowser;
 
   browserSubmodule =
     let
@@ -107,10 +107,10 @@ in
         type = types.package;
         default = rbrowser.override { inherit (cfg) browsers; };
         defaultText = ''
-          soxin.packages.${pkgs.system}.rbrowser.override { inherit (cfg) browsers; };
+          pkgs.soxin.rbrowser.override { inherit (cfg) browsers; };
         '';
         example = ''
-          soxin.packages.${pkgs.system}..override { browsers = [ { name = "chromium"; profile = "personal"; flags = []; } ]; };
+          pkgs.soxin.rbrowser.override { browsers = [ { name = "chromium"; profile = "personal"; flags = []; } ]; };
         '';
         description = ''
           The rbrowser package to use. It it automatically overriden depending

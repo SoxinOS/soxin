@@ -4,7 +4,7 @@ with lib;
 let
   cfg = config.soxin.programs.rofi;
 
-  inherit (soxin.packages.${pkgs.system}) rofi-i3-support;
+  inherit (pkgs.soxin) rofi-i3-support;
 in
 {
   options = {

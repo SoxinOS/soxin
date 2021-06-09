@@ -32,7 +32,7 @@
         nixosModules = (import ./modules) // { soxin = import ./modules/soxin.nix; };
         nixosModule = self.nixosModules.soxin;
 
-        overlay = import ./overlays;
+        overlay = final: prev: { soxin = import ./pkgs prev; };
       };
 
       specificSystemOutputs = eachDefaultSystem (system:
