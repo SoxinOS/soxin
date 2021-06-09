@@ -1,6 +1,9 @@
-{ lib, modules }:
+{ nixpkgs, self, ... }:
 
 let
+  inherit (self.lib.modules) keyboard themes;
+
+  inherit (nixpkgs) lib;
   inherit (lib)
     optionalAttrs
     mkEnableOption
@@ -21,13 +24,13 @@ recursiveUpdate
   enable = mkEnableOption name;
 
   keyboardLayout = optionalAttrs includeKeyboardLayout (mkOption {
-    type = modules.keyboard.layoutModule;
+    type = keyboard.layoutModule;
     default = config.soxin.settings.keyboard.defaultLayout;
     description = "Keyboard layout to use for ${name}.";
   });
 
   theme = optionalAttrs includeTheme (mkOption {
-    type = with types; oneOf [ str modules.themes.themeModule ];
+    type = with types; oneOf [ str themes.themeModule ];
     default = config.soxin.settings.theme;
     description = "Theme to use for ${name}.";
     apply = value:

@@ -1,10 +1,11 @@
-{ self, lib, home-manager }:
-
-with lib;
+{ self, nixpkgs, home-manager, ... }:
 
 {
+  # inputs of your own soxincfg
+  inputs
+
   # The configuration to build with home-manager.
-  configuration
+, configuration
 
   # The username and the absolute path to their home directory.
 , username
@@ -22,17 +23,37 @@ with lib;
 , ...
 } @ args:
 
-home-manager.lib.homeManagerConfiguration (lib.recursiveUpdate (removeAttrs args [ "hmSpecialArgs" "hmModules" ]) {
-  extraSpecialArgs = {
-    mode = "home-manager";
-    soxin = self;
-  }
-  # include the home-manager special arguments.
-  // hmSpecialArgs;
+let
+  inherit (builtins) removeAttrs;
+  inherit (lib) singleton recursiveUpdate;
+  inherit (nixpkgs) lib;
 
-  extraModules =
-    # include the home-manager modules
-    hmModules
-    # include Soxin module
-    ++ (singleton self.nixosModules.soxin);
-})
+  soxin = self;
+  soxincfg = inputs.self;
+
+  otherArguments = removeAttrs args [
+    "inputs"
+    "hmSpecialArgs"
+    "hmModules"
+  ];
+
+in
+home-manager.lib.homeManagerConfiguration (recursiveUpdate
+  {
+    extraSpecialArgs = {
+      inherit inputs soxin soxincfg;
+
+      mode = "home-manager";
+    }
+    # include the home-manager special arguments.
+    // hmSpecialArgs;
+
+    extraModules =
+      # include the home-manager modules
+      hmModules
+      # include Soxin module
+      ++ (singleton soxin.nixosModules.soxin)
+      # include SoxinCFG module
+      ++ (singleton soxincfg.nixosModules.soxincfg);
+  }
+  otherArguments)

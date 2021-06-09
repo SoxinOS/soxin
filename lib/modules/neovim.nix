@@ -1,5 +1,7 @@
-{ lib }:
+{ nixpkgs, ... }:
+
 let
+  inherit (nixpkgs) lib;
   inherit (lib)
     mkEnableOption
     mkOption

@@ -2,80 +2,88 @@
   description = "Soxin template flake";
 
   inputs = {
-    nixos.url = "nixpkgs/nixos-20.09";
-    master.url = "nixpkgs/master";
-    home-manager = {
-      url = "github:nix-community/home-manager/release-20.09";
-      inputs.nixpkgs.follows = "nixos";
-    };
+    deploy-rs.url = "github:serokell/deploy-rs";
+    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-21.05";
+    nur.url = "github:nix-community/NUR";
+
     soxin = {
       url = "github:SoxinOS/soxin";
       inputs = {
-        nixpkgs.follows = "nixos";
-        home-manager.follows = "home-manager";
+        deploy-rs.follows = "deploy-rs";
+        flake-utils-plus.follows = "flake-utils-plus";
+        nixpkgs-unstable.follows = "nixpkgs-unstable";
+        nixpkgs.follows = "nixpkgs";
+        nur.follows = "nur";
       };
     };
-    futils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixos, master, home-manager, soxin, futils } @ inputs:
+  outputs = inputs@{ flake-utils-plus, nixpkgs, self, soxin, ... }:
     let
-      inherit (nixos) lib;
-      inherit (nixos.lib) recursiveUpdate;
-      inherit (futils.lib) eachDefaultSystem;
+      # Enable deploy-rs support
+      withDeploy = true;
 
-      pkgImport = pkgs: system:
-        import pkgs {
-          inherit system;
-          overlays = lib.attrValues self.overlays;
-          config = { allowUnfree = true; };
+      # Enable sops support
+      withSops = true;
+
+      inherit (nixpkgs) lib;
+      inherit (lib) optionalAttrs recursiveUpdate singleton;
+      inherit (flake-utils-plus.lib) flattenTree;
+
+      # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
+      channels = {
+        nixpkgs = {
+          # Channel specific overlays
+          overlaysBuilder = channels: [
+            (final: prev: { })
+          ];
+
+          # Channel specific configuration. Overwrites `channelsConfig` argument
+          config = { };
+
+          # Yep, you see it first folks - you can patch nixpkgs!
+          patches = [ ];
         };
-
-      pkgset = system: {
-        nixos = pkgImport nixos system;
-        master = pkgImport master system;
       };
 
-      multiSystemOutputs = eachDefaultSystem (system:
-        let
-          pkgset' = pkgset system;
-          osPkgs = pkgset'.nixos;
-          pkgs = pkgset'.master;
-        in
-        {
-          devShell = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              git
-              nixpkgs-fmt
-              pre-commit
-            ];
-          };
-
-          packages = soxin.lib.overlaysToPkgs self.overlays pkgs;
-        }
-      );
-
-      outputs = {
-        overlay = self.overlays.packages;
-
-        overlays = import ./overlays;
-
-        nixosModules = recursiveUpdate (import ./modules) {
-          profiles = import ./profiles;
-        };
-
-        nixosConfigurations =
-          let
-            system = "x86_64-linux";
-            pkgset' = pkgset system;
-          in
-          import ./hosts (
-            recursiveUpdate inputs {
-              inherit lib system;
-              pkgset = pkgset';
-            }
-          );
+      # Default configuration values for `channels.<name>.config = {...}`
+      channelsConfig = {
+        # allowBroken = true;
+        allowUnfree = true;
       };
+
+      nixosModules = (import ./modules) // {
+        soxincfg = import ./modules/soxincfg.nix;
+        profiles = import ./profiles;
+      };
+
+      nixosModule = nixosModules.soxincfg;
+
     in
-    recursiveUpdate multiSystemOutputs outputs;
+    soxin.lib.systemFlake {
+      inherit channels channelsConfig inputs withDeploy withSops nixosModules nixosModule;
+
+      # add Soxin's main module to all builders
+      extraGlobalModules = [ nixosModule nixosModules.profiles.core ];
+
+      # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+
+      # pull in all hosts
+      hosts = import ./hosts inputs;
+
+      # create all home-managers
+      home-managers = import ./home-managers inputs;
+
+      # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
+      packagesBuilder = channels: flattenTree (import ./pkgs channels);
+
+      # declare the vars that are used only by sops
+      vars = optionalAttrs withSops (import ./vars inputs);
+
+      # include all overlays
+      overlay = import ./overlays;
+    };
 }

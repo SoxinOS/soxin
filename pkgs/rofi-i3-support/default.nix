@@ -44,7 +44,9 @@ stdenvNoCC.mkDerivation rec {
   '';
 
   meta = with lib; {
-    platforms = lists.intersectLists i3.meta.platforms jq.meta.platforms;
+    # TODO: For some reason i3's platform is set to all of them.
+    # platforms = lists.intersectLists i3.meta.platforms jq.meta.platforms;
+    platforms = platforms.linux;
     description = "Rofi support for i3.";
     maintainers = with maintainers; [ kalbasit ];
   };
