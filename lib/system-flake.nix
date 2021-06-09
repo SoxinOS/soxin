@@ -20,7 +20,6 @@
 , home-managers ? { }
 
   # Deploy-rs support
-  # TODO: implement
 , withDeploy ? false
 
   # Sops-nix support
