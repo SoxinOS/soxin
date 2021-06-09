@@ -14,5 +14,6 @@ in
 
   imports = [
     ./gruvbox-dark.nix
+    ./gruvbox-light.nix
   ];
 }

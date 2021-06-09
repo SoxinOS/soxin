@@ -1,7 +1,9 @@
-{ lib }:
+inputs@{ nixpkgs, ... }:
 
 {
-  keyboard = import ./keyboard.nix { inherit lib; };
-
-  themes = import ./themes.nix { inherit lib; };
+  keyboard = import ./keyboard.nix inputs;
+  neovim = import ./neovim.nix inputs;
+  themes = import ./themes.nix inputs;
+  tmux = import ./tmux.nix inputs;
+  zsh = import ./zsh.nix inputs;
 }
