@@ -10,6 +10,14 @@ in
       enable = mkEnableOption "Enable go programming language";
     };
   };
+
+  cfg = {
+    vscode = {
+      extensions = [
+        pkgs.vscode-extensions.golang.Go
+      ];
+    };
+  };
   
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs (mode == "home-manager") {

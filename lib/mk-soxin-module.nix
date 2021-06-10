@@ -17,7 +17,7 @@ in
 , includeKeyboardLayout ? false
 , includeTheme ? false
 , includeTool ? false
-, includeprogrammingLanguage ? false
+, includeProgrammingLanguage ? false
 , extraOptions ? { }
 }:
 
@@ -49,7 +49,7 @@ recursiveUpdate
       else value.${name};
   });
 
-  programmingLanguage = optionalAttrs includeprogrammingLanguage (mkOption {
+  programmingLanguage = optionalAttrs includeProgrammingLanguage (mkOption {
     type = with types; listOf [ str modules.programmingLanguages.programmingLanguagesModule ];
     default = config.soxin.settings.programmingLanguages;
     description = "Programming language to use for ${name}.";

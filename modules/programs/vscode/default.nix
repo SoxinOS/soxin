@@ -10,6 +10,7 @@ in
       inherit config;
       name = "vscode";
       includeProgrammingLanguage = true;
+      includeTool = true;
     };
   };
 
@@ -18,6 +19,7 @@ in
       programs.vscode = mkMerge [
         { inherit (cfg) enable; }
         cfg.programmingLanguages.extentions
+          ++ cfg.tools.extentions
       ];
     })
   ]);

@@ -19,7 +19,7 @@ rec {
   vscodeModule = with types; submodule {
     options = {
        extensions = mkOption {
-        type = types.nullOr (types.package);
+        type = types.listOf types.package;
         default = [ ];
         example = literalExample "[ pkgs.vscode-extensions.bbenoist.Nix ]";
         description = ''
