@@ -11,19 +11,15 @@ in
     };
   };
 
-  cfg = {
-    vscode = {
-      extensions = [
-        pkgs.vscode-extensions.golang.Go
-      ];
-    };
-  };
-  
   config = mkIf cfg.enable (mkMerge [
+
+    { vscode.extensions = [ pkgs.vscode-extensions.golang.Go ]; }
+
     (optionalAttrs (mode == "home-manager") {
       programs.go = {
         enable = true;
-      }
+      };
     })
   ]);
 }
+
