@@ -9,11 +9,17 @@ in
     soxin.programmingLanguages.go = {
       enable = mkEnableOption "Enable go programming language";
     };
+
   };
 
   config = mkIf cfg.enable (mkMerge [
-
-    { vscode.extensions = [ pkgs.vscode-extensions.golang.Go ]; }
+    { 
+      soxin.programmingLanguages = {
+        vscode = {
+          extensions = [ pkgs.vscode-extensions.golang.Go ];
+        };
+      };
+    }
 
     (optionalAttrs (mode == "home-manager") {
       programs.go = {
@@ -22,4 +28,3 @@ in
     })
   ]);
 }
-

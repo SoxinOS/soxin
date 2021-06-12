@@ -4,12 +4,8 @@ with lib;
 {
   options = {
     soxin.programmingLanguages = mkOption {
-      type = with types; soxin.lib.modules.programming.programmingLanguagesModule;
-      default = {  };
+      type = with types; attrsOf soxin.lib.modules.programmingLanguages.programmingLanguagesModule;
+      default = { };
     };
   };
-
-  imports = [
-  	./go.nix
-  ];
 }

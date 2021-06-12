@@ -18,8 +18,7 @@ in
     (optionalAttrs (mode == "home-manager") {
       programs.vscode = mkMerge [
         { inherit (cfg) enable; }
-        cfg.programmingLanguages.extentions
-          ++ cfg.tools.extentions
+        { extentions = cfg.programmingLanguages.extentions; }
       ];
     })
   ]);

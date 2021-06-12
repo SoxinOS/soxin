@@ -14,6 +14,7 @@
   termite = ./programs/termite;
   tmux = ./programs/tmux;
   zsh = ./programs/zsh;
+  vscode = ./programs/vscode;
 
   # settings
   keyboard = ./settings/keyboard.nix;
@@ -24,5 +25,5 @@
   themes = ./themes;
 
   # programmingLanguages
-  programmingLanguages = ./programmingLanguages;
+  go = ./programmingLanguages/go;
 }
