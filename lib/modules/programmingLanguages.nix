@@ -1,20 +1,24 @@
-{ lib }:
+{ nixpkgs, ... }@inputs:
 
 let
+  inherit (nixpkgs) lib;
   inherit (lib)
+    mkEnableOption
     mkOption
     types
     ;
 in
 rec {
-  programmingLanguagesModule = types.submodule {
+  programmingLanguagesModule = types.submodule ({ name, ... }: {
     options = {
+      enable = mkEnableOption "Enable ${name} support.";
+
       vscode = mkOption {
         type = vscodeModule;
         default = { };
       };
     };
-  };
+  });
 
   vscodeModule = with types; submodule {
     options = {

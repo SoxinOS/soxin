@@ -9,7 +9,7 @@ in
     soxin.programs.vscode = soxin.lib.mkSoxinModule {
       inherit config;
       name = "vscode";
-      includeProgrammingLanguage = true;
+      includeProgrammingLanguages = true;
       includeTool = true;
     };
   };
@@ -18,7 +18,11 @@ in
     (optionalAttrs (mode == "home-manager") {
       programs.vscode = mkMerge [
         { inherit (cfg) enable; }
-        { extentions = cfg.programmingLanguages.extentions; }
+        {
+          extentions = flatten (mapAttrsToList (language: module:
+            module.vscode.extenstions
+          ) (filterAttrs (language: module: module.enable) cfg.programmingLanguages));
+        }
       ];
     })
   ]);

@@ -17,7 +17,7 @@ in
 , includeKeyboardLayout ? false
 , includeTheme ? false
 , includeTool ? false
-, includeProgrammingLanguage ? false
+, includeProgrammingLanguages ? false
 , extraOptions ? { }
 }:
 
@@ -50,9 +50,9 @@ recursiveUpdate
     ) value;
   });
 
-  programmingLanguage = optionalAttrs includeProgrammingLanguage (mkOption {
-    type = with types; listOf [ str modules.programmingLanguages.programmingLanguagesModule ];
-    default = config.soxin.settings.programmingLanguages;
+  programmingLanguages = optionalAttrs includeProgrammingLanguages (mkOption {
+    type = with types; attrsOf (oneOf [ str modules.programmingLanguages.programmingLanguagesModule ]);
+    default = config.soxin.programmingLanguages;
     description = "Programming language to use for ${name}.";
     apply = value: map (v:
       if builtins.isString v then config.soxin.programmingLanguages.${v}.${name}
