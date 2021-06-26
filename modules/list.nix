@@ -19,12 +19,12 @@
   # settings
   keyboard = ./settings/keyboard.nix;
   theme = ./settings/theme.nix;
-  programmingLanguages = ./settings/programmingLanguages.nix;
+  programmingLanguage = ./settings/programmingLanguage.nix;
 
   # themes
   themes = ./themes;
 
   # programmingLanguages
-  #programmingLanguages = ./programmingLanguages;
-  #go = ./programmingLanguages/go;
+  programmingLanguages = ./programmingLanguages;
+  go = ./programmingLanguages/go;
 }
