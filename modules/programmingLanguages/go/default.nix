@@ -5,7 +5,7 @@ let
   cfg = config.soxin.programmingLanguages.go;
 in
 {
-  config = mkIf cfg.enable (mkMerge [
+  config = (mkMerge [
     {
       soxin.programmingLanguages.go = {
         vscode = {

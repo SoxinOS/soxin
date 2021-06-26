@@ -11,7 +11,7 @@ in
 rec {
   programmingLanguagesModule = types.submodule ({ name, ... }: {
     options = {
-      enable = mkEnableOption "Enable ${name} support.";
+      # enable = mkEnableOption "Enable ${name} support.";
 
       vscode = mkOption {
         type = vscodeModule;
