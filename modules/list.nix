@@ -25,6 +25,6 @@
   themes = ./themes;
 
   # programmingLanguages
-  programmingLanguages = ./programmingLanguages/default.nix;
+  programmingLanguages = ./programmingLanguages;
   go = ./programmingLanguages/go;
 }
