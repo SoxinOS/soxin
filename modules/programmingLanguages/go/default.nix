@@ -1,17 +1,12 @@
 { mode, config, pkgs, lib, soxin, ... }:
 
 with lib;
-let
-  cfg = config.soxin.programmingLanguages.go;
-in
 {
-  config = (mkMerge [
+  config.soxin.programmingLanguages.go = (mkMerge [
     {
-      soxin.programmingLanguages.go = {
-        vscode = {
-          extensions = [ pkgs.vscode-extensions.golang.Go ];
-        };
-      };
+    	vscode = {
+      		extensions = [ pkgs.vscode-extensions.golang.Go ];
+    	};
     }
 
     (optionalAttrs (mode == "home-manager") {

@@ -8,4 +8,8 @@ with lib;
       default = { };
     };
   };
+
+  imports = [
+    ./go/default.nix
+  ];
 }

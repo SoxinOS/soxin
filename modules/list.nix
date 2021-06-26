@@ -26,5 +26,4 @@
 
   # programmingLanguages
   programmingLanguages = ./programmingLanguages;
-  go = ./programmingLanguages/go;
 }
