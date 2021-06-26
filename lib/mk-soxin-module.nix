@@ -50,9 +50,10 @@ recursiveUpdate
     ) value;
   });
 
+  
   programmingLanguages = optionalAttrs includeProgrammingLanguages (mkOption {
-    type = with types; attrsOf (oneOf [ str modules.programmingLanguages.programmingLanguagesModule ]);
-    default = config.soxin.programmingLanguages;
+    type = with types; listOf [ str modules.programmingLanguages.programmingLanguagesModule ];
+    default = config.soxin.settings.programmingLanguages;
     description = "Programming language to use for ${name}.";
     apply = value: map (v:
       if builtins.isString v then config.soxin.programmingLanguages.${v}.${name}
@@ -61,3 +62,4 @@ recursiveUpdate
   });
 }
   extraOptions
+

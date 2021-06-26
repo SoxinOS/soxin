@@ -19,6 +19,7 @@
   # settings
   keyboard = ./settings/keyboard.nix;
   theme = ./settings/theme.nix;
+  programmingLanguages = ./settings/programmingLanguage.nix;
 
   # themes
   themes = ./themes;
