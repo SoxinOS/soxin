@@ -18,11 +18,13 @@ in
     (optionalAttrs (mode == "home-manager") {
       programs.vscode = mkMerge [
         { inherit (cfg) enable; }
-       
+
         {
-          extensions = flatten ( map (v:
+          extensions = flatten (map
+            (v:
               v.extensions
-            ) cfg.programmingLanguages);
+            )
+            cfg.programmingLanguages);
         }
 
       ];
