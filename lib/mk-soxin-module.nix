@@ -1,7 +1,7 @@
 { nixpkgs, self, ... }:
 
 let
-  inherit (self.lib.modules) keyboard programmingLanguages themes;
+  inherit (self.lib.modules) keyboard programmingLanguages themes tools;
 
   inherit (nixpkgs) lib;
   inherit (lib)
@@ -16,7 +16,7 @@ in
 , name
 , includeKeyboardLayout ? false
 , includeTheme ? false
-, includeTool ? false
+, includeTools ? false
 , includeProgrammingLanguages ? false
 , extraOptions ? { }
 }:
@@ -40,13 +40,13 @@ recursiveUpdate
       else value.${name};
   });
 
-  tool = optionalAttrs includeTool (mkOption {
-    type = with types; listOf (oneOf [ str modules.tools.toolsModule ]);
+  tools = optionalAttrs includeTools (mkOption {
+    type = with types; listOf (oneOf [ str tools.toolsModule ]);
     default = config.soxin.settings.tools;
-    description = "Tool to use for ${name}.";
+    description = "Tools to use for ${name}.";
     apply = value: map
       (v:
-        if builtins.isString v then config.soxin.tools.${v}.${name}
+        if builtins.isString v then config.soxin.toolsModules.${v}.${name}
         else v.${name}
       )
       value;

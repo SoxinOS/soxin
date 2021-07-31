@@ -10,7 +10,7 @@ in
       inherit config;
       name = "vscode";
       includeProgrammingLanguages = true;
-      includeTool = true;
+      includeTools = true;
     };
   };
 

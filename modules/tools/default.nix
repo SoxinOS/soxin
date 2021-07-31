@@ -3,13 +3,13 @@
 with lib;
 {
   options = {
-    soxin.tools = mkOption {
-      type = with types; soxin.lib.modules.tools.toolsModule;
-      default = {  };
+    soxin.toolsModules = mkOption {
+      type = with types; attrsOf soxin.lib.modules.tools.toolsModule;
+      default = { };
     };
   };
 
   imports = [
-    # import individual tools here
+    ./git/default.nix
   ];
 }
