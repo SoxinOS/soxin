@@ -29,11 +29,11 @@ feature integrates with the project was needed.
 
 ## Language definition
 
-Languages would be defined in a module named `soxin.programming.languages`.
+Languages would be defined in a module named `soxin.programmingLanguagesModules`.
 Each language, would be an attribute set in this module:
 
 ```
-soxin.programming.languages = {
+soxin.programmingLanguagesModules = {
   go = { /* ... */ };
   java = { /* ... */ };
   python = { /* ... */ };
@@ -41,11 +41,11 @@ soxin.programming.languages = {
 ```
 ## Tools defination
 
-Programming tools will be defined in a module named `soxin.programming.tools`.
+Programming tools will be defined in a module named `soxin.toolsModules`.
 Each tool will be an attribute set in this module.
 
 ```
-soxin.programming.tools = {
+soxin.toolsModules = {
   git = { /* ... */ };
   tmux = { /* ... */ };
 }
@@ -62,22 +62,22 @@ to configure that plugin.
 
 ### Globally
 
-Similar to RFC 2, a `soxin.settings.programming.languages` and
-`soxin.settings.programming.tools` option would be introduced to allow the user
+Similar to RFC 2, a `soxin.settings.programmingLanguages` and
+`soxin.settings.tools` option would be introduced to allow the user
 to choose his programming stack. The only permitted values here shall be the
-defined in `config.soxin.programming.<type>`. This option shall be of type
+defined in `config.soxin.<programmingLanguages/tools>`. This option shall be of type
 `Array` of `str`, with apply function which iterate over the array and find
 appropriate languages or tools.
 
 ### Per-program
 
 Each program that supports a language must provide a
-`soxin.programs.<program-name>.programming.language` and
-`soxin.programs.<editor-name>.programming.tool` option to allow the user to
-override the programming language stack settings per program. These options will default
-to `config.soxin.settings.programming.<type>`, and thus will be of type
+`soxin.programs.<program-name>.programmingLanguages` and
+`soxin.programs.<program-name>.tools` option to allow the user to
+override the programming language stack and tools settings per program. These options will default
+to `config.soxin.settings.<programmingLanguages/tools>`, and thus will be of type `listOf`
 `attrs`. Similar to RFC 2, they will also have will also allow `str` and have
-an `apply` function that will lookup the theme from `config.soxin.programming.<type>`
+an `apply` function that will lookup the programmingLanguage/tools config from `config.soxin.<programmingLanguages/tools>`
 for each option.
 
 # Examples and Interactions
@@ -87,51 +87,87 @@ Here's how one could define a language and a tool implementing only the `neovim`
 editor:
 
 ```
-{ pkgs, ... }:
+# ProgrammingLanguages
 
+{ mode, config, pkgs, lib, soxin, ... }:
+
+with lib;
 {
-  config.soxin.programming.languages = {
-    go = {
+  config.soxin.programmingLanguagesModules.go = (mkMerge [
+    {
       neovim = {
         plugins = [ pkgs.neovim.go ];
         extraRC = ''
         '';
       };
-    };
+    }
 
-    config.soxin.programming.tools = {
-      git = {
+    /*(optionalAttrs (mode == "home-manager") {
+      programs.go = {
+      enable = true;
+      };
+      })*/
+  ]);
+}
+
+#tools
+{ mode, config, pkgs, lib, soxin, ... }:
+
+with lib;
+{
+  config.soxin.toolsModules.git = (mkMerge [
+    {
+      neovim = {
         plugins = [ pkgs.neovim.fugitive ];
         extraRc = ''
         '';
       };
-    };
-  };
+    }
+
+    /*(optionalAttrs (mode == "home-manager") {
+      programs.go = {
+      enable = true;
+      };
+      })*/
+  ]);
 }
 ```
 
 Here's how this would be implemented on the editor side:
 
 ```
-{ config, lib, ... }:
+{ mode, config, pkgs, lib, soxin, ... }:
 
+with lib;
 let
   cfg = config.soxin.programs.neovim;
-  goSupportRc = cfg.programming.languages.go ? "";
-  gitSupportRc = cfg.programming.tools.git ? "";
-  goSupportPlugins = cfg.programming.languages.go.plugins ? [];
-  gitSupportPlugins = cfg.programming.tools.git.plugins ? [];
+in
 {
-  config.program.neovim = lib.mkIf soxin.programs.neovim.enable {
-    enable = true;
-    configure = ''
-      /* Some configuration */
-      ${goSupportRc}
-      ${gitSupportRc}
-    '';
-
-    plugins = [ /* Some plugins */ ] ++ goSupportPlugins ++ gitSupportPlugins;
+  options = {
+    soxin.programs.neovim = soxin.lib.mkSoxinModule {
+      inherit config;
+      name = "neovim";
+      includeProgrammingLanguages = true;
+      includeTools = true;
+    };
   };
+
+  config = mkIf cfg.enable (mkMerge [
+    (optionalAttrs (mode == "home-manager") {
+      programs.neovim = mkMerge [
+        { inherit (cfg) enable; }
+
+        {
+          plugins = flatten (map
+            (v:
+              v.extensions
+            )
+            cfg.programmingLanguages ++ cfg.tools);
+        }
+
+      ];
+    })
+  ]);
 }
 ```
 
@@ -142,7 +178,7 @@ The options of the `programs.neovim` have been modified for simplicity's sake.
 [drawbacks]: #drawbacks
 
 Adds additional layer of segregation between `soxin.programs` and
-`soxin.programming.tools`. Which will require Soxin developers to be cognizant
+`soxin.tools`. Which will require Soxin developers to be cognizant
 about where to add a new language or a tool, thus adding additional layer of
 complexity.
 
