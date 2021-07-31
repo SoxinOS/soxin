@@ -2,7 +2,7 @@
 
 with lib;
 {
-  config.soxin.programmingLanguages.go = (mkMerge [
+  config.soxin.programmingLanguagesModules.go = (mkMerge [
     {
       vscode = {
         extensions = [ pkgs.vscode-extensions.golang.Go ];
