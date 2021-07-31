@@ -1,9 +1,10 @@
-{ ... }:
+{ lib, ... }:
 
+let
+  inherit (lib) mkMerge;
+in
 {
-  soxin = {
-    hardware = {
-      bluetooth.enable = true;
-    };
-  };
+  config = mkMerge [
+    { soxin.hardware.bluetooth.enable = true; }
+  ];
 }

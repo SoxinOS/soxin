@@ -1,13 +1,44 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, mode, ... }:
 
+let
+  inherit (lib) mkMerge optionalAttrs;
+in
 {
-  nix = {
-    package = pkgs.nixFlakes;
+  config = mkMerge [
+    # configure the theme
+    { soxin.settings.theme = "gruvbox-dark"; }
 
-    useSandbox = true;
+    # configure the keyboard
+    {
+      soxin = {
+        settings = {
+          keyboard = {
+            layouts = [
+              { x11 = { layout = "us"; }; }
+            ];
+          };
+        };
+      };
+    }
 
-    extraOptions = ''
-      experimental-features = nix-command flakes ca-references
-    '';
-  };
+    # enable the sandbox on NixOS
+    (optionalAttrs (mode == "NixOS") {
+      nix.useSandbox = true;
+
+      # configure the users
+      users.mutableUsers = false; # do not allow runtime mods to the users
+      users.users = {
+        nick = {
+          extraGroups = [ "wheel" ];
+          isNormalUser = true;
+          password = "nick";
+          shell = pkgs.zsh;
+        };
+
+        root = {
+          password = "toor";
+        };
+      };
+    })
+  ];
 }

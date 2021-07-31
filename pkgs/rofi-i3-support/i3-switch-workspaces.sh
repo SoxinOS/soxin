@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 #
-#  vim:ft=sh:
+# vim:ft=sh:tabstop=4:shiftwidth=4:softtabstop=4:noexpandtab
 #
-#  Copyright (c) 2010-2020 Wael Nasreddine <wael.nasreddine@gmail.com>
+# Copyright (c) 2010-2018 Wael Nasreddine <wael.nasreddine@gmail.com>
 #
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-#  USA.
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+# USA.
 #
 
 set -euo pipefail
@@ -25,11 +25,11 @@ set -euo pipefail
 source @out_dir@/lib/list-workspaces.sh
 
 if [[ -z "${*}" ]]; then
-  # we need the back and forth first
-  echo back_and_forth
-  # get the list of workspaces that are not empty
-  listWorkspaces
+	# we need the back and forth first
+	echo back_and_forth
+	# get the list of workspaces that are not empty
+	listWorkspaces
 else
-  # switch to the given workspace
-  @i3-msg_bin@ workspace "${@}" >/dev/null
+	# switch to the given workspace
+	@i3-msg_bin@ workspace "${@}" >/dev/null
 fi

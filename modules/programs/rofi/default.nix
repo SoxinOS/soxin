@@ -4,8 +4,7 @@ with lib;
 let
   cfg = config.soxin.programs.rofi;
 
-  modi = concatStringsSep ","
-    (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") cfg.modi);
+  inherit (pkgs.soxin) rofi-i3-support;
 in
 {
   options = {
@@ -23,6 +22,9 @@ in
             modi name. If the attribute value is not null, its path is given to
             rofi.
           '';
+          apply = attrs:
+            builtins.concatStringsSep ","
+              (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") attrs);
           example = {
             custom = "/some/custom/script.sh";
           };
@@ -37,9 +39,10 @@ in
               Whether to enable i3 support for rofi.
 
               When enabled, you can set i3 bindings to the following commands:
-              exec ''${pkgs.rofi}/bin/rofi -show i3Workspaces
-              exec ''${pkgs.rofi}/bin/rofi -show i3RenameWorkspace
               exec ''${pkgs.rofi}/bin/rofi -show i3MoveContainer
+              exec ''${pkgs.rofi}/bin/rofi -show i3RenameWorkspace
+              exec ''${pkgs.rofi}/bin/rofi -show i3SwapWorkspaces
+              exec ''${pkgs.rofi}/bin/rofi -show i3Workspaces
             '';
           };
         };
@@ -57,9 +60,10 @@ in
   config = mkIf cfg.enable (mkMerge [
     {
       soxin.programs.rofi.modi = mkIf (cfg.i3.enable) {
-        i3Workspaces = "${pkgs.rofi-i3-support}/bin/i3-switch-workspaces";
-        i3RenameWorkspace = "${pkgs.rofi-i3-support}/bin/i3-rename-workspace";
-        i3MoveContainer = "${pkgs.rofi-i3-support}/bin/i3-move-container";
+        i3MoveContainer = "${rofi-i3-support}/bin/i3-move-container";
+        i3RenameWorkspace = "${rofi-i3-support}/bin/i3-rename-workspace";
+        i3SwapWorkspaces = "${rofi-i3-support}/bin/i3-swap-workspaces";
+        i3Workspaces = "${rofi-i3-support}/bin/i3-switch-workspaces";
       };
     }
 
@@ -69,11 +73,9 @@ in
 
         theme = cfg.theme.name;
 
-        extraConfig = ''
-          rofi.modi: ${modi}
-        '' + (optionalString (cfg.dpi != null) ''
-          rofi.dpi: ${cfg.dpi}
-        '');
+        extraConfig = {
+          inherit (cfg) modi dpi;
+        };
 
         font = "Source Code Pro for Powerline 9";
       };

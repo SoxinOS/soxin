@@ -1,3 +1,1 @@
-{
-  packages = import ./pkgs.nix;
-}
+final: prev: { }

@@ -1,11 +1,12 @@
-{ lib }:
+{ nixpkgs, ... }:
 
 let
+  inherit (nixpkgs) lib;
   inherit (lib)
     mkDefault
     mkOption
     types
-  ;
+    ;
 in
 {
   layoutModule = types.submodule ({ config, ... }: {

@@ -1,8 +1,10 @@
-{ mode, config, home-manager, lib, pkgs, ... }:
+{ soxin, mode, config, home-manager, lib, pkgs, ... }:
 
 with lib;
 let
   cfg = config.soxin.programs.rbrowser;
+
+  inherit (pkgs.soxin) rbrowser;
 
   browserSubmodule =
     let
@@ -19,12 +21,12 @@ let
     {
       options = {
         name = mkOption {
-          type = types.enum pkgs.rbrowser.supportedBrowsers;
+          type = types.enum rbrowser.supportedBrowsers;
           default = getFromDagName dagName 0;
           readOnly = true; # do not allow changes to this value
           internal = true; # do not show this option in the manual
           description = ''
-            The name of the browser. These browsers are supported: ${builtins.concatStringsSep " " pkgs.rbrowser.supportedBrowsers}.
+            The name of the browser. These browsers are supported: ${builtins.concatStringsSep " " rbrowser.supportedBrowsers}.
           '';
         };
 
@@ -103,12 +105,12 @@ in
 
       package = mkOption {
         type = types.package;
-        default = pkgs.rbrowser.override { inherit (cfg) browsers; };
+        default = rbrowser.override { inherit (cfg) browsers; };
         defaultText = ''
-          pkgs.rbrowser.override { inherit (cfg) browsers; };
+          pkgs.soxin.rbrowser.override { inherit (cfg) browsers; };
         '';
         example = ''
-          pkgs.rbrowser.override { browsers = [ { name = "chromium"; profile = "personal"; flags = []; } ]; };
+          pkgs.soxin.rbrowser.override { browsers = [ { name = "chromium"; profile = "personal"; flags = []; } ]; };
         '';
         description = ''
           The rbrowser package to use. It it automatically overriden depending
