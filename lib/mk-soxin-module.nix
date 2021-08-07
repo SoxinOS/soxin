@@ -15,9 +15,9 @@ in
 { config
 , name
 , includeKeyboardLayout ? false
+, includeProgrammingLanguages ? false
 , includeTheme ? false
 , includeTools ? false
-, includeProgrammingLanguages ? false
 , extraOptions ? { }
 }:
 
@@ -29,6 +29,18 @@ recursiveUpdate
     type = keyboard.layoutModule;
     default = config.soxin.settings.keyboard.defaultLayout;
     description = "Keyboard layout to use for ${name}.";
+  });
+
+  programmingLanguages = optionalAttrs includeProgrammingLanguages (mkOption {
+    type = with types; listOf (oneOf [ str programmingLanguages.programmingLanguagesModule ]);
+    default = config.soxin.settings.programmingLanguages;
+    description = "Programming language to use for ${name}.";
+    apply = value: map
+      (v:
+        if builtins.isString v then config.soxin.programmingLanguagesModules.${v}.${name}
+        else v.${name}
+      )
+      value;
   });
 
   theme = optionalAttrs includeTheme (mkOption {
@@ -52,18 +64,6 @@ recursiveUpdate
       value;
   });
 
-
-  programmingLanguages = optionalAttrs includeProgrammingLanguages (mkOption {
-    type = with types; listOf (oneOf [ str programmingLanguages.programmingLanguagesModule ]);
-    default = config.soxin.settings.programmingLanguages;
-    description = "Programming language to use for ${name}.";
-    apply = value: map
-      (v:
-        if builtins.isString v then config.soxin.programmingLanguagesModules.${v}.${name}
-        else v.${name}
-      )
-      value;
-  });
 }
   extraOptions
 

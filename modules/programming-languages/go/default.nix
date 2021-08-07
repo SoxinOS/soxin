@@ -9,10 +9,5 @@ with lib;
       };
     }
 
-    /*(optionalAttrs (mode == "home-manager") {
-      programs.go = {
-      enable = true;
-      };
-      })*/
   ]);
 }

@@ -11,7 +11,6 @@ in
 rec {
   programmingLanguagesModule = types.submodule ({ name, ... }: {
     options = {
-      # enable = mkEnableOption "Enable ${name} support.";
 
       vscode = mkOption {
         type = vscodeModule;
@@ -22,7 +21,7 @@ rec {
 
   vscodeModule = with types; submodule {
     options = {
-       extensions = mkOption {
+      extensions = mkOption {
         type = types.listOf types.package;
         default = [ ];
         example = literalExample "[ pkgs.vscode-extensions.bbenoist.Nix ]";

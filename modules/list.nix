@@ -19,14 +19,14 @@
   # settings
   keyboard = ./settings/keyboard.nix;
   theme = ./settings/theme.nix;
-  programmingLanguages = ./settings/programmingLanguages.nix;
+  programmingLanguages = ./settings/programming-languages.nix;
   tools = ./settings/tools.nix;
 
   # themes
   themes = ./themes;
 
   # programmingLanguagesModules
-  programmingLanguagesModules = ./programmingLanguages;
+  programmingLanguagesModules = ./programming-languages;
 
   # toolsModules
   toolsModules = ./tools;
