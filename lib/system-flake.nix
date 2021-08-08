@@ -34,6 +34,9 @@
   # NixOS specific modules.
 , extraNixosModules ? [ ]
 
+  # nix-darwin specific modules.
+, extraNixDarwinModules ? [ ]
+
   # The global extra arguments are included in both NixOS and home-manager.
 , globalSpecialArgs ? { }
 
@@ -42,6 +45,9 @@
 
   # NixOS specific extra arguments.
 , nixosSpecialArgs ? { }
+
+  # nix-darwin specific extra arguments.
+, nixDarwinSpecialArgs ? { }
 
   # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
 , packagesBuilder ? (_: { })
@@ -72,9 +78,11 @@ let
     "extraGlobalModules"
     "extraHomeManagerModules"
     "extraNixosModules"
+    "extraNixDarwinModules"
     "globalSpecialArgs"
     "hmSpecialArgs"
     "nixosSpecialArgs"
+    "nixDarwinSpecialArgs"
     "packagesBuilder"
     "sharedOverlays"
   ];
@@ -82,25 +90,62 @@ let
   # generate each host by injecting special arguments and the given host
   # without certain soxin-only attributes.
   hosts' =
-    mapAttrs
-      (hostname: host: (recursiveUpdate
-        {
-          specialArgs = {
-            inherit soxin soxincfg home-manager;
+    let
+      # TODO: make this more generic
+      # hostOS = host: builtins.head (builtins.tail (builtins.split ".*-(linux|darwin)" host.system));
+      # isDarwin = system: (lib.systems.parse.mkSystemFromString system)
+      isDarwin = host: host.system == "x86_64-darwin";
+      isLinux = host: host.system == "x86_64-linux" || host.system == "aarch64-linux";
 
-            # the mode allows us to tell at what level we are within the modules.
-            mode = "NixOS";
-          }
-          # include the global special arguments.
-          // globalSpecialArgs
-          # include the NixOS special arguments.
-          // nixosSpecialArgs;
-        }
+      darwinHosts =
+        let
+          darwinOnlyHosts = filterAttrs (n: host: isDarwin host) hosts;
+        in
+        mapAttrs
+          (hostname: host: (recursiveUpdate
+            {
+              specialArgs = {
+                inherit soxin soxincfg home-manager;
 
-        # pass along the hosts minus the deploy key that's specific to soxin.
-        (removeAttrs host [ "deploy" ])
-      ))
-      hosts;
+                # the mode allows us to tell at what level we are within the modules.
+                mode = "nix-darwin";
+              }
+              # include the global special arguments.
+              // globalSpecialArgs
+              # include the NixDarwin special arguments.
+              // nixDarwinSpecialArgs;
+            }
+
+            # pass along the hosts minus the deploy key that's specific to soxin.
+            (removeAttrs host [ "deploy" ])
+          ))
+          darwinOnlyHosts;
+
+      nixosHosts =
+        let
+          nixosOnlyHosts = filterAttrs (n: host: isLinux host) hosts;
+        in
+        mapAttrs
+          (hostname: host: (recursiveUpdate
+            {
+              specialArgs = {
+                inherit soxin soxincfg home-manager;
+
+                # the mode allows us to tell at what level we are within the modules.
+                mode = "NixOS";
+              }
+              # include the global special arguments.
+              // globalSpecialArgs
+              # include the NixOS special arguments.
+              // nixosSpecialArgs;
+            }
+
+            # pass along the hosts minus the deploy key that's specific to soxin.
+            (removeAttrs host [ "deploy" ])
+          ))
+          nixosOnlyHosts;
+    in
+    darwinHosts // nixosHosts;
 
   # Generate the deployment nodes.
   deploy.nodes =
@@ -218,6 +263,8 @@ let
             # install all  user packages through the users.users.<name>.packages.
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+
+            # TODO: Must wire up extraNixDarwinModules
 
             home-manager.extraSpecialArgs = {
               inherit soxin soxincfg home-manager;
