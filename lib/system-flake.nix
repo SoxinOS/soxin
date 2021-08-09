@@ -99,7 +99,15 @@ let
           (hostname: host: (recursiveUpdate
             {
               specialArgs = {
-                inherit soxin soxincfg home-manager;
+                inherit
+                  home-manager
+                  soxin
+                  soxincfg
+                  ;
+
+                inherit (host)
+                  mode
+                  ;
               }
               # include the global special arguments.
               // globalSpecialArgs
@@ -162,7 +170,15 @@ let
           (hostname: host: (recursiveUpdate
             {
               specialArgs = {
-                inherit soxin soxincfg home-manager;
+                inherit
+                  home-manager
+                  soxin
+                  soxincfg
+                  ;
+
+                inherit (host)
+                  mode
+                  ;
               }
               # include the global special arguments.
               // globalSpecialArgs
