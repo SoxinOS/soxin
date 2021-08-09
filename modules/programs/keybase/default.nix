@@ -16,9 +16,9 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    {
+    (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
       services.keybase.enable = true;
       services.kbfs.enable = cfg.enableFs;
-    }
+    })
   ]);
 }
