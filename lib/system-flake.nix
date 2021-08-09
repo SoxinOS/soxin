@@ -97,25 +97,32 @@ let
         in
         mapAttrs
           (hostname: host: (recursiveUpdate
-            {
-              specialArgs = {
-                inherit
-                  home-manager
-                  soxin
-                  soxincfg
-                  ;
+            # pass along the hosts minus few keys that are implementation detail to soxin.
+            (removeAttrs host [ "deploy" "mode" ])
 
-                inherit (host)
-                  mode
-                  ;
-              }
-              # include the global special arguments.
-              // globalSpecialArgs
-              # include the NixDarwin special arguments.
-              // nixDarwinSpecialArgs;
+            {
+              specialArgs =
+                (host.specialArgs or { })
+                //
+                {
+                  inherit
+                    home-manager
+                    soxin
+                    soxincfg
+                    ;
+
+                  inherit (host)
+                    mode
+                    ;
+                }
+                # include the global special arguments.
+                // globalSpecialArgs
+                # include the NixDarwin special arguments.
+                // nixDarwinSpecialArgs
+              ;
 
               modules =
-                [ ]
+                (host.modules or [ ])
                 # include sops
                 # ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
                 # include sane flake defaults from flake-utils-plus which sets sane `nix.*` defaults.
@@ -156,9 +163,6 @@ let
                 })
               ;
             }
-
-            # pass along the hosts minus few keys that are implementation detail to soxin.
-            (removeAttrs host [ "deploy" "mode" ])
           ))
           darwinOnlyHosts;
 
@@ -168,22 +172,29 @@ let
         in
         mapAttrs
           (hostname: host: (recursiveUpdate
-            {
-              specialArgs = {
-                inherit
-                  home-manager
-                  soxin
-                  soxincfg
-                  ;
+            # pass along the hosts minus few keys that are implementation detail to soxin.
+            (removeAttrs host [ "deploy" "mode" ])
 
-                inherit (host)
-                  mode
-                  ;
-              }
-              # include the global special arguments.
-              // globalSpecialArgs
-              # include the NixOS special arguments.
-              // nixosSpecialArgs;
+            {
+              specialArgs =
+                (host.specialArgs or { })
+                //
+                {
+                  inherit
+                    home-manager
+                    soxin
+                    soxincfg
+                    ;
+
+                  inherit (host)
+                    mode
+                    ;
+                }
+                # include the global special arguments.
+                // globalSpecialArgs
+                # include the NixOS special arguments.
+                // nixosSpecialArgs
+              ;
 
               modules =
                 [ ]
@@ -227,9 +238,6 @@ let
                 })
               ;
             }
-
-            # pass along the hosts minus few keys that are implementation detail to soxin.
-            (removeAttrs host [ "deploy" "mode" ])
           ))
           nixosOnlyHosts;
 
