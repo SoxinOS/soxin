@@ -149,8 +149,8 @@ let
               ;
             }
 
-            # pass along the hosts minus the deploy key that's specific to soxin.
-            (removeAttrs host [ "deploy" ])
+            # pass along the hosts minus few keys that are implementation detail to soxin.
+            (removeAttrs host [ "deploy" "mode" ])
           ))
           darwinOnlyHosts;
 
@@ -212,8 +212,8 @@ let
               ;
             }
 
-            # pass along the hosts minus the deploy key that's specific to soxin.
-            (removeAttrs host [ "deploy" ])
+            # pass along the hosts minus few keys that are implementation detail to soxin.
+            (removeAttrs host [ "deploy" "mode" ])
           ))
           nixosOnlyHosts;
 
