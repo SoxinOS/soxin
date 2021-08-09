@@ -197,7 +197,7 @@ let
               ;
 
               modules =
-                [ ]
+                (host.modules or [ ])
                 # include sops
                 ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
                 # include sane flake defaults from flake-utils-plus which sets sane `nix.*` defaults.
