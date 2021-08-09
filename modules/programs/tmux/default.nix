@@ -99,7 +99,9 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     # add all plugins installed by themes
-    { soxin.programs.tmux.plugins = cfg.theme.plugins; }
+    (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
+      soxin.programs.tmux.plugins = cfg.theme.plugins;
+    })
 
     (optionalAttrs (mode == "NixOS") (mkMerge [
       { programs.tmux = { inherit (cfg) enable extraConfig secureSocket; }; }
