@@ -56,9 +56,13 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     # add all plugins installed by themes
-    { soxin.programs.zsh.plugins = cfg.theme.plugins; }
+    (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
+      soxin.programs.zsh.plugins = cfg.theme.plugins;
+    })
 
-    { programs.zsh = { inherit (cfg) enable; }; }
+    (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
+      programs.zsh = { inherit (cfg) enable; };
+    })
 
     # Forward configurations to home-manager.
     (optionalAttrs (mode == "home-manager") {
