@@ -76,5 +76,7 @@ in
         variant = concatMapStringsSep "," (l: l.x11.variant) cfg.layouts;
       };
     })
+
+    # TODO: nix-darwin support
   ];
 }
