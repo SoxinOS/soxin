@@ -136,16 +136,18 @@ let
                   (host.modules or [ ])
                   # include sops
                   # ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
+                  # TODO: include sops above, or remove if unsupported.
                   # include sane flake defaults from flake-utils-plus which sets sane `nix.*` defaults.
                   # Please refer to implementation/readme in
                   # github:gytis-ivaskevicius/flake-utils-plus for more details.
                   # ++ (singleton flake-utils-plus.nixosModules.saneFlakeDefaults)
+                  # TODO: include flake-utils-plus above, or remove if unsupported.
                   # include the nix-darwin modules
                   ++ extraNixDarwinModules
                   # include Soxin modules
                   ++ (singleton soxin.nixosModule)
                   # include home-manager modules
-                  ++ (singleton home-manager.nixosModules.home-manager)
+                  ++ (singleton home-manager.darwinModules.home-manager)
                   # configure home-manager
                   ++ (singleton {
                     # tell home-manager to use the global (as in NixOS system-level) pkgs and
