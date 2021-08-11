@@ -151,13 +151,13 @@ let
                   # Please refer to implementation/readme in
                   # github:gytis-ivaskevicius/flake-utils-plus for more details.
                   #
-                  # First allow us to import by defining a dummy option
-                  ++ (singleton { options.nix.registry = mkOption {
-                    type = types.attrs;
-                    default = { };
-                    description = "Unused - Makes saneFlakeDefaults from flake-utils-plus works for Mac";
-                    internal = true;
-                  }; })
+                  # # First allow us to import by defining a dummy option
+                  # ++ (singleton { options.nix.registry = mkOption {
+                  #   type = types.attrs;
+                  #   default = { };
+                  #   description = "Unused - Makes saneFlakeDefaults from flake-utils-plus works for Mac";
+                  #   internal = true;
+                  # }; })
                   ++ (singleton flake-utils-plus.nixosModules.saneFlakeDefaults)
                   # include the nix-darwin modules
                   ++ extraNixDarwinModules
