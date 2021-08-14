@@ -17,10 +17,11 @@
   vscode = ./programs/vscode;
 
   # settings
-  keyboard = ./settings/keyboard.nix;
-  theme = ./settings/theme.nix;
-  programmingLanguages = ./settings/programming-languages.nix;
-  tools = ./settings/tools.nix;
+  settings = ./settings;
+  # keyboard = ./settings/keyboard.nix;
+  # theme = ./settings/theme.nix;
+  # programmingLanguages = ./settings/programming-languages.nix;
+  # tools = ./settings/tools.nix;
 
   # themes
   themes = ./themes;
