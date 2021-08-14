@@ -2,7 +2,7 @@
 
 with lib;
 {
-  config.soxin.toolsModules.git = (mkMerge [
+  config.soxin.tools.git = (mkMerge [
     {
       vscode = {
         extensions = [ pkgs.vscode-extensions.eamodio.gitlens ];

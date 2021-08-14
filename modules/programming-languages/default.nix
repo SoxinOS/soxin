@@ -3,8 +3,8 @@
 with lib;
 {
   options = {
-    soxin.programmingLanguagesModules = mkOption {
-      type = with types; attrsOf soxin.lib.modules.programmingLanguages.programmingLanguagesModule;
+    soxin.programmingLanguages = mkOption {
+      type = with types; attrsOf soxin.lib.modules.programmingLanguages.programmingLanguages;
       default = { };
     };
   };

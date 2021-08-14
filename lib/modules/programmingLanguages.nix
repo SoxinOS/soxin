@@ -9,7 +9,7 @@ let
     ;
 in
 rec {
-  programmingLanguagesModule = types.submodule ({ name, ... }: {
+  programmingLanguages = types.submodule ({ name, ... }: {
     options = {
 
       vscode = mkOption {

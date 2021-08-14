@@ -26,9 +26,9 @@
   # themes
   themes = ./themes;
 
-  # programmingLanguagesModules
-  programmingLanguagesModules = ./programming-languages;
+  # programmingLanguages
+  programmingLanguages = ./programming-languages;
 
-  # toolsModules
-  toolsModules = ./tools;
+  # tools
+  tools = ./tools;
 }

@@ -3,7 +3,7 @@
 with lib;
 {
   options = {
-    soxin.toolsModules = mkOption {
+    soxin.tools = mkOption {
       type = with types; attrsOf soxin.lib.modules.tools.toolsModule;
       default = { };
     };
