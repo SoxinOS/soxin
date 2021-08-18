@@ -5,6 +5,7 @@
     darwin.url = "github:lnl7/nix-darwin/master";
     deploy-rs.url = "github:serokell/deploy-rs";
     flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/release-21.05";
     nur.url = "github:nix-community/NUR";
@@ -24,7 +25,7 @@
     };
   };
 
-  outputs = inputs@{ flake-utils-plus, nixpkgs, self, soxin, ... }:
+  outputs = inputs@{ flake-utils-plus, nixos-hardware, nixpkgs, self, soxin, ... }:
     let
       # Enable deploy-rs support
       withDeploy = true;
@@ -56,6 +57,7 @@
       channelsConfig = {
         # allowBroken = true;
         allowUnfree = true;
+        # allowUnsupportedSystem = true;
       };
 
       nixosModules = (import ./modules) // {
@@ -89,5 +91,8 @@
 
       # include all overlays
       overlay = import ./overlays;
+
+      # set the nixos specialArgs
+      nixosSpecialArgs = { inherit nixos-hardware; };
     };
 }
