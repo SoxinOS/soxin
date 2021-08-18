@@ -2,15 +2,19 @@
   description = "Soxin template flake";
 
   inputs = {
+    darwin.url = "github:lnl7/nix-darwin/master";
     deploy-rs.url = "github:serokell/deploy-rs";
     flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/release-21.05";
     nur.url = "github:nix-community/NUR";
 
+    darwin.inputs.nixpkgs.follows = "nixpkgs";
+
     soxin = {
       url = "github:SoxinOS/soxin";
       inputs = {
+        darwin.follows = "darwin";
         deploy-rs.follows = "deploy-rs";
         flake-utils-plus.follows = "flake-utils-plus";
         nixpkgs-unstable.follows = "nixpkgs-unstable";

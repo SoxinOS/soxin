@@ -1,15 +1,12 @@
-{ soxincfg, lib, ... }:
+{ config, lib, soxincfg, ... }:
 
 let
   inherit (lib) singleton;
 in
 {
   imports = [
-    # hardware configuration for this host
-    ./hardware-configuration.nix
-
     # import the workstation profile that configures a workstation.
-    soxincfg.nixosModules.profiles.workstation.nixos.local
+    soxincfg.nixosModules.profiles.workstation.darwin.local
   ];
 
   # the user nick is created by the core profiles which is automatically added
