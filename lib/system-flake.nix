@@ -164,6 +164,7 @@ let
                     # install all  user packages through the users.users.<name>.packages.
                     home-manager.useGlobalPkgs = true;
                     home-manager.useUserPackages = true;
+                    home-manager.verbose = true;
 
                     home-manager.extraSpecialArgs = {
                       inherit soxin soxincfg home-manager;
