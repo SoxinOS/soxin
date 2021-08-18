@@ -55,12 +55,15 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    # add all plugins installed by themes
     (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
+      programs.zsh = { inherit (cfg) enable; };
+
+      # add all plugins installed by themes
       soxin.programs.zsh.plugins = cfg.theme.plugins;
     })
 
-    (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
+    # Forward configurations to nix-darwin.
+    (optionalAttrs (mode == "nix-darwin") {
       programs.zsh = { inherit (cfg) enable; };
     })
 
