@@ -77,10 +77,10 @@ in
       programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
     })
 
-    # Forward plugins to NixOS.
+    # Forward plugins to NixOS and home-manager.
     # Copy the plugin management from home-manager
-    # TODO: Send it upstream to NixOS.
-    (optionalAttrs (mode == "NixOS") (mkIf (cfg.plugins != [ ]) {
+    # TODO: Send it upstream to NixOS and nix-darwin.
+    (optionalAttrs (mode == "NixOS" || mode == "nix-darwin") (mkIf (cfg.plugins != [ ]) {
       # Many plugins require compinit to be called
       # but allow the user to opt out.
       programs.zsh.enableCompletion = mkDefault true;
