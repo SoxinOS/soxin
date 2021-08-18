@@ -113,7 +113,7 @@ let
           output = "darwinConfigurations";
         in
         mapAttrs
-          (hostname: host:
+          (_: host:
             # setup the default attributes, users can override it by passing them through their host definition.
             { inherit builder output; }
             //
@@ -194,7 +194,7 @@ let
           nixosOnlyHosts = filterAttrs (n: host: host.mode == "NixOS") hosts;
         in
         mapAttrs
-          (hostname: host: (recursiveUpdate
+          (_: host: (recursiveUpdate
             # pass along the hosts minus few keys that are implementation detail to soxin.
             (removeAttrs host [ "deploy" "mode" ])
 
@@ -274,7 +274,7 @@ let
       # filter out hosts without a deploy attribute.
       deploy-hosts = filterAttrs (n: v: (v.deploy or { }) != { }) hosts;
     in
-    mapAttrs (hostname: host: host.deploy) deploy-hosts;
+    mapAttrs (_: host: host.deploy) deploy-hosts;
 
   soxinSystemFlake = {
     # inherit the required fields as-is
@@ -385,7 +385,7 @@ flake-utils-plus.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArgument
   # TODO: Let flake-utils-plus.lib.systemFlake handle the home-managers by using the host's builder function
   // {
   homeConfigurations = (mapAttrs
-    (hostname: host: soxin.lib.homeManagerConfiguration (host // {
+    (_: host: soxin.lib.homeManagerConfiguration (host // {
       inherit inputs;
       hmModules =
         # include the global modules
