@@ -123,8 +123,6 @@ let
 
               {
                 specialArgs =
-                  (host.specialArgs or { })
-                  //
                   {
                     inherit
                       home-manager
@@ -136,6 +134,8 @@ let
                       mode
                       ;
                   }
+                  # include the specialArgs that were passed in.
+                  // (host.specialArgs or { })
                   # include the global special arguments.
                   // globalSpecialArgs
                   # include the NixDarwin special arguments.
@@ -200,8 +200,6 @@ let
 
             {
               specialArgs =
-                (host.specialArgs or { })
-                //
                 {
                   inherit
                     home-manager
@@ -213,6 +211,8 @@ let
                     mode
                     ;
                 }
+                # include the specialArgs that were passed in.
+                // (host.specialArgs or { })
                 # include the global special arguments.
                 // globalSpecialArgs
                 # include the NixOS special arguments.
