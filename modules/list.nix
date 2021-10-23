@@ -14,11 +14,21 @@
   termite = ./programs/termite;
   tmux = ./programs/tmux;
   zsh = ./programs/zsh;
+  vscode = ./programs/vscode;
 
   # settings
-  keyboard = ./settings/keyboard.nix;
-  theme = ./settings/theme.nix;
+  settings = ./settings;
+  # keyboard = ./settings/keyboard.nix;
+  # theme = ./settings/theme.nix;
+  # programmingLanguages = ./settings/programming-languages.nix;
+  # tools = ./settings/tools.nix;
 
   # themes
   themes = ./themes;
+
+  # programmingLanguages
+  programmingLanguages = ./programming-languages;
+
+  # tools
+  tools = ./tools;
 }
