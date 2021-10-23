@@ -64,7 +64,7 @@ to configure that plugin.
 
 Similar to RFC 2, a `soxin.settings.programmingLanguages` and
 `soxin.settings.tools` option would be introduced to allow the user
-to choose his programming stack. The only permitted values here shall be the
+to choose their programming stack. The only permitted values here shall be the
 defined in `config.soxin.<programmingLanguages/tools>`. This option shall be of type
 `Array` of `str`, with apply function which iterate over the array and find
 appropriate languages or tools.
