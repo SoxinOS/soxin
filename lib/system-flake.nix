@@ -49,6 +49,9 @@
   # Shared overlays between channels, gets applied to all `channels.<name>.input`
 , sharedOverlays ? [ ]
 
+  # Evaluates to `devShell.<system>`
+, devShellBuilder ? (_: null)
+
   # Default host settings.
 , hostDefaults ? { }
 , ...
@@ -76,6 +79,7 @@ let
     "hmSpecialArgs"
     "nixosSpecialArgs"
     "packagesBuilder"
+    "devShellBuilder"
     "sharedOverlays"
   ];
 
@@ -150,10 +154,13 @@ let
     # Evaluates to `devShell.<system> = "attributeValue"`
     devShellBuilder = channels: with channels.nixpkgs;
       let
+        _userShell = devShellBuilder channels;
+        userShell = if _userShell != null then _userShell else mkShell { };
+
         # the base devShell.
-        baseShell = mkShell {
+        baseShell = userShell.overrideAttrs (oa: {
           name = "soxincfg";
-          buildInputs = [
+          buildInputs = (oa.buildInputs or [ ]) ++ [
             nixpkgs-fmt
             pre-commit
 
@@ -161,7 +168,7 @@ let
             # TODO: make this more useful by generalizing it.
             # (pkgs.writeShellScriptBin "fetchpatch" "curl -L https://github.com/NixOS/nixpkgs/pull/$1.patch -o patches/$1.patch")
           ];
-        };
+        });
 
         # overlay the baseShell with things that are only necessary if the
         # user has enabled sops support.
