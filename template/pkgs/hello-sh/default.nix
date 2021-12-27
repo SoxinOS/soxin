@@ -1,4 +1,4 @@
-{ stdenv }:
+{ stdenv, lib }:
 
 stdenv.mkDerivation {
   pname = "helloSh";
@@ -10,7 +10,7 @@ stdenv.mkDerivation {
     install -Dm755 $src/hello.sh $out/bin/hello.sh
   '';
 
-  meta = with stdenv.lib; {
-    platforms = platforms.unix;
+  meta = {
+    platforms = lib.platforms.unix;
   };
 }
