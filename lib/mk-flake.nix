@@ -163,7 +163,7 @@ let
     # pass along sops-nix overlay.
     ++ optionals withSops (singleton sops-nix.overlay);
 
-    # TODO: Add support for modifying to outputsBuilder.
+    # TODO: Add support for modifying the outputsBuilder.
     outputsBuilder = channels: {
       # Evaluates to `packages.<system>.coreutils = <unstable-nixpkgs-reference>.package-from-overlays`.
       packages =
