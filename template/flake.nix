@@ -64,7 +64,7 @@
       nixosModule = nixosModules.soxincfg;
 
     in
-    soxin.lib.systemFlake {
+    soxin.lib.mkFlake {
       inherit channels channelsConfig inputs withDeploy withSops nixosModules nixosModule;
 
       # add Soxin's main module to all builders
