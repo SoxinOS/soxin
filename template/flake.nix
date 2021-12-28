@@ -4,8 +4,9 @@
   inputs = {
     deploy-rs.url = "github:serokell/deploy-rs";
     flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
+    home-manager.url = "github:nix-community/home-manager/release-21.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-21.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-21.11";
     nur.url = "github:nix-community/NUR";
 
     soxin = {
@@ -13,6 +14,7 @@
       inputs = {
         deploy-rs.follows = "deploy-rs";
         flake-utils-plus.follows = "flake-utils-plus";
+        home-manager.follows = "home-manager";
         nixpkgs-unstable.follows = "nixpkgs-unstable";
         nixpkgs.follows = "nixpkgs";
         nur.follows = "nur";
