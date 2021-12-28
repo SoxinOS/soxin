@@ -258,9 +258,9 @@ in
 
 assert asserts.assertMsg (hosts != { } || home-managers != { }) "At least hosts or home-managers must be set";
 
-flake-utils-plus.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
+flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
 
-  # TODO: Let flake-utils-plus.lib.systemFlake handle the home-managers by using the host's builder function
+  # TODO: Let flake-utils-plus.lib.mkFlake handle the home-managers by using the host's builder function
   // {
   homeConfigurations = (mapAttrs
     (hostname: host: soxin.lib.homeManagerConfiguration (host // {
