@@ -75,7 +75,13 @@ let
     ;
 
   inherit (lib)
-    asserts filterAttrs mapAttrs optionalAttrs optionals recursiveUpdate singleton
+    asserts
+    filterAttrs
+    mapAttrs
+    optionalAttrs
+    optionals
+    recursiveUpdate
+    singleton
     ;
 
   inherit (builtins)
