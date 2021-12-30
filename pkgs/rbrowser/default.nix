@@ -6,17 +6,19 @@
 , rofi
 , runtimeShell
 , stdenvNoCC
+, vivaldi
 , writeScriptBin
 
 , browsers ? [
-    { name = "chromium"; profile = "default"; flags = [ ]; }
     { name = "brave"; profile = "default"; flags = [ ]; }
+    { name = "chromium"; profile = "default"; flags = [ ]; }
     { name = "firefox"; profile = "default"; flags = [ ]; }
+    { name = "vivaldi"; profile = "default"; flags = [ ]; }
   ]
 }:
 let
   # What are the supported browsers by Rbrowser?
-  supportedBrowsers = [ "brave" "chromium" "firefox" ];
+  supportedBrowsers = [ "brave" "chromium" "firefox" "vivaldi" ];
 
   inherit (lib) foldl intersectLists optional optionalString;
 
@@ -30,6 +32,7 @@ let
   withBrave = withBrowser "brave";
   withChromium = withBrowser "chromium";
   withFirefox = withBrowser "firefox";
+  withVivaldi = withBrowser "vivaldi";
 
   rbrowser = writeScriptBin "rbrowser"
     (
@@ -95,6 +98,7 @@ let
         ${optionalString withBrave ''brave="${brave}/bin/brave"''}
         ${optionalString withChromium ''chromium="${chromium}/bin/chromium"''}
         ${optionalString withFirefox ''firefox="${firefox}/bin/firefox"''}
+        ${optionalString withVivaldi ''vivaldi="${vivaldi}/bin/vivaldi"''}
 
         log_depth="0"
         args=""
@@ -140,6 +144,7 @@ let
         ${optionalString withBrave ''BRAVE_PROFILES_PATH="''${HOME}/.config/brave/profiles"''}
         ${optionalString withChromium ''CHROMIUM_PROFILES_PATH="''${HOME}/.config/chromium/profiles"''}
         ${optionalString withFirefox ''FIREFOX_PROFILES_PATH="''${HOME}/.mozilla/firefox/profiles"''}
+        ${optionalString withVivaldi ''VIVALDI_PROFILES_PATH="''${HOME}/.config/vivaldi/profiles"''}
 
         # make sure we have both profile and a browser.
         if [[ -n "''${profile:-}" ]] && [[ -z "''${browser:-}" ]]; then
@@ -188,6 +193,18 @@ let
               done
             fi
           ''}
+          ${optionalString withVivaldi ''
+            if [[ -d "$VIVALDI_PROFILES_PATH" ]]; then
+              for i in $VIVALDI_PROFILES_PATH/*; do
+                if [[ -d "''${i}" ]]; then
+                  prof="vivaldi@$(basename "''${i}")"
+                  if ! has_key "$prof" "''${items[@]}"; then
+                    items+=("$prof")
+                  fi
+                fi
+              done
+            fi
+          ''}
           fi
 
           # Some applications such as Slack are failing to open rbrowser
@@ -214,6 +231,11 @@ let
         ${optionalString withFirefox ''
           "firefox")
             PROFILES_PATH="''${FIREFOX_PROFILES_PATH}"
+            ;;
+        ''}
+        ${optionalString withVivaldi ''
+          "vivaldi")
+            PROFILES_PATH="''${VIVALDI_PROFILES_PATH}"
             ;;
         ''}
           *)
@@ -255,6 +277,11 @@ let
             (exec "''${firefox}" --profile "''${PROFILES_PATH}/''${profile}" --new-tab "''${args[@]}" &>/dev/null)&
             ;;
         ''}
+        ${optionalString withVivaldi ''
+          "vivaldi")
+            (exec "''${vivaldi}" --user-data-dir="''${PROFILES_PATH}/''${profile}" "''${args[@]}" &>/dev/null)&
+            ;;
+        ''}
           *)
             echo -e "ERR: the browser ''${browser} is not supported"
             exit 1
@@ -273,7 +300,7 @@ let
     name = "rbrowser";
   };
 in
-assert lib.asserts.assertMsg (withBrave || withChromium || withFirefox) "At least one browser must be enabled.";
+assert lib.asserts.assertMsg (withBrave || withChromium || withFirefox || withVivaldi) "At least one browser must be enabled.";
 stdenvNoCC.mkDerivation rec {
   name = "rbrowser";
 
@@ -293,9 +320,12 @@ stdenvNoCC.mkDerivation rec {
       bravePlatforms = brave.meta.platforms;
       chromiumPlatforms = chromium.meta.platforms;
       firefoxPlatforms = firefox.meta.platforms;
+      vivaldiPlatforms = vivaldi.meta.platforms;
+
       browsersPlatforms = (optional withBrave bravePlatforms)
         ++ (optional withChromium chromiumPlatforms)
-        ++ (optional withFirefox firefoxPlatforms);
+        ++ (optional withFirefox firefoxPlatforms)
+        ++ (optional withVivaldi vivaldiPlatforms);
       mkPlatforms = foldl (lhs: rhs: intersectLists lhs rhs) lib.platforms.unix;
       platforms = mkPlatforms browsersPlatforms;
     in
