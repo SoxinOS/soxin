@@ -6,5 +6,5 @@ rec {
 
   homeManagerConfiguration = import ./home-manager-configuration.nix inputs;
   mkSoxinModule = import ./mk-soxin-module.nix inputs;
-  systemFlake = import ./system-flake.nix inputs;
+  mkFlake = import ./mk-flake.nix inputs;
 }
