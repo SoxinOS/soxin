@@ -4,10 +4,11 @@
   inputs = {
     darwin.url = "github:lnl7/nix-darwin/master";
     deploy-rs.url = "github:serokell/deploy-rs";
-    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.1.0";
+    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.3.1";
+    home-manager.url = "github:nix-community/home-manager/release-21.11";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-21.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-21.11";
     nur.url = "github:nix-community/NUR";
 
     darwin.inputs.nixpkgs.follows = "nixpkgs";
@@ -18,6 +19,7 @@
         darwin.follows = "darwin";
         deploy-rs.follows = "deploy-rs";
         flake-utils-plus.follows = "flake-utils-plus";
+        home-manager.follows = "home-manager";
         nixpkgs-unstable.follows = "nixpkgs-unstable";
         nixpkgs.follows = "nixpkgs";
         nur.follows = "nur";
@@ -68,7 +70,7 @@
       nixosModule = nixosModules.soxincfg;
 
     in
-    soxin.lib.systemFlake {
+    soxin.lib.mkFlake {
       inherit channels channelsConfig inputs withDeploy withSops nixosModules nixosModule;
 
       # add Soxin's main module to all builders

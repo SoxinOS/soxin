@@ -56,8 +56,20 @@
   # Shared overlays between channels, gets applied to all `channels.<name>.input`
 , sharedOverlays ? [ ]
 
+  # Evaluates to `devShell.<system>`
+, devShellBuilder ? (_: null)
+
   # Default host settings.
 , hostDefaults ? { }
+
+  # Generate NIX_PATH from available inputs?
+, generateNixPathFromInputs ? true
+
+  # Generate Nix registry from available inputs?
+, generateRegistryFromInputs ? true
+
+  # Symlink inputs to /etc/nix/inputs?
+, linkInputs ? true
 , ...
 } @ args:
 
@@ -65,18 +77,22 @@ let
   soxin = self;
   soxincfg = inputs.self;
 
-  inherit (nixpkgs) lib;
-  inherit (builtins) removeAttrs;
+  inherit (nixpkgs)
+    lib
+    ;
+
   inherit (lib)
     asserts
     filterAttrs
     mapAttrs
-    mkOption
     optionalAttrs
     optionals
     recursiveUpdate
     singleton
-    types
+    ;
+
+  inherit (builtins)
+    removeAttrs
     ;
 
   otherArguments = removeAttrs args [
@@ -95,6 +111,7 @@ let
     "nixosSpecialArgs"
     "nixDarwinSpecialArgs"
     "packagesBuilder"
+    "devShellBuilder"
     "sharedOverlays"
   ];
 
@@ -302,60 +319,70 @@ let
     # pass along sops-nix overlay.
     ++ optionals withSops (singleton sops-nix.overlay);
 
-    # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
-    packagesBuilder = channels:
-      let
-        inherit (channels) nixpkgs;
-      in
-      recursiveUpdate
-        # these packages construct themselves if and only if the system is supported.
-        (import ../pkgs nixpkgs)
-        # pass along the packagesBuilder
-        (packagesBuilder channels);
+    # TODO: Add support for modifying the outputsBuilder.
+    outputsBuilder = channels: {
+      # Evaluates to `packages.<system>.coreutils = <unstable-nixpkgs-reference>.package-from-overlays`.
+      packages =
+        let
+          inherit (channels) nixpkgs;
+        in
+        recursiveUpdate
+          # these packages construct themselves if and only if the system is supported.
+          (import ../pkgs nixpkgs)
+          # pass along the packagesBuilder
+          (packagesBuilder channels);
 
-    # Evaluates to `devShell.<system> = "attributeValue"`
-    devShellBuilder = channels: with channels.nixpkgs;
-      let
-        # the base devShell.
-        baseShell = mkShell {
-          name = "soxincfg";
-          buildInputs = [
+      # Evaluates to `devShell.<system> = <nixpkgs-channel-reference>.mkShell { name = "devShell"; };`.
+      devShell =
+        let
+          inherit (channels) nixpkgs;
+
+          inherit (nixpkgs)
+            mkShell
             nixpkgs-fmt
             pre-commit
+            sops
+            sops-pgp-hook
+            ssh-to-pgp
+            ;
 
-            # Source: https://github.com/chvp/nixos-config/blob/51b76511816d03e94b87cdc8096ce437ec43756b/flake.nix#L46
-            # TODO: make this more useful by generalizing it.
-            # (pkgs.writeShellScriptBin "fetchpatch" "curl -L https://github.com/NixOS/nixpkgs/pull/$1.patch -o patches/$1.patch")
-          ];
-        };
+          _userShell = devShellBuilder channels;
+          userShell = if _userShell != null then _userShell else mkShell { name = "devShell"; };
 
-        # overlay the baseShell with things that are only necessary if the
-        # user has enabled sops support.
-        sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
-          buildInputs = (oa.buildInputs or [ ]) ++ [ sops ssh-to-pgp ];
-          nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-pgp-hook ];
-          sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [ "./vars/sops-keys/hosts" "./vars/sops-keys/users" ];
+          # the base devShell.
+          baseShell = userShell.overrideAttrs (oa: {
+            name = "soxincfg";
+            buildInputs = (oa.buildInputs or [ ]) ++ [ nixpkgs-fmt pre-commit ];
+          });
 
-          shellHook = (oa.shellHook or "") + ''
-            sopsPGPHook
-            git config diff.sopsdiffer.textconv "sops -d"
-          '';
-        });
+          # overlay the baseShell with things that are only necessary if the
+          # user has enabled sops support.
+          sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
+            buildInputs = (oa.buildInputs or [ ]) ++ [ sops ssh-to-pgp ];
+            nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-pgp-hook ];
+            sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [ "./vars/sops-keys/hosts" "./vars/sops-keys/users" ];
 
-        # overlay the baseShell with things that are only necessary if the
-        # user has enabled deploy-rs support.
-        deployShell = sopsShell.overrideAttrs (oa: optionalAttrs withDeploy {
-          buildInputs = (oa.buildInputs or [ ]) ++ [ deploy-rs.packages.${system}.deploy-rs ];
-        });
+            shellHook = (oa.shellHook or "") + ''
+              sopsPGPHook
+              git config diff.sopsdiffer.textconv "sops -d"
+            '';
+          });
 
-        homeManagerShell = deployShell.overrideAttrs (oa: optionalAttrs (home-managers != { }) {
-          buildInputs = (oa.buildInputs or [ ]) ++ [ home-manager.packages.${system}.home-manager ];
-        });
+          # overlay the baseShell with things that are only necessary if the
+          # user has enabled deploy-rs support.
+          deployShell = sopsShell.overrideAttrs (oa: optionalAttrs withDeploy {
+            buildInputs = (oa.buildInputs or [ ]) ++ [ deploy-rs.packages.${nixpkgs.system}.deploy-rs ];
+          });
 
-        # set the final shell to be returned
-        finalShell = homeManagerShell;
-      in
-      finalShell;
+          homeManagerShell = deployShell.overrideAttrs (oa: optionalAttrs (home-managers != { }) {
+            buildInputs = (oa.buildInputs or [ ]) ++ [ home-manager.packages.${nixpkgs.system}.home-manager ];
+          });
+
+          # set the final shell to be returned
+          finalShell = homeManagerShell;
+        in
+        finalShell;
+    };
 
     # configure the modules
     hostDefaults =
@@ -366,7 +393,40 @@ let
           (hostDefaults.modules or [ ])
             # include the global modules
             ++ extraGlobalModules
-        ;
+            # include the NixOS modules
+            ++ extraNixosModules
+            # include Soxin modules
+            ++ (singleton soxin.nixosModule)
+            # include home-manager modules
+            ++ (singleton home-manager.nixosModules.home-manager)
+            # configure fup to expose NIX_PATH and Nix registry from inputs.
+            ++ (singleton { nix = { inherit generateNixPathFromInputs generateRegistryFromInputs linkInputs; }; })
+            # configure home-manager
+            ++ (singleton {
+            # tell home-manager to use the global (as in NixOS system-level) pkgs and
+            # install all  user packages through the users.users.<name>.packages.
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+
+            home-manager.extraSpecialArgs = {
+              inherit soxin soxincfg home-manager;
+
+              # the mode allows us to tell at what level we are within the modules.
+              mode = "home-manager";
+            }
+            # include the global special arguments.
+            // globalSpecialArgs
+            # include the home-manager special arguments.
+            // hmSpecialArgs;
+
+            home-manager.sharedModules =
+              # include the global modules
+              extraGlobalModules
+                # include the home-manager modules
+                ++ extraHomeManagerModules
+                # include Soxin module
+                ++ (singleton soxin.nixosModule);
+          });
       };
   }
   // (optionalAttrs withDeploy {
@@ -380,9 +440,9 @@ in
 
 assert asserts.assertMsg (hosts != { } || home-managers != { }) "At least hosts or home-managers must be set";
 
-flake-utils-plus.lib.systemFlake (recursiveUpdate soxinSystemFlake otherArguments)
+flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
 
-  # TODO: Let flake-utils-plus.lib.systemFlake handle the home-managers by using the host's builder function
+  # TODO: Let flake-utils-plus.lib.mkFlake handle the home-managers by using the host's builder function
   // {
   homeConfigurations = (mapAttrs
     (_: host: soxin.lib.homeManagerConfiguration (host // {
