@@ -139,6 +139,12 @@ let
               (removeAttrs host [ "deploy" "mode" ])
 
               {
+                modules = [ ]
+                # include the NixOS modules
+                ++ extraNixDarwinModules
+                # include home-manager modules
+                ++ (singleton home-manager.darwinModules.home-manager)
+                ;
                 specialArgs =
                   {
                     inherit
@@ -172,6 +178,13 @@ let
             (removeAttrs host [ "deploy" "mode" ])
 
             {
+              modules = [ ]
+                # include the NixOS modules
+                ++ extraNixosModules
+                # include home-manager modules
+                ++ (singleton home-manager.nixosModules.home-manager)
+              ;
+
               specialArgs =
                 {
                   inherit
@@ -307,12 +320,8 @@ let
           (hostDefaults.modules or [ ])
             # include the global modules
             ++ extraGlobalModules
-            # include the NixOS modules
-            ++ extraNixosModules
             # include Soxin modules
             ++ (singleton soxin.nixosModule)
-            # include home-manager modules
-            ++ (singleton home-manager.nixosModules.home-manager)
             # configure fup to expose NIX_PATH and Nix registry from inputs.
             ++ (singleton { nix = { inherit generateNixPathFromInputs generateRegistryFromInputs linkInputs; }; })
             # configure home-manager
@@ -331,7 +340,8 @@ let
             # include the global special arguments.
             // globalSpecialArgs
             # include the home-manager special arguments.
-            // hmSpecialArgs;
+            // hmSpecialArgs
+            ;
 
             home-manager.sharedModules =
               # include the global modules
@@ -339,7 +349,8 @@ let
                 # include the home-manager modules
                 ++ extraHomeManagerModules
                 # include Soxin module
-                ++ (singleton soxin.nixosModule);
+                ++ (singleton soxin.nixosModule)
+            ;
           });
       };
   }
