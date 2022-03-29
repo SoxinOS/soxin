@@ -123,8 +123,8 @@ let
         let
           darwinOnlyHosts = filterAttrs (n: host: host.mode == "nix-darwin") hosts;
 
-          # Build host with darwinSystem. `removeAttrs` workaround due to https://github.com/LnL7/nix-darwin/issues/319
-          builder = args: darwin.lib.darwinSystem (builtins.removeAttrs args [ "system" ]);
+          # Build host with darwinSystem.
+          builder = args: darwin.lib.darwinSystem args;
 
           # Setup the output
           output = "darwinConfigurations";
@@ -158,50 +158,6 @@ let
                   # include the NixDarwin special arguments.
                   // nixDarwinSpecialArgs
                 ;
-
-                modules =
-                  (host.modules or [ ])
-                  # include sops
-                  # ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
-                  # TODO: include sops above, or remove if unsupported.
-                  # include sane flake defaults from flake-utils-plus which sets sane `nix.*` defaults.
-                  # Please refer to implementation/readme in
-                  # github:gytis-ivaskevicius/flake-utils-plus for more details.
-                  #
-                  ++ (singleton flake-utils-plus.nixosModules.saneFlakeDefaults)
-                  # include the nix-darwin modules
-                  ++ extraNixDarwinModules
-                  # include Soxin modules
-                  ++ (singleton soxin.nixosModule)
-                  # include home-manager modules
-                  ++ (singleton home-manager.darwinModules.home-manager)
-                  # configure home-manager
-                  ++ (singleton {
-                    # tell home-manager to use the global (as in NixOS system-level) pkgs and
-                    # install all  user packages through the users.users.<name>.packages.
-                    home-manager.useGlobalPkgs = true;
-                    home-manager.useUserPackages = true;
-
-                    home-manager.extraSpecialArgs = {
-                      inherit soxin soxincfg home-manager;
-
-                      # the mode allows us to tell at what level we are within the modules.
-                      mode = "home-manager";
-                    }
-                    # include the global special arguments.
-                    // globalSpecialArgs
-                    # include the home-manager special arguments.
-                    // hmSpecialArgs;
-
-                    home-manager.sharedModules =
-                      # include the global modules
-                      extraGlobalModules
-                      # include the home-manager modules
-                      ++ extraHomeManagerModules
-                      # include Soxin module
-                      ++ (singleton soxin.nixosModule);
-                  })
-                ;
               }
             ))
           darwinOnlyHosts;
@@ -234,48 +190,6 @@ let
                 // globalSpecialArgs
                 # include the NixOS special arguments.
                 // nixosSpecialArgs
-              ;
-
-              modules =
-                (host.modules or [ ])
-                # include sops
-                ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
-                # include sane flake defaults from flake-utils-plus which sets sane `nix.*` defaults.
-                # Please refer to implementation/readme in
-                # github:gytis-ivaskevicius/flake-utils-plus for more details.
-                ++ (singleton flake-utils-plus.nixosModules.saneFlakeDefaults)
-                # include the NixOS modules
-                ++ extraNixosModules
-                # include Soxin modules
-                ++ (singleton soxin.nixosModule)
-                # include home-manager modules
-                ++ (singleton home-manager.nixosModules.home-manager)
-                # configure home-manager
-                ++ (singleton {
-                  # tell home-manager to use the global (as in NixOS system-level) pkgs and
-                  # install all  user packages through the users.users.<name>.packages.
-                  home-manager.useGlobalPkgs = true;
-                  home-manager.useUserPackages = true;
-
-                  home-manager.extraSpecialArgs = {
-                    inherit soxin soxincfg home-manager;
-
-                    # the mode allows us to tell at what level we are within the modules.
-                    mode = "home-manager";
-                  }
-                  # include the global special arguments.
-                  // globalSpecialArgs
-                  # include the home-manager special arguments.
-                  // hmSpecialArgs;
-
-                  home-manager.sharedModules =
-                    # include the global modules
-                    extraGlobalModules
-                    # include the home-manager modules
-                    ++ extraHomeManagerModules
-                    # include Soxin module
-                    ++ (singleton soxin.nixosModule);
-                })
               ;
             }
           ))
