@@ -185,6 +185,8 @@ let
                 ++ (host.modules or [ ])
                 # include the NixOS modules
                 ++ extraNixosModules
+                # include sops
+                ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
                 # include home-manager modules
                 ++ (singleton home-manager.nixosModules.home-manager)
               ;
