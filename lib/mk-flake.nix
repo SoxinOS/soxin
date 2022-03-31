@@ -136,10 +136,12 @@ let
             //
             (recursiveUpdate
               # pass along the hosts minus few keys that are implementation detail to soxin.
-              (removeAttrs host [ "deploy" "mode" ])
+              (removeAttrs host [ "deploy" "mode" "modules" ])
 
               {
                 modules = [ ]
+                # include modules for the host
+                ++ (host.modules or [ ])
                 # include the NixOS modules
                 ++ extraNixDarwinModules
                 # include home-manager modules
@@ -179,6 +181,8 @@ let
 
             {
               modules = [ ]
+                # include modules for the host
+                ++ (host.modules or [ ])
                 # include the NixOS modules
                 ++ extraNixosModules
                 # include home-manager modules
@@ -326,8 +330,9 @@ let
             ++ (singleton { nix = { inherit generateNixPathFromInputs generateRegistryFromInputs linkInputs; }; })
             # configure home-manager
             ++ (singleton {
-            # tell home-manager to use the global (as in NixOS system-level) pkgs and
-            # install all  user packages through the users.users.<name>.packages.
+            # tell home-manager to use the global (as in NixOS/Nix-Darwin
+            # system-level) pkgs and install all user packages through the
+            # users.users.<name>.packages.
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
