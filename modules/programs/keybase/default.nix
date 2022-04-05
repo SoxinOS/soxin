@@ -1,8 +1,19 @@
 { mode, config, pkgs, lib, ... }:
 
-with lib;
 let
   cfg = config.soxin.programs.keybase;
+
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkMerge
+    optionalAttrs
+    recursiveUpdate
+    ;
+
+  inherit (pkgs.hostPlatform)
+    isLinux
+    ;
 in
 {
   options = {
@@ -11,7 +22,7 @@ in
       enableFs =
         recursiveUpdate
           (mkEnableOption "Keybase filesystem")
-          { default = true; };
+          { default = isLinux; };
     };
   };
 
