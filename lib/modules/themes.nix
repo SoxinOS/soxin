@@ -102,7 +102,7 @@ rec {
     options = {
       # TODO: Get this directly from home-manager instead of copying it
       plugins = mkOption {
-        type = listOf (either package neovim.pluginWithConfigModule);
+        type = neovim.pluginWithConfigModule;
         default = [ ];
         example = literalExample ''
           with pkgs.vimPlugins; [

@@ -2,6 +2,8 @@
 
 with lib;
 let
+  inherit (soxin.lib.modules) neovim;
+
   cfg = config.soxin.programs.neovim;
 in
 {
@@ -25,7 +27,7 @@ in
         };
 
         plugins = mkOption {
-          type = with types; listOf (either package soxin.lib.modules.neovim.pluginWithConfigModule);
+          type = neovim.pluginWithConfigModule;
           default = [ ];
           defaultText = "The plugins added by the theme";
           example = literalExample ''
