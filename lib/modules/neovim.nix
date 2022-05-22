@@ -8,11 +8,12 @@ let
     types
     ;
 
-  hmModuleEval = home-manager.homeManagerConfiguration {
+  hmModuleEval = home-manager.lib.homeManagerConfiguration rec {
+    system="x86_64-linux";
     configuration = { };
-    username = "foo";
-    pkgs = nixpkgs;
-    check = false;
+    username = "nouser";
+    homeDirectory="/home/nouser";
+    pkgs = builtins.getAttr system nixpkgs.outputs.legacyPackages;
   };
 in
 {
