@@ -14,7 +14,7 @@ let
       system = "x86_64-linux";
 
       # username also don't matter here.
-      username = "nouser";
+      username = "nobody";
     in
     home-manager.lib.homeManagerConfiguration {
       inherit system username;
