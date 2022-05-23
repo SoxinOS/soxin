@@ -100,7 +100,6 @@ rec {
 
   neovimModule = with types; submodule {
     options = {
-      # TODO: Get this directly from home-manager instead of copying it
       plugins = mkOption {
         type = neovim.pluginWithConfigModule;
         default = [ ];
