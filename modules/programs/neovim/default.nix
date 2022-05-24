@@ -26,6 +26,30 @@ in
           '';
         };
 
+        rcheader = mkOption {
+          type = types.nullOr types.lines;
+          default = null;
+          description = ''
+            Lines added to the top of the rc file.
+          '';
+        };
+
+        rcfooter = mkOption {
+          type = types.nullOr types.lines;
+          default = null;
+          description = ''
+            Lines added to the bottom of the rc file.
+          '';
+        };
+
+        mapleader = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = ''
+            Set the mapleader early in int the init.
+          '';
+        };
+
         plugins = mkOption {
           type = neovim.pluginWithConfigModule;
           default = [ ];
@@ -49,6 +73,14 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
+    # make a snippet in the header for the mapleader
+    (mkIf (cfg.mapleader != null) {
+      soxin.programs.neovim.rcheader = ''
+        " set the mapleader globally
+        let mapleader = "${cfg.mapleader}"
+      '';
+    })
+
     # add all plugins installed by themes
     { soxin.programs.neovim.plugins = cfg.theme.plugins; }
 
@@ -77,6 +109,16 @@ in
       #     packages.myVimPackage = { inherit start opt; };
       #   };
       # };
+    })
+
+    # inject the header of the rcfile on home-manager
+    (optionalAttrs (mode == "home-manager") {
+      xdg.configFile."nvim/init.vim" = mkIf (cfg.rcheader != null) (mkBefore { text = cfg.rcheader; });
+    })
+
+    # inject the footer of the rcfile on home-manager
+    (optionalAttrs (mode == "home-manager") {
+      xdg.configFile."nvim/init.vim" = mkIf (cfg.rcfooter != null) (mkAfter { text = cfg.rcfooter; });
     })
 
     (optionalAttrs (mode == "home-manager") {
