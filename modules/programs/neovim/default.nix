@@ -138,16 +138,10 @@ in
       // (genAttrs [ "withNodeJs" "withPython3" "withRuby" ] (name: true));
 
       # inject the header/footer to the rcfile on home-manager
-      xdg.configFile."nvim/init.vim".text = mkForce (builtins.concatStringsSep "\n" [
-        cfg.rcheader
-        config.programs.neovim.generatedConfigViml
-        cfg.rcfooter
-      ]);
-      # TODO: The above should work, and is better as below. Why no work?
-      # xdg.configFile."nvim/init.vim" = mkMerge [
-      #   (mkBefore { text = cfg.rcheader; })
-      #   (mkAfter { text = cfg.rcfooter; })
-      # ];
+      xdg.configFile."nvim/init.vim".text = mkMerge [
+        (mkBefore cfg.rcheader)
+        (mkAfter cfg.rcfooter)
+      ];
     })
   ]);
 }
