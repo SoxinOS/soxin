@@ -27,18 +27,28 @@ in
         };
 
         rcheader = mkOption {
-          type = types.nullOr types.lines;
-          default = null;
+          type = types.lines;
+          default = "";
           description = ''
             Lines added to the top of the rc file.
+          '';
+          apply = lines: ''
+            " rcheader {{{
+            ${lines}
+            " }}}
           '';
         };
 
         rcfooter = mkOption {
-          type = types.nullOr types.lines;
-          default = null;
+          type = types.lines;
+          default = "";
           description = ''
             Lines added to the bottom of the rc file.
+          '';
+          apply = lines: ''
+            " rcfooter {{{
+            ${lines}
+            " }}}
           '';
         };
 
@@ -111,16 +121,6 @@ in
       # };
     })
 
-    # inject the header of the rcfile on home-manager
-    (optionalAttrs (mode == "home-manager") {
-      xdg.configFile."nvim/init.vim" = mkIf (cfg.rcheader != null) (mkBefore { text = cfg.rcheader; });
-    })
-
-    # inject the footer of the rcfile on home-manager
-    (optionalAttrs (mode == "home-manager") {
-      xdg.configFile."nvim/init.vim" = mkIf (cfg.rcfooter != null) (mkAfter { text = cfg.rcfooter; });
-    })
-
     (optionalAttrs (mode == "home-manager") {
       # TODO: I wish home-manager had a defaultEditor as well!
       home.sessionVariables = { EDITOR = "nvim"; };
@@ -136,6 +136,18 @@ in
       // (genAttrs [ "viAlias" "vimAlias" "vimdiffAlias" ] (name: true))
       # Add support for NodeJS, Python 2 and 3 as well as Ruby
       // (genAttrs [ "withNodeJs" "withPython3" "withRuby" ] (name: true));
+
+      # inject the header/footer to the rcfile on home-manager
+      xdg.configFile."nvim/init.vim".text = mkForce (builtins.concatStringsSep "\n" [
+        cfg.rcheader
+        config.programs.neovim.generatedConfigViml
+        cfg.rcfooter
+      ]);
+      # TODO: The above should work, and is better as below. Why no work?
+      # xdg.configFile."nvim/init.vim" = mkMerge [
+      #   (mkBefore { text = cfg.rcheader; })
+      #   (mkAfter { text = cfg.rcfooter; })
+      # ];
     })
   ]);
 }
