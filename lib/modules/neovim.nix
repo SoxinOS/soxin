@@ -1,4 +1,4 @@
-{ nixpkgs, ... }:
+{ nixpkgs, home-manager, ... }:
 
 let
   inherit (nixpkgs) lib;
@@ -8,25 +8,19 @@ let
     types
     ;
 
-in
-{
-  # TODO: Bring this from home-manager!
-  pluginWithConfigModule = types.submodule {
-    options = {
-      config = mkOption {
-        type = types.lines;
-        description = "vimscript for this plugin to be placed in init.vim";
-        default = "";
-      };
+  hmModuleEval =
+    let
+      # system don't matter here, we just need the type of the plugins option.
+      system = "x86_64-linux";
 
-      optional = mkEnableOption "optional" // {
-        description = "Don't load by default (load with :packadd)";
-      };
-
-      plugin = mkOption {
-        type = types.package;
-        description = "vim plugin";
-      };
+      # username also don't matter here.
+      username = "nobody";
+    in
+    home-manager.lib.homeManagerConfiguration {
+      inherit system username;
+      configuration = { };
+      homeDirectory = "/home/${username}";
+      pkgs = builtins.getAttr system nixpkgs.outputs.legacyPackages;
     };
-  };
-}
+in
+{ pluginWithConfigModule = hmModuleEval.options.programs.neovim.plugins.type; }

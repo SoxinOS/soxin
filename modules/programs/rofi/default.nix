@@ -51,7 +51,6 @@ in
           type = with types; nullOr ints.positive;
           default = null;
           description = "The DPI of the rofi.";
-          apply = value: toString value;
         };
       };
     };
@@ -73,9 +72,9 @@ in
 
         theme = cfg.theme.name;
 
-        extraConfig = {
-          inherit (cfg) modi dpi;
-        };
+        extraConfig =
+          { inherit (cfg) modi; }
+          // (optionalAttrs (cfg.dpi != null) { inherit (cfg) dpi; });
 
         font = "Source Code Pro for Powerline 9";
       };
