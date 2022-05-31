@@ -38,7 +38,7 @@ in
           enableZshIntegration = config.soxin.programs.zsh.enable;
         }
 
-        (mkIf (isDarwin /* TODO: && M1 only */) {
+        (mkIf (isDarwin && pkgs.system == "aarch64-darwin") {
           package = pkgs.writeShellScriptBin "starship" ''
             set -euo pipefail
 
