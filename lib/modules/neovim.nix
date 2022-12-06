@@ -17,10 +17,14 @@ let
       username = "nobody";
     in
     home-manager.lib.homeManagerConfiguration {
-      inherit system username;
-      configuration = { };
-      homeDirectory = "/home/${username}";
       pkgs = builtins.getAttr system nixpkgs.outputs.legacyPackages;
+      modules = [{
+        home = {
+          inherit username;
+          stateVersion = "22.11";
+          homeDirectory = "/home/${username}";
+        };
+      }];
     };
 in
 { pluginWithConfigModule = hmModuleEval.options.programs.neovim.plugins.type; }
