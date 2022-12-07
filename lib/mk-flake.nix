@@ -43,14 +43,11 @@
   # NixOS specific extra arguments.
 , nixosSpecialArgs ? { }
 
-  # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
-, packagesBuilder ? (_: { })
-
   # Shared overlays between channels, gets applied to all `channels.<name>.input`
 , sharedOverlays ? [ ]
 
-  # Evaluates to `devShell.<system>`
-, devShellBuilder ? (_: null)
+  # See flake-utils-plus for documentation
+, outputsBuilder ? (_: { })
 
   # Default host settings.
 , hostDefaults ? { }
@@ -101,8 +98,7 @@ let
     "globalSpecialArgs"
     "hmSpecialArgs"
     "nixosSpecialArgs"
-    "packagesBuilder"
-    "devShellBuilder"
+    "outputsBuilder"
     "sharedOverlays"
   ];
 
@@ -164,69 +160,74 @@ let
     ++ optionals withSops (singleton sops-nix.overlay);
 
     # TODO: Add support for modifying the outputsBuilder.
-    outputsBuilder = channels: {
-      # Evaluates to `packages.<system>.coreutils = <unstable-nixpkgs-reference>.package-from-overlays`.
-      packages =
-        let
-          inherit (channels) nixpkgs;
-        in
-        recursiveUpdate
+    outputsBuilder = channels:
+      let
+        userOutputs = outputsBuilder channels;
+
+        # Evaluates to `packages.<system>.coreutils = <unstable-nixpkgs-reference>.package-from-overlays`.
+        soxinPackages =
+          let
+            inherit (channels) nixpkgs;
+          in
           # these packages construct themselves if and only if the system is supported.
-          (import ../pkgs nixpkgs)
-          # pass along the packagesBuilder
-          (packagesBuilder channels);
+          (import ../pkgs nixpkgs);
 
-      # Evaluates to `devShell.<system> = <nixpkgs-channel-reference>.mkShell { name = "devShell"; };`.
-      devShell =
-        let
-          inherit (channels) nixpkgs;
+        # Evaluates to `devShell.<system> = <nixpkgs-channel-reference>.mkShell { name = "devShell"; };`.
+        devShell =
+          let
+            inherit (channels) nixpkgs;
 
-          inherit (nixpkgs)
-            mkShell
-            nixpkgs-fmt
-            pre-commit
-            sops
-            sops-pgp-hook
-            ssh-to-pgp
-            ;
+            inherit (nixpkgs)
+              mkShell
+              nixpkgs-fmt
+              pre-commit
+              sops
+              sops-pgp-hook
+              ssh-to-pgp
+              ;
 
-          _userShell = devShellBuilder channels;
-          userShell = if _userShell != null then _userShell else mkShell { name = "devShell"; };
+            userShell = userOutputs.devShell or (mkShell { name = "devShell"; });
 
-          # the base devShell.
-          baseShell = userShell.overrideAttrs (oa: {
-            name = "soxincfg";
-            buildInputs = (oa.buildInputs or [ ]) ++ [ nixpkgs-fmt pre-commit ];
-          });
+            # the base devShell.
+            baseShell = userShell.overrideAttrs (oa: {
+              name = "soxincfg";
+              buildInputs = (oa.buildInputs or [ ]) ++ [ nixpkgs-fmt pre-commit ];
+            });
 
-          # overlay the baseShell with things that are only necessary if the
-          # user has enabled sops support.
-          sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
-            buildInputs = (oa.buildInputs or [ ]) ++ [ sops ssh-to-pgp ];
-            nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-pgp-hook ];
-            sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [ "./vars/sops-keys/hosts" "./vars/sops-keys/users" ];
+            # overlay the baseShell with things that are only necessary if the
+            # user has enabled sops support.
+            sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
+              buildInputs = (oa.buildInputs or [ ]) ++ [ sops ssh-to-pgp ];
+              nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-pgp-hook ];
+              sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [ "./vars/sops-keys/hosts" "./vars/sops-keys/users" ];
 
-            shellHook = (oa.shellHook or "") + ''
-              sopsPGPHook
-              git config diff.sopsdiffer.textconv "sops -d"
-            '';
-          });
+              shellHook = (oa.shellHook or "") + ''
+                sopsPGPHook
+                git config diff.sopsdiffer.textconv "sops -d"
+              '';
+            });
 
-          # overlay the baseShell with things that are only necessary if the
-          # user has enabled deploy-rs support.
-          deployShell = sopsShell.overrideAttrs (oa: optionalAttrs withDeploy {
-            buildInputs = (oa.buildInputs or [ ]) ++ [ deploy-rs.packages.${nixpkgs.system}.deploy-rs ];
-          });
+            # overlay the baseShell with things that are only necessary if the
+            # user has enabled deploy-rs support.
+            deployShell = sopsShell.overrideAttrs (oa: optionalAttrs withDeploy {
+              buildInputs = (oa.buildInputs or [ ]) ++ [ deploy-rs.packages.${nixpkgs.system}.deploy-rs ];
+            });
 
-          homeManagerShell = deployShell.overrideAttrs (oa: optionalAttrs (home-managers != { }) {
-            buildInputs = (oa.buildInputs or [ ]) ++ [ home-manager.packages.${nixpkgs.system}.home-manager ];
-          });
+            homeManagerShell = deployShell.overrideAttrs (oa: optionalAttrs (home-managers != { }) {
+              buildInputs = (oa.buildInputs or [ ]) ++ [ home-manager.packages.${nixpkgs.system}.home-manager ];
+            });
 
-          # set the final shell to be returned
-          finalShell = homeManagerShell;
-        in
-        finalShell;
-    };
+            # set the final shell to be returned
+            finalShell = homeManagerShell;
+          in
+          finalShell;
+
+        outputs = recursiveUpdate userOutputs {
+          inherit devShell;
+          packages = recursiveUpdate soxinPackages (userOutputs.packages or { });
+        };
+      in
+      outputs;
 
     # configure the modules
     hostDefaults =
