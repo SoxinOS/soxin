@@ -14,11 +14,11 @@ in
       includeKeyboardLayout = true;
       includeTheme = true;
       extraOptions = {
+
         extraConfig = mkOption {
           type = types.lines;
           default = "";
           example = ''
-            set nocompatible
             set nobackup
           '';
           description = ''
@@ -26,29 +26,14 @@ in
           '';
         };
 
-        rcheader = mkOption {
+        extraLuaConfig = mkOption {
           type = types.lines;
           default = "";
+          example = ''
+            vim.opt.nobackup = true
+          '';
           description = ''
-            Lines added to the top of the rc file.
-          '';
-          apply = lines: ''
-            " rcheader {{{
-            ${lines}
-            " }}}
-          '';
-        };
-
-        rcfooter = mkOption {
-          type = types.lines;
-          default = "";
-          description = ''
-            Lines added to the bottom of the rc file.
-          '';
-          apply = lines: ''
-            " rcfooter {{{
-            ${lines}
-            " }}}
+            Custom lua lines.
           '';
         };
 
@@ -83,14 +68,6 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    # make a snippet in the header for the mapleader
-    (mkIf (cfg.mapleader != null) {
-      soxin.programs.neovim.rcheader = ''
-        " set the mapleader globally
-        let mapleader = "${cfg.mapleader}"
-      '';
-    })
-
     # add all plugins installed by themes
     { soxin.programs.neovim.plugins = cfg.theme.plugins; }
 
@@ -127,7 +104,11 @@ in
 
       programs.neovim = {
         enable = true;
-        inherit (cfg) extraConfig plugins;
+        inherit (cfg) extraLuaConfig plugins;
+
+        extraConfig = ""
+          + (optionalString (cfg.mapleader != null) ''let mapleader = "${cfg.mapleader}"'')
+          + cfg.extraConfig;
 
         # Add the Python's neovim plugin
         extraPython3Packages = ps: with ps; [ pynvim ];
@@ -136,12 +117,6 @@ in
       // (genAttrs [ "viAlias" "vimAlias" "vimdiffAlias" ] (name: true))
       # Add support for NodeJS, Python 2 and 3 as well as Ruby
       // (genAttrs [ "withNodeJs" "withPython3" "withRuby" ] (name: true));
-
-      # inject the header/footer to the rcfile on home-manager
-      xdg.configFile."nvim/init.vim".text = mkMerge [
-        (mkBefore cfg.rcheader)
-        (mkAfter cfg.rcfooter)
-      ];
     })
   ]);
 }
