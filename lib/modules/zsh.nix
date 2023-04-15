@@ -5,6 +5,7 @@
 let
   inherit (nixpkgs) lib;
   inherit (lib)
+    mkDefault
     mkEnableOption
     mkOption
     types
@@ -13,7 +14,7 @@ let
 in
 {
   # TODO: Bring this from home-manager!
-  pluginModule = with types; submodule {
+  pluginModule = with types; submodule ({ config, ... }: {
     options = {
       src = mkOption {
         type = path;
@@ -37,5 +38,7 @@ in
         description = "The plugin script to source.";
       };
     };
-  };
+
+    config.file = mkDefault "${config.name}.plugin.zsh";
+  });
 }
