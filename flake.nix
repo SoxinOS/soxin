@@ -9,6 +9,10 @@
     nur.url = "github:nix-community/NUR";
     sops-nix.url = "github:Mic92/sops-nix";
 
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

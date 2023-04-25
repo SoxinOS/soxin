@@ -134,7 +134,7 @@ in
     };
   };
 
-  config = mkIf cfg.enable (mkMerge [
+  config = mkIf (cfg.enable && pkgs.stdenv.isLinux) (mkMerge [
     (optionalAttrs (mode == "NixOS") {
       environment.variables.BROWSER = "${cfg.package}/bin/rbrowser";
 

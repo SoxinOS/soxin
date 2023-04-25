@@ -1,4 +1,4 @@
-{ mode, config, lib, ... }:
+{ mode, config, lib, pkgs, ... }:
 
 with lib;
 
@@ -15,7 +15,7 @@ with lib;
     })
 
     (optionalAttrs (mode == "home-manager") {
-      services.blueman-applet.enable = true;
+      services.blueman-applet.enable = pkgs.stdenv.isLinux;
     })
 
   ]);

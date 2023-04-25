@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1682009832,
+        "narHash": "sha256-QdNOeFE7sI+0ddqVfn9vQDCUs7OdxhJ7evo9sdyP82Y=",
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "rev": "a1ee4d333b092bc055655fb06229eb3013755812",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
     "deploy-rs": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -203,6 +223,7 @@
     },
     "root": {
       "inputs": {
+        "darwin": "darwin",
         "deploy-rs": "deploy-rs",
         "flake-utils-plus": "flake-utils-plus",
         "home-manager": "home-manager",

@@ -20,6 +20,11 @@ in
           type = types.bool;
           description = "Enable zsh autosuggestions";
         };
+        enableCompletion = mkOption {
+          default = true;
+          type = types.bool;
+          description = "Enable zsh auto-completion";
+        };
         plugins = mkOption {
           #
           type = types.listOf soxin.lib.modules.zsh.pluginModule;
@@ -60,24 +65,22 @@ in
 
     { programs.zsh = { inherit (cfg) enable; }; }
 
-    # Forward configurations to home-manager.
     (optionalAttrs (mode == "home-manager") {
       programs.zsh = { inherit (cfg) enableAutosuggestions plugins; };
     })
 
-    # Forward configurations to NixOS.
     (optionalAttrs (mode == "NixOS") {
       programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
+    })
+
+    (optionalAttrs (mode == "NixOS" || mode == "darwin") {
+      programs.zsh.enableCompletion = cfg.enableCompletion;
     })
 
     # Forward plugins to NixOS.
     # Copy the plugin management from home-manager
     # TODO: Send it upstream to NixOS.
     (optionalAttrs (mode == "NixOS") (mkIf (cfg.plugins != [ ]) {
-      # Many plugins require compinit to be called
-      # but allow the user to opt out.
-      programs.zsh.enableCompletion = mkDefault true;
-
       environment.etc =
         foldl' (a: b: a // b) { }
           (map (plugin: { "${pluginsDir}/${plugin.name}".source = plugin.src; })

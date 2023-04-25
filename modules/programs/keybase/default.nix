@@ -11,14 +11,14 @@ in
       enableFs =
         recursiveUpdate
           (mkEnableOption "Keybase filesystem")
-          { default = true; };
+          { default = pkgs.hostPlatform.isLinux; };
     };
   };
 
   config = mkIf cfg.enable (mkMerge [
-    {
+    (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
       services.keybase.enable = true;
       services.kbfs.enable = cfg.enableFs;
-    }
+    })
   ]);
 }

@@ -68,7 +68,7 @@ in
 
     (optionalAttrs (mode == "home-manager") {
       programs.rofi = {
-        enable = true;
+        enable = pkgs.stdenv.isLinux;
 
         theme = cfg.theme.name;
 
