@@ -50,9 +50,6 @@
   # nix-darwin specific extra arguments.
 , nixDarwinSpecialArgs ? { }
 
-  # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
-, packagesBuilder ? (_: { })
-
   # Shared overlays between channels, gets applied to all `channels.<name>.input`
 , sharedOverlays ? [ ]
 
@@ -110,8 +107,6 @@ let
     "hmSpecialArgs"
     "nixosSpecialArgs"
     "nixDarwinSpecialArgs"
-    "packagesBuilder"
-    "devShellBuilder"
     "outputsBuilder"
     "sharedOverlays"
   ];
