@@ -9,4 +9,6 @@ in
   home.packages = with soxincfg.packages."${pkgs.system}"; singleton helloSh;
 
   programs.zsh.enable = true;
+
+  home.stateVersion = "23.05";
 }

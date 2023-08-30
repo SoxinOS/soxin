@@ -2,19 +2,29 @@
   description = "Soxin template flake";
 
   inputs = {
-    darwin.url = "github:lnl7/nix-darwin/master";
     deploy-rs.url = "github:serokell/deploy-rs";
-    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.3.1";
-    home-manager.url = "github:nix-community/home-manager/release-21.11";
+    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-21.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
     nur.url = "github:nix-community/NUR";
 
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager/release-23.05";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
 
     soxin = {
-      url = "github:SoxinOS/soxin";
+      url = "path:../";
       inputs = {
         darwin.follows = "darwin";
         deploy-rs.follows = "deploy-rs";
