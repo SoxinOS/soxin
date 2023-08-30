@@ -1,19 +1,8 @@
 { mode, config, pkgs, lib, ... }:
 
+with lib;
 let
   cfg = config.soxin.programs.starship;
-
-  inherit (lib)
-    mkEnableOption
-    mkAfter
-    mkIf
-    mkMerge
-    optionalAttrs
-    ;
-
-  inherit (pkgs.hostPlatform)
-    isDarwin
-    ;
 in
 {
   options = {
@@ -32,27 +21,10 @@ in
     })
 
     (optionalAttrs (mode == "home-manager") {
-      programs.starship = mkMerge [
-        {
-          enable = true;
-          enableZshIntegration = config.soxin.programs.zsh.enable;
-        }
-
-        (mkIf (isDarwin && pkgs.system == "aarch64-darwin") {
-          package = pkgs.writeShellScriptBin "starship" ''
-            set -euo pipefail
-
-            readonly real_path=/opt/homebrew/bin/starship
-
-            if [[ ! -x $real_path ]]; then
-              >&2 echo "Installing starship, please wait."
-              brew install starship
-            fi
-
-            exec $real_path "$@"
-          '';
-        })
-      ];
+      programs.starship = {
+        enable = true;
+        enableZshIntegration = config.soxin.programs.zsh.enable;
+      };
     })
   ]);
 }
