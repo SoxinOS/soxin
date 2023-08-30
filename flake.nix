@@ -2,6 +2,10 @@
   description = "soxin: opiniated configs for everyone";
 
   inputs = {
+    darwin = {
+      url = "github:lnl7/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     deploy-rs.url = "github:serokell/deploy-rs";
     flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.3.1";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";

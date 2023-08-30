@@ -3,15 +3,30 @@
 
   inputs = {
     deploy-rs.url = "github:serokell/deploy-rs";
-    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.3.1";
-    home-manager.url = "github:nix-community/home-manager/release-21.11";
+    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-21.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
     nur.url = "github:nix-community/NUR";
 
-    soxin = {
-      url = "github:SoxinOS/soxin";
+    home-manager = {
+      url = "github:nix-community/home-manager/release-23.05";
       inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
+    darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
+    soxin = {
+      url = "path:../";
+      inputs = {
+        darwin.follows = "darwin";
         deploy-rs.follows = "deploy-rs";
         flake-utils-plus.follows = "flake-utils-plus";
         home-manager.follows = "home-manager";
@@ -22,7 +37,7 @@
     };
   };
 
-  outputs = inputs@{ flake-utils-plus, nixpkgs, self, soxin, ... }:
+  outputs = inputs@{ flake-utils-plus, nixos-hardware, nixpkgs, self, soxin, ... }:
     let
       # Enable deploy-rs support
       withDeploy = true;
@@ -54,6 +69,7 @@
       channelsConfig = {
         # allowBroken = true;
         allowUnfree = true;
+        # allowUnsupportedSystem = true;
       };
 
       nixosModules = (import ./modules) // {
@@ -87,5 +103,8 @@
 
       # include all overlays
       overlay = import ./overlays;
+
+      # set the nixos specialArgs
+      nixosSpecialArgs = { inherit nixos-hardware; };
     };
 }

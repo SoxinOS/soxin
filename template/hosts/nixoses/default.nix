@@ -1,6 +1,30 @@
-inputs@{ self, deploy-rs, ... }:
+inputs@{ self, deploy-rs, lib ? nixpkgs.lib, nixpkgs, ... }:
 
+let
+  inherit (lib)
+    mapAttrs
+    recursiveUpdate
+    ;
+
+  # the default channel to follow.
+  channelName = "nixpkgs";
+
+  # the operating mode of Soxin
+  mode = "NixOS";
+in
+mapAttrs
+  (n: v: recursiveUpdate
+  {
+    inherit
+      mode
+      ;
+  }
+    v)
 {
+  ###
+  # x86_64-linux
+  ###
+
   minimal-nixos-system =
     let
       system = "x86_64-linux";
@@ -9,7 +33,7 @@ inputs@{ self, deploy-rs, ... }:
       # System architecture.
       inherit system;
       # <name> of the channel to be used. Defaults to `nixpkgs`
-      channelName = "nixpkgs";
+      inherit channelName;
       # Extra arguments to be passed to the modules.
       extraArgs = { };
       # Host specific configuration.

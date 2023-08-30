@@ -76,5 +76,11 @@ in
         variant = concatMapStringsSep "," (l: l.x11.variant) cfg.layouts;
       };
     })
+
+    (optionalAttrs (mode == "nix-darwin") {
+      # TODO: Write this up.
+      # Some resources:
+      # - https://github.com/kalbasit/shabka/blob/b6161e62e08eb323eb59fd94d4e12335507a6238/modules/darwin/general/keyboard.nix#L29-L38
+    })
   ];
 }

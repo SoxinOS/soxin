@@ -39,21 +39,21 @@ let
 
 in
 home-manager.lib.homeManagerConfiguration (recursiveUpdate
-  {
-    extraSpecialArgs = {
-      inherit inputs soxin soxincfg;
+{
+  extraSpecialArgs = {
+    inherit inputs soxin soxincfg;
 
-      mode = "home-manager";
-    }
-    # include the home-manager special arguments.
-    // hmSpecialArgs;
-
-    extraModules =
-      # include the home-manager modules
-      hmModules
-      # include Soxin module
-      ++ (singleton soxin.nixosModules.soxin)
-      # include SoxinCFG module
-      ++ (singleton soxincfg.nixosModules.soxincfg);
+    mode = "home-manager";
   }
+  # include the home-manager special arguments.
+  // hmSpecialArgs;
+
+  extraModules =
+    # include the home-manager modules
+    hmModules
+    # include Soxin module
+    ++ (singleton soxin.nixosModules.soxin)
+    # include SoxinCFG module
+    ++ (singleton soxincfg.nixosModules.soxincfg);
+}
   otherArguments)

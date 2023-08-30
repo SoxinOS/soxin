@@ -14,12 +14,19 @@ in
       includeTheme = true;
       # TODO: copied from home-manager, fix this!
       extraOptions = {
-        # TODO: Consider taking one from NixOS because of the strategy feature!
+        # TODO: Consider taking this one from NixOS because of the strategy feature!
         enableAutosuggestions = mkOption {
           default = true;
           type = types.bool;
           description = "Enable zsh autosuggestions";
         };
+
+        enableCompletion = mkOption {
+          default = true;
+          type = types.bool;
+          description = "Enable zsh auto-completion";
+        };
+
         plugins = mkOption {
           #
           type = types.listOf soxin.lib.modules.zsh.pluginModule;
@@ -55,28 +62,19 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    # add all plugins installed by themes
-    { soxin.programs.zsh.plugins = cfg.theme.plugins; }
+    (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
+      programs.zsh = { inherit (cfg) enable; };
 
-    { programs.zsh = { inherit (cfg) enable; }; }
-
-    # Forward configurations to home-manager.
-    (optionalAttrs (mode == "home-manager") {
-      programs.zsh = { inherit (cfg) enableAutosuggestions plugins; };
+      # add all plugins installed by themes
+      soxin.programs.zsh.plugins = cfg.theme.plugins;
     })
 
-    # Forward configurations to NixOS.
-    (optionalAttrs (mode == "NixOS") {
-      programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
-    })
-
-    # Forward plugins to NixOS.
-    # Copy the plugin management from home-manager
-    # TODO: Send it upstream to NixOS.
-    (optionalAttrs (mode == "NixOS") (mkIf (cfg.plugins != [ ]) {
+    # Copy the plugin management from home-manager to send plugins to NixOS and nix-darwin
+    # TODO: Send it upstream to NixOS and nix-darwin.
+    (optionalAttrs (mode == "NixOS" || mode == "nix-darwin") (mkIf (cfg.plugins != [ ]) {
       # Many plugins require compinit to be called
       # but allow the user to opt out.
-      programs.zsh.enableCompletion = mkDefault true;
+      soxin.programs.zsh.enableCompletion = mkDefault true;
 
       environment.etc =
         foldl' (a: b: a // b) { }
@@ -90,6 +88,19 @@ in
         '')
         cfg.plugins);
     }))
+
+    (optionalAttrs (mode == "NixOS") {
+      programs.zsh = { inherit (cfg) enableCompletion; };
+      programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
+    })
+
+    (optionalAttrs (mode == "nix-darwin") {
+      programs.zsh = { inherit (cfg) enable enableCompletion; };
+    })
+
+    (optionalAttrs (mode == "home-manager") {
+      programs.zsh = { inherit (cfg) enableAutosuggestions plugins; };
+    })
 
     # install all completions libraries for system packages
     (optionalAttrs (mode == "NixOS") (mkIf config.programs.zsh.enableCompletion {

@@ -1,4 +1,5 @@
-{ deploy-rs
+{ darwin
+, deploy-rs
 , home-manager
 , flake-utils-plus
 , nixpkgs
@@ -34,6 +35,9 @@
   # NixOS specific modules.
 , extraNixosModules ? [ ]
 
+  # nix-darwin specific modules.
+, extraNixDarwinModules ? [ ]
+
   # The global extra arguments are included in both NixOS and home-manager.
 , globalSpecialArgs ? { }
 
@@ -42,6 +46,9 @@
 
   # NixOS specific extra arguments.
 , nixosSpecialArgs ? { }
+
+  # nix-darwin specific extra arguments.
+, nixDarwinSpecialArgs ? { }
 
   # Shared overlays between channels, gets applied to all `channels.<name>.input`
 , sharedOverlays ? [ ]
@@ -95,9 +102,11 @@ let
     "extraGlobalModules"
     "extraHomeManagerModules"
     "extraNixosModules"
+    "extraNixDarwinModules"
     "globalSpecialArgs"
     "hmSpecialArgs"
     "nixosSpecialArgs"
+    "nixDarwinSpecialArgs"
     "outputsBuilder"
     "sharedOverlays"
   ];
@@ -105,25 +114,105 @@ let
   # generate each host by injecting special arguments and the given host
   # without certain soxin-only attributes.
   hosts' =
-    mapAttrs
-      (hostname: host: (recursiveUpdate
-        {
-          specialArgs = {
-            inherit soxin soxincfg home-manager;
+    let
+      darwinHosts =
+        let
+          darwinOnlyHosts = filterAttrs (n: host: host.mode == "nix-darwin") hosts;
 
-            # the mode allows us to tell at what level we are within the modules.
-            mode = "NixOS";
-          }
-          # include the global special arguments.
-          // globalSpecialArgs
-          # include the NixOS special arguments.
-          // nixosSpecialArgs;
-        }
+          # Build host with darwinSystem.
+          builder = args: darwin.lib.darwinSystem args;
 
-        # pass along the hosts minus the deploy key that's specific to soxin.
-        (removeAttrs host [ "deploy" ])
-      ))
-      hosts;
+          # Setup the output
+          output = "darwinConfigurations";
+        in
+        mapAttrs
+          (_: host:
+            # setup the default attributes, users can override it by passing them through their host definition.
+            { inherit builder output; }
+            //
+            (recursiveUpdate
+              # pass along the hosts minus few keys that are implementation detail to soxin.
+              (removeAttrs host [ "deploy" "mode" "modules" ])
+
+              {
+                modules = [ ]
+                # include modules for the host
+                ++ (host.modules or [ ])
+                # include the NixOS modules
+                ++ extraNixDarwinModules
+                # include home-manager modules
+                ++ (singleton home-manager.darwinModules.home-manager)
+                ;
+                specialArgs =
+                  {
+                    inherit
+                      home-manager
+                      soxin
+                      soxincfg
+                      ;
+
+                    inherit (host)
+                      mode
+                      ;
+                  }
+                  # include the specialArgs that were passed in.
+                  // (host.specialArgs or { })
+                  # include the global special arguments.
+                  // globalSpecialArgs
+                  # include the NixDarwin special arguments.
+                  // nixDarwinSpecialArgs
+                ;
+              }
+            ))
+          darwinOnlyHosts;
+
+      nixosHosts =
+        let
+          nixosOnlyHosts = filterAttrs (n: host: host.mode == "NixOS") hosts;
+        in
+        mapAttrs
+          (_: host: (recursiveUpdate
+            # pass along the hosts minus few keys that are implementation detail to soxin.
+            (removeAttrs host [ "deploy" "mode" ])
+
+            {
+              modules = [ ]
+                # include modules for the host
+                ++ (host.modules or [ ])
+                # include the NixOS modules
+                ++ extraNixosModules
+                # include sops
+                ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
+                # include home-manager modules
+                ++ (singleton home-manager.nixosModules.home-manager)
+              ;
+
+              specialArgs =
+                {
+                  inherit
+                    home-manager
+                    soxin
+                    soxincfg
+                    ;
+
+                  inherit (host)
+                    mode
+                    ;
+                }
+                # include the specialArgs that were passed in.
+                // (host.specialArgs or { })
+                # include the global special arguments.
+                // globalSpecialArgs
+                # include the NixOS special arguments.
+                // nixosSpecialArgs
+              ;
+            }
+          ))
+          nixosOnlyHosts;
+
+      # TODO: add support for home-manager modes
+    in
+    darwinHosts // nixosHosts;
 
   # Generate the deployment nodes.
   deploy.nodes =
@@ -131,7 +220,7 @@ let
       # filter out hosts without a deploy attribute.
       deploy-hosts = filterAttrs (n: v: (v.deploy or { }) != { }) hosts;
     in
-    mapAttrs (hostname: host: host.deploy) deploy-hosts;
+    mapAttrs (_: host: host.deploy) deploy-hosts;
 
   soxinSystemFlake = {
     # inherit the required fields as-is
@@ -236,22 +325,17 @@ let
         modules =
           # include the modules that are passed in
           (hostDefaults.modules or [ ])
-            # include sops
-            ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
             # include the global modules
             ++ extraGlobalModules
-            # include the NixOS modules
-            ++ extraNixosModules
             # include Soxin modules
             ++ (singleton soxin.nixosModule)
-            # include home-manager modules
-            ++ (singleton home-manager.nixosModules.home-manager)
             # configure fup to expose NIX_PATH and Nix registry from inputs.
             ++ (singleton { nix = { inherit generateNixPathFromInputs generateRegistryFromInputs linkInputs; }; })
             # configure home-manager
             ++ (singleton {
-            # tell home-manager to use the global (as in NixOS system-level) pkgs and
-            # install all  user packages through the users.users.<name>.packages.
+            # tell home-manager to use the global (as in NixOS/Nix-Darwin
+            # system-level) pkgs and install all user packages through the
+            # users.users.<name>.packages.
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
@@ -264,7 +348,8 @@ let
             # include the global special arguments.
             // globalSpecialArgs
             # include the home-manager special arguments.
-            // hmSpecialArgs;
+            // hmSpecialArgs
+            ;
 
             home-manager.sharedModules =
               # include the global modules
@@ -272,7 +357,8 @@ let
                 # include the home-manager modules
                 ++ extraHomeManagerModules
                 # include Soxin module
-                ++ (singleton soxin.nixosModule);
+                ++ (singleton soxin.nixosModule)
+            ;
           });
       };
   }
@@ -292,7 +378,7 @@ flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
   # TODO: Let flake-utils-plus.lib.mkFlake handle the home-managers by using the host's builder function
   // {
   homeConfigurations = (mapAttrs
-    (hostname: host: soxin.lib.homeManagerConfiguration (host // {
+    (_: host: soxin.lib.homeManagerConfiguration (host // {
       inherit inputs;
       hmModules =
         # include the global modules

@@ -4,7 +4,7 @@ let
   inherit (lib) singleton;
 in
 {
-  imports = [ soxincfg.nixosModules.profiles.workstation.nixos.local ];
+  imports = [ soxincfg.nixosModules.profiles.workstation.darwin.local ];
 
   home.packages = with soxincfg.packages."${pkgs.system}"; singleton helloSh;
 
