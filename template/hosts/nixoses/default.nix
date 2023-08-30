@@ -14,11 +14,11 @@ let
 in
 mapAttrs
   (n: v: recursiveUpdate
-    {
-      inherit
-        mode
-        ;
-    }
+  {
+    inherit
+      mode
+      ;
+  }
     v)
 {
   ###
