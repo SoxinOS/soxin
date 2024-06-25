@@ -2,20 +2,28 @@
   description = "soxin: opiniated configs for everyone";
 
   inputs = {
+    deploy-rs.url = "github:serokell/deploy-rs";
+    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/1.5.0";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs";
+    nur.url = "github:nix-community/NUR";
+
     darwin = {
       url = "github:lnl7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    deploy-rs.url = "github:serokell/deploy-rs";
-    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/v1.3.1";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    nur.url = "github:nix-community/NUR";
-    sops-nix.url = "github:Mic92/sops-nix";
 
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs-unstable";
+        nixpkgs-stable.follows = "nixpkgs";
+      };
     };
   };
 

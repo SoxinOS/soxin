@@ -245,8 +245,8 @@ let
     ]
     # pass along the sharedModules
     ++ sharedOverlays
-    # pass along sops-nix overlay.
-    ++ optionals withSops (singleton sops-nix.overlay);
+    # pass along sops-nix overlays.
+    ++ optionals withSops (singleton sops-nix.overlays.default);
 
     # TODO: Add support for modifying the outputsBuilder.
     outputsBuilder = channels:
@@ -271,7 +271,7 @@ let
               nixpkgs-fmt
               pre-commit
               sops
-              sops-pgp-hook
+              sops-import-keys-hook
               ssh-to-pgp
               ;
 
@@ -287,11 +287,11 @@ let
             # user has enabled sops support.
             sopsShell = baseShell.overrideAttrs (oa: optionalAttrs withSops {
               buildInputs = (oa.buildInputs or [ ]) ++ [ sops ssh-to-pgp ];
-              nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-pgp-hook ];
+              nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-import-keys-hook ];
               sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [ "./vars/sops-keys/hosts" "./vars/sops-keys/users" ];
 
               shellHook = (oa.shellHook or "") + ''
-                sopsPGPHook
+                sopsImportKeysHook
                 git config diff.sopsdiffer.textconv "sops -d"
               '';
             });

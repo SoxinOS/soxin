@@ -6,11 +6,11 @@
     flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
     nur.url = "github:nix-community/NUR";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-23.05";
+      url = "github:nix-community/home-manager/release-24.05";
       inputs = {
         nixpkgs.follows = "nixpkgs";
       };
@@ -96,6 +96,9 @@
       home-managers = import ./home-managers inputs;
 
       # Evaluates to `packages.<system>.<pname> = <unstable-channel-reference>.<pname>`.
+      # TODO: This got broken by
+      # https://github.com/SoxinOS/soxin/commit/3cbcf53223daeed00ce324964db36ffa4ad943a4
+      # and must be fixed.
       packagesBuilder = channels: flattenTree (import ./pkgs channels);
 
       # declare the vars that are used only by sops
