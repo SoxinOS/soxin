@@ -42,17 +42,23 @@ function listWorkspaces() {
 	done
 
 	# get the list of available stories
-	for story in $(swm story list --name-only); do
-		profile_name="$(echo "${story}" | cut -d/ -f1)"
-		story_name="$(echo "${story}" | cut -d/ -f2-)"
-		elem="${profile_name}@${story_name}"
-		if ! containsElement "${elem}" "${all_workspaces[@]}"; then
-			all_workspaces+=("${elem}")
-		fi
-	done
+	if [[ "$(swm story list --name-only | wc -l)" -gt 0 ]]; then
+		for story in $(swm story list --name-only); do
+			profile_name="$(echo "${story}" | cut -d/ -f1)"
+			story_name="$(echo "${story}" | cut -d/ -f2-)"
+			elem="${profile_name}@${story_name}"
+			if ! containsElement "${elem}" "${all_workspaces[@]}"; then
+				all_workspaces+=("${elem}")
+			fi
+		done
+	fi
+
 
 	# sort the workspaces by putting first the non-story workspaces followed by the story workspaces
-	workspaces=( $(printf "%s\n" "${all_workspaces[@]}" | grep -v '@' | sort) $(printf "%s\n" "${all_workspaces[@]}" | grep '@' | sort) )
+	workspaces=( $(printf "%s\n" "${all_workspaces[@]}" | grep -v '@' | sort) )
+	if [[ "$(swm story list --name-only | wc -l)" -gt 0 ]]; then
+		workspaces+=( $(printf "%s\n" "${all_workspaces[@]}" | grep '@' | sort) )
+	fi
 
 	# compute the current workspace
 	current_workspace="$( @i3-msg_bin@ -t get_workspaces | @jq_bin@ -r '.[] | select(.focused == true) | .name' )"
