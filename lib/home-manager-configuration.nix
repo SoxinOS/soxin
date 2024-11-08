@@ -4,18 +4,11 @@
   # inputs of your own soxincfg
   inputs
 
-  # The configuration to build with home-manager.
-, configuration
-
-  # The username and the absolute path to their home directory.
-, username
-, homeDirectory
-
-  # What system to build for?
-, system
+# TODO: comment
+, pkgs
 
   # Home-manager specific modules.
-, hmModules ? [ ]
+, modules ? [ ]
 
   # Home-manager specific extra arguments.
 , hmSpecialArgs ? { }
@@ -34,7 +27,6 @@ let
   otherArguments = removeAttrs args [
     "inputs"
     "hmSpecialArgs"
-    "hmModules"
   ];
 
 in
@@ -48,11 +40,9 @@ home-manager.lib.homeManagerConfiguration (recursiveUpdate
   # include the home-manager special arguments.
   // hmSpecialArgs;
 
-  extraModules =
-    # include the home-manager modules
-    hmModules
+  modules =
     # include Soxin module
-    ++ (singleton soxin.nixosModules.soxin)
+    (singleton soxin.nixosModules.soxin)
     # include SoxinCFG module
     ++ (singleton soxincfg.nixosModules.soxincfg);
 }
