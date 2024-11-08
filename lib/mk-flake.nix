@@ -111,6 +111,18 @@ let
     "sharedOverlays"
   ];
 
+  # Overlays which are applied to all channels.
+  sharedOverlays' = [
+    # Overlay imported from this flake
+    self.overlay
+    # Nix User Repository overlay
+    nur.overlay
+  ]
+  # pass along the sharedModules
+  ++ sharedOverlays
+  # pass along sops-nix overlays.
+  ++ optionals withSops (singleton sops-nix.overlays.default);
+
   # generate each host by injecting special arguments and the given host
   # without certain soxin-only attributes.
   hosts' =
@@ -226,6 +238,9 @@ let
     # inherit the required fields as-is
     inherit inputs flake-utils-plus;
 
+    # Overlays which are applied to all channels.
+    sharedOverlays = sharedOverlays';
+
     # send self as soxincfg
     self = soxincfg;
 
@@ -235,18 +250,6 @@ let
     # configure the channels.
     channels.nixpkgs.input = nixpkgs;
     channels.nixpkgs-unstable.input = nixpkgs-unstable;
-
-    # Overlays which are applied to all channels.
-    sharedOverlays = [
-      # Overlay imported from this flake
-      self.overlay
-      # Nix User Repository overlay
-      nur.overlay
-    ]
-    # pass along the sharedModules
-    ++ sharedOverlays
-    # pass along sops-nix overlays.
-    ++ optionals withSops (singleton sops-nix.overlays.default);
 
     # TODO: Add support for modifying the outputsBuilder.
     outputsBuilder = channels:
@@ -379,12 +382,16 @@ flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
   // {
   homeConfigurations = (mapAttrs
     (_: host: soxin.lib.homeManagerConfiguration (host // {
-      inherit inputs;
-      hmModules =
+      inherit hmSpecialArgs;
+
+      modules =
+        host.modules
         # include the global modules
-        extraGlobalModules
+        ++ extraGlobalModules
         # include the home-manager modules
         ++ extraHomeManagerModules;
+
+      overlays = sharedOverlays';
     }))
     home-managers);
 }
