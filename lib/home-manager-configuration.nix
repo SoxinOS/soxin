@@ -4,14 +4,17 @@
   # inputs of your own soxincfg
   inputs
 
-# TODO: comment
-, pkgs
-
   # Home-manager specific modules.
 , modules ? [ ]
 
   # Home-manager specific extra arguments.
 , hmSpecialArgs ? { }
+
+  # What packages to use?
+, pkgs ? inputs.nixpkgs.legacyPackages."${system}"
+
+  # What system to build for?
+, system
 
 , ...
 } @ args:
@@ -25,25 +28,32 @@ let
   soxincfg = inputs.self;
 
   otherArguments = removeAttrs args [
-    "inputs"
     "hmSpecialArgs"
+    "inputs"
+    "modules"
+    "pkgs"
+    "system"
   ];
 
+  hmArgs = (recursiveUpdate
+    {
+      inherit pkgs;
+
+      extraSpecialArgs = {
+        inherit inputs soxin soxincfg;
+
+        mode = "home-manager";
+      }
+      # include the home-manager special arguments.
+      // hmSpecialArgs;
+
+      modules =
+        modules
+        # include Soxin module
+        ++ (singleton soxin.nixosModules.soxin)
+        # include SoxinCFG module
+        ++ (singleton soxincfg.nixosModules.soxincfg);
+    }
+    otherArguments);
 in
-home-manager.lib.homeManagerConfiguration (recursiveUpdate
-{
-  extraSpecialArgs = {
-    inherit inputs soxin soxincfg;
-
-    mode = "home-manager";
-  }
-  # include the home-manager special arguments.
-  // hmSpecialArgs;
-
-  modules =
-    # include Soxin module
-    (singleton soxin.nixosModules.soxin)
-    # include SoxinCFG module
-    ++ (singleton soxincfg.nixosModules.soxincfg);
-}
-  otherArguments)
+home-manager.lib.homeManagerConfiguration hmArgs
