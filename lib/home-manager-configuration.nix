@@ -13,6 +13,9 @@
   # What packages to use?
 , pkgs ? inputs.nixpkgs.legacyPackages."${system}"
 
+  # Define the overlays to apply to pkgs
+, overlays ? [ ]
+
   # What system to build for?
 , system
 
@@ -31,13 +34,18 @@ let
     "hmSpecialArgs"
     "inputs"
     "modules"
+    "overlays"
     "pkgs"
     "system"
   ];
 
   hmArgs = (recursiveUpdate
     {
-      inherit pkgs;
+      pkgs = import pkgs.path {
+        inherit (pkgs) config system;
+
+        overlays = pkgs.overlays ++ overlays;
+      };
 
       extraSpecialArgs = {
         inherit inputs soxin soxincfg;
