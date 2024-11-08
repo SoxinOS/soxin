@@ -384,6 +384,8 @@ flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
   // {
   homeConfigurations = (mapAttrs
     (_: host: soxin.lib.homeManagerConfiguration (host // {
+      inherit hmSpecialArgs;
+
       modules =
         host.modules
         # include the global modules
