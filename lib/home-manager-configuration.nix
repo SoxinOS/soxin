@@ -31,11 +31,11 @@ let
   soxincfg = inputs.self;
 
   otherArguments = removeAttrs args [
-    "specialArgs"
     "inputs"
     "modules"
     "overlays"
     "pkgs"
+    "specialArgs"
     "system"
   ];
 
