@@ -8,7 +8,7 @@
 , modules ? [ ]
 
   # Home-manager specific extra arguments.
-, hmSpecialArgs ? { }
+, specialArgs ? { }
 
   # What packages to use?
 , pkgs ? inputs.nixpkgs.legacyPackages."${system}"
@@ -31,7 +31,7 @@ let
   soxincfg = inputs.self;
 
   otherArguments = removeAttrs args [
-    "hmSpecialArgs"
+    "specialArgs"
     "inputs"
     "modules"
     "overlays"
@@ -53,7 +53,7 @@ let
         mode = "home-manager";
       }
       # include the home-manager special arguments.
-      // hmSpecialArgs;
+      // specialArgs;
 
       modules =
         modules

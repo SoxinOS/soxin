@@ -38,7 +38,7 @@
   # nix-darwin specific modules.
 , extraNixDarwinModules ? [ ]
 
-  # The global extra arguments are included in both NixOS and home-manager.
+  # The global extra arguments are included everywhere.
 , globalSpecialArgs ? { }
 
   # Home-manager specific extra arguments.
@@ -387,7 +387,16 @@ flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
   // {
   homeConfigurations = (mapAttrs
     (_: host: soxin.lib.homeManagerConfiguration (host // {
-      inherit hmSpecialArgs inputs;
+      inherit inputs;
+
+      specialArgs =
+        { }
+        # include the specialArgs that were passed in.
+        // (host.specialArgs or { })
+        # include the global special arguments.
+        // globalSpecialArgs
+        # include the home-manager special arguments.
+        // hmSpecialArgs;
 
       modules =
         host.modules
