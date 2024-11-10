@@ -142,7 +142,10 @@ let
                 ++ extraNixDarwinModules
                 # include home-manager modules
                 ++ (singleton home-manager.darwinModules.home-manager)
+                # configure home-manager with host-specific settings
+                ++ (singleton { home-manager.extraSpecialArgs = host.specialArgs; })
                 ;
+
                 specialArgs =
                   {
                     inherit
@@ -185,6 +188,8 @@ let
                 ++ (optionals withSops (singleton sops-nix.nixosModules.sops))
                 # include home-manager modules
                 ++ (singleton home-manager.nixosModules.home-manager)
+                # configure home-manager with host-specific settings
+                ++ (singleton { home-manager.extraSpecialArgs = host.specialArgs; })
               ;
 
               specialArgs =
