@@ -2,40 +2,40 @@
 
 let
   inherit (lib)
+    mkDefault
     mkIf
+    mkMerge
     ;
 
   cfg = config.soxin.programs.git;
+
 in
 {
   config = mkIf cfg.enable {
-    programs.git = {
-      inherit (cfg) enable package;
+    programs.git = mkMerge [
+      {
+        inherit (cfg) enable package;
 
-      config = [
-        (mkIf (cfg.signing != null) {
-          user.signingKey = mkIf (cfg.signing.key != null) cfg.signing.key;
-          commit.gpgSign = mkDefault cfg.signing.signByDefault;
-          tag.gpgSign = mkDefault cfg.signing.signByDefault;
-          gpg.program = cfg.signing.gpgPath;
-        })
+        lfs = { inherit (cfg.lfs) enable; };
+      }
 
-        (mkIf (cfg.userName != null) {
-          user = {
-            name = cfg.userName;
-          };
-        })
+      (mkIf (cfg.signing != null) {
+        config.commit.gpgSign = mkDefault cfg.signing.signByDefault;
+        config.tag.gpgSign = mkDefault cfg.signing.signByDefault;
+        config.gpg.program = cfg.signing.gpgPath;
+      })
 
-        (mkIf (cfg.userEmail != null) {
-          user = {
-            email = cfg.userEmail;
-          };
-        })
-      ];
+      (mkIf (cfg.signing != null && cfg.signing.key != null) {
+        config.user.signingKey = cfg.signing.key;
+      })
 
-      lfs = { inherit (cfg.lfs) enable; };
+      (mkIf (cfg.userName != null) {
+        config.user.name = cfg.userName;
+      })
 
-      signing = cfg.signing;
-    };
+      (mkIf (cfg.userEmail != null) {
+        config.user.email = cfg.userEmail;
+      })
+    ];
   };
 }
