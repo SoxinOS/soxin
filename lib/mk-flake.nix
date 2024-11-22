@@ -162,6 +162,7 @@ let
                   {
                     inherit
                       home-manager
+                      inputs
                       soxin
                       soxincfg
                       ;
@@ -208,6 +209,7 @@ let
                 {
                   inherit
                     home-manager
+                    inputs
                     soxin
                     soxincfg
                     ;
@@ -348,7 +350,7 @@ let
             home-manager.useUserPackages = true;
 
             home-manager.extraSpecialArgs = {
-              inherit soxin soxincfg home-manager;
+              inherit inputs soxin soxincfg home-manager;
 
               # the mode allows us to tell at what level we are within the modules.
               mode = "home-manager";
