@@ -1,10 +1,47 @@
 { mode, config, pkgs, lib, ... }:
 
-with lib;
 let
-  cfg = config.soxin.programs.git;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    optionals
+    types
+    ;
+
+  signModule = types.submodule {
+    options = {
+      key = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = ''
+          The default GPG signing key fingerprint.
+
+          Set to `null` to let GnuPG decide what signing key
+          to use depending on commit’s author.
+        '';
+      };
+
+      signByDefault = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Whether commits and tags should be signed by default.";
+      };
+
+      gpgPath = mkOption {
+        type = types.str;
+        default = "${pkgs.gnupg}/bin/gpg2";
+        defaultText = "\${pkgs.gnupg}/bin/gpg2";
+        description = "Path to GnuPG binary to use.";
+      };
+    };
+  };
 in
 {
+  imports =
+    [ ]
+    ++ optionals (mode == "NixOS") [ ./nixos.nix ]
+    ++ optionals (mode == "home-manager") [ ./home.nix ];
+
   options = {
     soxin.programs.git = {
       enable = mkEnableOption "git";
@@ -28,36 +65,14 @@ in
         description = "git user email";
       };
 
-      gpgSigningKey = mkOption {
-        type = with types; nullOr str;
+      signing = mkOption {
+        type = types.nullOr signModule;
         default = null;
-        description = "git PGP signing key";
+        description = "Options related to signing commits using GnuPG.";
       };
 
       lfs.enable = mkEnableOption "Enable git.lfs";
     };
   };
-
-  config = mkIf cfg.enable (mkMerge [
-    (optionalAttrs (mode == "NixOS") {
-      # TODO: NixOS does not currently mirror home-manager
-      environment.systemPackages = [ cfg.package ];
-    })
-
-    (optionalAttrs (mode == "home-manager") {
-      programs.git = {
-        inherit (cfg) package userName userEmail;
-
-        enable = true;
-
-        signing = mkIf (cfg.gpgSigningKey != null) {
-          key = cfg.gpgSigningKey;
-          signByDefault = mkDefault true;
-        };
-
-        lfs = { inherit (cfg.lfs) enable; };
-      };
-    })
-  ]);
 }
 
