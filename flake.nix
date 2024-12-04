@@ -27,7 +27,13 @@
     };
   };
 
-  outputs = { flake-utils-plus, nixpkgs, self, ... } @ inputs:
+  outputs =
+    {
+      flake-utils-plus,
+      nixpkgs,
+      self,
+      ...
+    }@inputs:
     let
       inherit (nixpkgs) lib;
       inherit (lib) recurseIntoAttrs recursiveUpdate;
@@ -41,13 +47,16 @@
 
         lib = import ./lib inputs;
 
-        nixosModules = (import ./modules) // { soxin = import ./modules/soxin.nix; };
+        nixosModules = (import ./modules) // {
+          soxin = import ./modules/soxin.nix;
+        };
         nixosModule = self.nixosModules.soxin;
 
         overlay = final: prev: { soxin = import ./pkgs prev; };
       };
 
-      specificSystemOutputs = eachDefaultSystem (system:
+      specificSystemOutputs = eachDefaultSystem (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
