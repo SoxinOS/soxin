@@ -114,9 +114,7 @@ in
     })
 
     (optionalAttrs (mode == "home-manager") {
-      programs.zsh = {
-        inherit (cfg) enableAutosuggestions plugins;
-      };
+      programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
     })
 
     # install all completions libraries for system packages
