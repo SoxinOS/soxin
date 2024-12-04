@@ -2,35 +2,36 @@
 
 let
   inherit (nixpkgs) lib;
-  inherit (lib)
-    mkEnableOption
-    mkOption
-    types
-    ;
+  inherit (lib) mkEnableOption mkOption types;
 in
 rec {
-  programmingLanguages = types.submodule ({ name, ... }: {
-    options = {
+  programmingLanguages = types.submodule (
+    { name, ... }:
+    {
+      options = {
 
-      vscode = mkOption {
-        type = vscodeModule;
-        default = { };
+        vscode = mkOption {
+          type = vscodeModule;
+          default = { };
+        };
+      };
+    }
+  );
+
+  vscodeModule =
+    with types;
+    submodule {
+      options = {
+        extensions = mkOption {
+          type = types.listOf types.package;
+          default = [ ];
+          example = literalExample "[ pkgs.vscode-extensions.bbenoist.Nix ]";
+          description = ''
+            The extensions Visual Studio Code should be started with.
+            These will override but not delete manually installed ones.
+          '';
+        };
       };
     };
-  });
-
-  vscodeModule = with types; submodule {
-    options = {
-      extensions = mkOption {
-        type = types.listOf types.package;
-        default = [ ];
-        example = literalExample "[ pkgs.vscode-extensions.bbenoist.Nix ]";
-        description = ''
-          The extensions Visual Studio Code should be started with.
-          These will override but not delete manually installed ones.
-        '';
-      };
-    };
-  };
 
 }

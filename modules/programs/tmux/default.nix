@@ -1,4 +1,11 @@
-{ mode, config, pkgs, lib, soxin, ... }:
+{
+  mode,
+  config,
+  pkgs,
+  lib,
+  soxin,
+  ...
+}:
 
 with lib;
 let
@@ -27,18 +34,14 @@ let
       # ============================================= #
       # Load plugins with NixOS                       #
       # --------------------------------------------- #
-      ${(concatMapStringsSep "\n\n"
-      (p: ''
-        # ${pluginName p}
-        # ---------------------
-        ${p.extraConfig or ""}
-        run-shell ${
-          if types.package.check p
-          then p.rtp
-          else p.plugin.rtp
-        }
-      '')
-      cfg.plugins)}
+      ${
+        (concatMapStringsSep "\n\n" (p: ''
+          # ${pluginName p}
+          # ---------------------
+          ${p.extraConfig or ""}
+          run-shell ${if types.package.check p then p.rtp else p.plugin.rtp}
+        '') cfg.plugins)
+      }
       # ============================================= #
     '';
   };
@@ -104,12 +107,23 @@ in
     })
 
     (optionalAttrs (mode == "NixOS") (mkMerge [
-      { programs.tmux = { inherit (cfg) enable extraConfig secureSocket; }; }
+      {
+        programs.tmux = {
+          inherit (cfg) enable extraConfig secureSocket;
+        };
+      }
       (mkIf (cfg.plugins != [ ]) configPlugins)
     ]))
 
     (optionalAttrs (mode == "home-manager") {
-      programs.tmux = { inherit (cfg) enable extraConfig plugins secureSocket; };
+      programs.tmux = {
+        inherit (cfg)
+          enable
+          extraConfig
+          plugins
+          secureSocket
+          ;
+      };
     })
   ]);
 }

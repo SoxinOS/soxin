@@ -1,3 +1,1 @@
-{
-  imports = builtins.attrValues (import ./list.nix);
-}
+{ imports = builtins.attrValues (import ./list.nix); }

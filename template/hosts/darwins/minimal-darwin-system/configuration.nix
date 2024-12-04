@@ -1,4 +1,9 @@
-{ config, lib, soxincfg, ... }:
+{
+  config,
+  lib,
+  soxincfg,
+  ...
+}:
 
 let
   inherit (lib) singleton;
@@ -11,7 +16,9 @@ in
 
   # the user nick is created by the core profiles which is automatically added
   # to the configuration of all supported systems.
-  home-manager.users.nick = { ... }: {
-    imports = singleton ./home.nix;
-  };
+  home-manager.users.nick =
+    { ... }:
+    {
+      imports = singleton ./home.nix;
+    };
 }

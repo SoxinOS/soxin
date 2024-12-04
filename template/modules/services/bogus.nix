@@ -1,4 +1,9 @@
-{ mode, config, lib, ... }:
+{
+  mode,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 let

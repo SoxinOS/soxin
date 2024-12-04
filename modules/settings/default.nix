@@ -1,4 +1,9 @@
-{ soxin, config, lib, ... }:
+{
+  soxin,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 {

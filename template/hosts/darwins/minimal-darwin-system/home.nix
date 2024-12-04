@@ -1,4 +1,9 @@
-{ lib, soxincfg, pkgs, ... }:
+{
+  lib,
+  soxincfg,
+  pkgs,
+  ...
+}:
 
 let
   inherit (lib) singleton;

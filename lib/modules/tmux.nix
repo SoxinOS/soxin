@@ -2,11 +2,7 @@
 
 let
   inherit (nixpkgs) lib;
-  inherit (lib)
-    mkEnableOption
-    mkOption
-    types
-    ;
+  inherit (lib) mkEnableOption mkOption types;
 
 in
 {

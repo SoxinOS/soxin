@@ -2,11 +2,7 @@
 
 let
   inherit (nixpkgs) lib;
-  inherit (lib)
-    mkEnableOption
-    mkOption
-    types
-    ;
+  inherit (lib) mkEnableOption mkOption types;
 
   hmModuleEval =
     let
@@ -18,13 +14,17 @@ let
     in
     home-manager.lib.homeManagerConfiguration {
       pkgs = builtins.getAttr system nixpkgs.outputs.legacyPackages;
-      modules = [{
-        home = {
-          inherit username;
-          stateVersion = "22.11";
-          homeDirectory = "/home/${username}";
-        };
-      }];
+      modules = [
+        {
+          home = {
+            inherit username;
+            stateVersion = "22.11";
+            homeDirectory = "/home/${username}";
+          };
+        }
+      ];
     };
 in
-{ pluginWithConfigModule = hmModuleEval.options.programs.neovim.plugins.type; }
+{
+  pluginWithConfigModule = hmModuleEval.options.programs.neovim.plugins.type;
+}
