@@ -18,6 +18,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    pre-commit-hooks = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:cachix/pre-commit-hooks.nix";
+    };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs = {
@@ -30,6 +35,7 @@
   outputs =
     {
       flake-utils-plus,
+      pre-commit-hooks,
       nixpkgs,
       self,
       ...
@@ -59,9 +65,22 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
+          pre-commit-check = pre-commit-hooks.lib.${pkgs.hostPlatform.system}.run {
+            src = ./.;
+            hooks = {
+              # TODO: Fix all errors and enable statix
+              # statix.enable = true;
+              nixfmt-rfc-style.enable = true;
+            };
+          };
         in
         {
+          checks = {
+            inherit pre-commit-check;
+          };
+
           devShell = pkgs.mkShell {
+            inherit (pre-commit-check) shellHook;
             buildInputs = with pkgs; [
               git
               nixfmt-rfc-style
