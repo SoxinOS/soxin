@@ -1,9 +1,10 @@
-{ i3
-, jq
-, lib
-, stdenvNoCC
-, withSwm ? false
-  # TODO: once swm is packaged in Soxin, add it as a dependency
+{
+  i3,
+  jq,
+  lib,
+  stdenvNoCC,
+  withSwm ? false,
+# TODO: once swm is packaged in Soxin, add it as a dependency
 }:
 
 stdenvNoCC.mkDerivation rec {

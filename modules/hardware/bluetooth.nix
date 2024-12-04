@@ -1,4 +1,9 @@
-{ mode, config, lib, ... }:
+{
+  mode,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 
@@ -14,9 +19,7 @@ with lib;
       services.blueman.enable = true;
     })
 
-    (optionalAttrs (mode == "home-manager") {
-      services.blueman-applet.enable = true;
-    })
+    (optionalAttrs (mode == "home-manager") { services.blueman-applet.enable = true; })
 
   ]);
 }

@@ -1,4 +1,11 @@
-{ config, mode, pkgs, lib, soxin, ... }:
+{
+  config,
+  mode,
+  pkgs,
+  lib,
+  soxin,
+  ...
+}:
 
 with lib;
 

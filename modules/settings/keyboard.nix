@@ -1,4 +1,10 @@
-{ mode, soxin, config, lib, ... }:
+{
+  mode,
+  soxin,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 let
@@ -17,15 +23,27 @@ in
         '';
         example = [
           {
-            x11 = { layout = "us"; variant = "colemak"; };
-            console = { keyMap = "colemak"; };
+            x11 = {
+              layout = "us";
+              variant = "colemak";
+            };
+            console = {
+              keyMap = "colemak";
+            };
           }
           {
-            x11 = { layout = "fr"; variant = "bepo"; };
-            console = { keyMap = "fr-bepo"; };
+            x11 = {
+              layout = "fr";
+              variant = "bepo";
+            };
+            console = {
+              keyMap = "fr-bepo";
+            };
           }
           {
-            x11 = { layout = "us"; };
+            x11 = {
+              layout = "us";
+            };
           }
         ];
       };
@@ -40,11 +58,9 @@ in
         '';
       };
 
-      enableAtBoot = recursiveUpdate
-        (mkEnableOption ''
-          Enable setting keyboard layout as early as possible (in initrd).
-        '')
-        { default = true; };
+      enableAtBoot = recursiveUpdate (mkEnableOption ''
+        Enable setting keyboard layout as early as possible (in initrd).
+      '') { default = true; };
     };
   };
 

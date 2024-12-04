@@ -1,4 +1,9 @@
-{ pkgs, lib, mode, ... }:
+{
+  pkgs,
+  lib,
+  mode,
+  ...
+}:
 
 let
   inherit (lib) mkMerge optionalAttrs;
@@ -14,7 +19,11 @@ in
         settings = {
           keyboard = {
             layouts = [
-              { x11 = { layout = "us"; }; }
+              {
+                x11 = {
+                  layout = "us";
+                };
+              }
             ];
           };
         };

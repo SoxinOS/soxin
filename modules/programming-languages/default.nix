@@ -1,4 +1,9 @@
-{ soxin, config, lib, ... }:
+{
+  soxin,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 {
@@ -9,7 +14,5 @@ with lib;
     };
   };
 
-  imports = [
-    ./go/default.nix
-  ];
+  imports = [ ./go/default.nix ];
 }

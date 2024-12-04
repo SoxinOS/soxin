@@ -1,3 +1,1 @@
-{
-  local = import ./local;
-}
+{ local = import ./local; }

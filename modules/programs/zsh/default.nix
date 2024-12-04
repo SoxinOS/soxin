@@ -1,4 +1,12 @@
-{ mode, config, home-manager, pkgs, lib, soxin, ... }:
+{
+  mode,
+  config,
+  home-manager,
+  pkgs,
+  lib,
+  soxin,
+  ...
+}:
 
 with lib;
 let
@@ -63,7 +71,9 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     (optionalAttrs (mode == "NixOS" || mode == "home-manager") {
-      programs.zsh = { inherit (cfg) enable; };
+      programs.zsh = {
+        inherit (cfg) enable;
+      };
 
       # add all plugins installed by themes
       soxin.programs.zsh.plugins = cfg.theme.plugins;
@@ -71,40 +81,47 @@ in
 
     # Copy the plugin management from home-manager to send plugins to NixOS and nix-darwin
     # TODO: Send it upstream to NixOS and nix-darwin.
-    (optionalAttrs (mode == "NixOS" || mode == "nix-darwin") (mkIf (cfg.plugins != [ ]) {
-      # Many plugins require compinit to be called
-      # but allow the user to opt out.
-      soxin.programs.zsh.enableCompletion = mkDefault true;
+    (optionalAttrs (mode == "NixOS" || mode == "nix-darwin") (
+      mkIf (cfg.plugins != [ ]) {
+        # Many plugins require compinit to be called
+        # but allow the user to opt out.
+        soxin.programs.zsh.enableCompletion = mkDefault true;
 
-      environment.etc =
-        foldl' (a: b: a // b) { }
-          (map (plugin: { "${pluginsDir}/${plugin.name}".source = plugin.src; })
-            cfg.plugins);
+        environment.etc = foldl' (a: b: a // b) { } (
+          map (plugin: { "${pluginsDir}/${plugin.name}".source = plugin.src; }) cfg.plugins
+        );
 
-      programs.zsh.shellInit = concatStrings (map
-        (plugin: ''
-          path+="/etc/${pluginsDir}/${plugin.name}"
-          fpath+="/etc/${pluginsDir}/${plugin.name}"
-        '')
-        cfg.plugins);
-    }))
+        programs.zsh.shellInit = concatStrings (
+          map (plugin: ''
+            path+="/etc/${pluginsDir}/${plugin.name}"
+            fpath+="/etc/${pluginsDir}/${plugin.name}"
+          '') cfg.plugins
+        );
+      }
+    ))
 
     (optionalAttrs (mode == "NixOS") {
-      programs.zsh = { inherit (cfg) enableCompletion; };
+      programs.zsh = {
+        inherit (cfg) enableCompletion;
+      };
       programs.zsh.autosuggestions.enable = cfg.enableAutosuggestions;
     })
 
     (optionalAttrs (mode == "nix-darwin") {
-      programs.zsh = { inherit (cfg) enable enableCompletion; };
+      programs.zsh = {
+        inherit (cfg) enable enableCompletion;
+      };
     })
 
     (optionalAttrs (mode == "home-manager") {
-      programs.zsh = { inherit (cfg) enableAutosuggestions plugins; };
+      programs.zsh = {
+        inherit (cfg) enableAutosuggestions plugins;
+      };
     })
 
     # install all completions libraries for system packages
-    (optionalAttrs (mode == "NixOS") (mkIf config.programs.zsh.enableCompletion {
-      environment.pathsToLink = [ "/share/zsh" ];
-    }))
+    (optionalAttrs (mode == "NixOS") (
+      mkIf config.programs.zsh.enableCompletion { environment.pathsToLink = [ "/share/zsh" ]; }
+    ))
   ]);
 }

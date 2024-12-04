@@ -1,11 +1,7 @@
 { config, lib, ... }:
 
 let
-  inherit (lib)
-    mkDefault
-    mkIf
-    mkMerge
-    ;
+  inherit (lib) mkDefault mkIf mkMerge;
 
   cfg = config.soxin.programs.git;
 
@@ -16,7 +12,9 @@ in
       {
         inherit (cfg) enable package;
 
-        lfs = { inherit (cfg.lfs) enable; };
+        lfs = {
+          inherit (cfg.lfs) enable;
+        };
       }
 
       (mkIf (cfg.signing != null) {
@@ -29,13 +27,9 @@ in
         config.user.signingKey = cfg.signing.key;
       })
 
-      (mkIf (cfg.userName != null) {
-        config.user.name = cfg.userName;
-      })
+      (mkIf (cfg.userName != null) { config.user.name = cfg.userName; })
 
-      (mkIf (cfg.userEmail != null) {
-        config.user.email = cfg.userEmail;
-      })
+      (mkIf (cfg.userEmail != null) { config.user.email = cfg.userEmail; })
     ];
   };
 }

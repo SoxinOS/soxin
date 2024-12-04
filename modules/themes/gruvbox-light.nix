@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -15,6 +20,8 @@ with lib;
       };
     };
 
-    rofi = { name = "gruvbox-light"; };
+    rofi = {
+      name = "gruvbox-light";
+    };
   };
 }

@@ -1,3 +1,1 @@
-{
-  bogus = ./services/bogus.nix;
-}
+{ bogus = ./services/bogus.nix; }

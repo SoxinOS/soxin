@@ -37,7 +37,15 @@
     };
   };
 
-  outputs = inputs@{ flake-utils-plus, nixos-hardware, nixpkgs, self, soxin, ... }:
+  outputs =
+    inputs@{
+      flake-utils-plus,
+      nixos-hardware,
+      nixpkgs,
+      self,
+      soxin,
+      ...
+    }:
     let
       # Enable deploy-rs support
       withDeploy = true;
@@ -53,9 +61,7 @@
       channels = {
         nixpkgs = {
           # Channel specific overlays
-          overlaysBuilder = channels: [
-            (final: prev: { })
-          ];
+          overlaysBuilder = channels: [ (final: prev: { }) ];
 
           # Channel specific configuration. Overwrites `channelsConfig` argument
           config = { };
@@ -81,13 +87,27 @@
 
     in
     soxin.lib.mkFlake {
-      inherit channels channelsConfig inputs withDeploy withSops nixosModules nixosModule;
+      inherit
+        channels
+        channelsConfig
+        inputs
+        withDeploy
+        withSops
+        nixosModules
+        nixosModule
+        ;
 
       # add Soxin's main module to all builders
-      extraGlobalModules = [ nixosModule nixosModules.profiles.core ];
+      extraGlobalModules = [
+        nixosModule
+        nixosModules.profiles.core
+      ];
 
       # Supported systems, used for packages, apps, devShell and multiple other definitions. Defaults to `flake-utils.lib.defaultSystems`
-      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+      supportedSystems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+      ];
 
       # pull in all hosts
       hosts = import ./hosts inputs;
@@ -108,6 +128,8 @@
       overlay = import ./overlays;
 
       # set the nixos specialArgs
-      nixosSpecialArgs = { inherit nixos-hardware; };
+      nixosSpecialArgs = {
+        inherit nixos-hardware;
+      };
     };
 }

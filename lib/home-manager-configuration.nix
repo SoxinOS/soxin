@@ -1,26 +1,31 @@
-{ self, nixpkgs, home-manager, ... }:
+{
+  self,
+  nixpkgs,
+  home-manager,
+  ...
+}:
 
 {
   # inputs of your own soxincfg
-  inputs
+  inputs,
 
   # Home-manager specific modules.
-, modules ? [ ]
+  modules ? [ ],
 
   # Home-manager specific extra arguments.
-, specialArgs ? { }
+  specialArgs ? { },
 
   # What packages to use?
-, pkgs ? inputs.nixpkgs.legacyPackages."${system}"
+  pkgs ? inputs.nixpkgs.legacyPackages."${system}",
 
   # Define the overlays to apply to pkgs
-, overlays ? [ ]
+  overlays ? [ ],
 
   # What system to build for?
-, system
+  system,
 
-, ...
-} @ args:
+  ...
+}@args:
 
 let
   inherit (builtins) removeAttrs;
@@ -39,21 +44,22 @@ let
     "system"
   ];
 
-  hmArgs = (recursiveUpdate
-    {
+  hmArgs = (
+    recursiveUpdate {
       pkgs = import pkgs.path {
         inherit (pkgs) config system;
 
         overlays = pkgs.overlays ++ overlays;
       };
 
-      extraSpecialArgs = {
-        inherit inputs soxin soxincfg;
+      extraSpecialArgs =
+        {
+          inherit inputs soxin soxincfg;
 
-        mode = "home-manager";
-      }
-      # include the home-manager special arguments.
-      // specialArgs;
+          mode = "home-manager";
+        }
+        # include the home-manager special arguments.
+        // specialArgs;
 
       modules =
         modules
@@ -61,7 +67,7 @@ let
         ++ (singleton soxin.nixosModules.soxin)
         # include SoxinCFG module
         ++ (singleton soxincfg.nixosModules.soxincfg);
-    }
-    otherArguments);
+    } otherArguments
+  );
 in
 home-manager.lib.homeManagerConfiguration hmArgs

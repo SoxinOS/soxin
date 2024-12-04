@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 {
@@ -85,7 +90,9 @@ with lib;
       };
     };
 
-    rofi = { name = "gruvbox-dark"; };
+    rofi = {
+      name = "gruvbox-dark";
+    };
 
     termite = {
       extraConfig = {
@@ -134,7 +141,8 @@ with lib;
     tmux = {
       plugins =
         let
-          tmux-gruvbox-dark-plugin-src = with pkgs;
+          tmux-gruvbox-dark-plugin-src =
+            with pkgs;
             runCommandNoCCLocal "tmux-gruvbox-dark"
               {
                 theme = writeShellScript "tmux-gruvbox-dark.tmux" ''
@@ -185,16 +193,19 @@ with lib;
                   # writting commands inactive
                   tmux set-option -g message-command-style bg=colour239,fg=colour223
                 '';
-              } ''
-              mkdir -p $out
-              ln -s $theme $out/gruvbox_dark.tmux
-            '';
+              }
+              ''
+                mkdir -p $out
+                ln -s $theme $out/gruvbox_dark.tmux
+              '';
         in
-        singleton (pkgs.tmuxPlugins.mkTmuxPlugin {
-          pluginName = "gruvbox-dark";
-          inherit (pkgs.vimPlugins.gruvbox-community) version;
-          src = tmux-gruvbox-dark-plugin-src;
-        });
+        singleton (
+          pkgs.tmuxPlugins.mkTmuxPlugin {
+            pluginName = "gruvbox-dark";
+            inherit (pkgs.vimPlugins.gruvbox-community) version;
+            src = tmux-gruvbox-dark-plugin-src;
+          }
+        );
     };
 
     zsh = {

@@ -1,4 +1,11 @@
-{ mode, config, pkgs, lib, soxin, ... }:
+{
+  mode,
+  config,
+  pkgs,
+  lib,
+  soxin,
+  ...
+}:
 
 with lib;
 let
@@ -19,13 +26,7 @@ in
       programs.vscode = mkMerge [
         { inherit (cfg) enable; }
 
-        {
-          extensions = flatten (map
-            (v:
-              v.extensions
-            )
-            cfg.programmingLanguages);
-        }
+        { extensions = flatten (map (v: v.extensions) cfg.programmingLanguages); }
 
       ];
     })

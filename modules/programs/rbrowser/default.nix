@@ -1,4 +1,12 @@
-{ soxin, mode, config, home-manager, lib, pkgs, ... }:
+{
+  soxin,
+  mode,
+  config,
+  home-manager,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -8,13 +16,17 @@ let
 
   browserSubmodule =
     let
-      getFromDagName = dagName: index:
+      getFromDagName =
+        dagName: index:
         let
           hasAt = lib.stringAsChars (x: if x == "@" then x else "") dagName == "@";
           nameProfile = builtins.head (builtins.tail (builtins.split "^(.*)@(.*)$" dagName));
         in
-        assert lib.asserts.assertMsg hasAt ''The dagName must be of the format browser@profile, got "${dagName}"!'';
-        assert lib.asserts.assertMsg (builtins.length nameProfile == 2) "The dagName must be of the format browser@profile.";
+        assert lib.asserts.assertMsg hasAt
+          ''The dagName must be of the format browser@profile, got "${dagName}"!'';
+        assert lib.asserts.assertMsg (
+          builtins.length nameProfile == 2
+        ) "The dagName must be of the format browser@profile.";
         builtins.elemAt nameProfile index;
     in
     { dagName, ... }:
@@ -70,9 +82,7 @@ let
     "x-scheme-handler/unknown"
     "x-scheme-handler/webcal"
   ];
-  rbrowserMimeList = concatStringsSep "\n" (
-    map (mimeType: "${mimeType}=rbrowser.desktop") mimeTypes
-  );
+  rbrowserMimeList = concatStringsSep "\n" (map (mimeType: "${mimeType}=rbrowser.desktop") mimeTypes);
   mimeList = ''
     [Default Applications]
     ${rbrowserMimeList}
@@ -92,15 +102,20 @@ in
 
         # when the browsers option is accessed, the dag is then converted to an
         # ordered list of attribute set of all browsers.
-        apply = with pkgs; config:
+        apply =
+          with pkgs;
+          config:
           let
             sortedCommands = home-manager.lib.hm.dag.topoSort config;
           in
-          if sortedCommands ? result
+          if
+            sortedCommands ? result
           # build the list by getting the data attr out of the list of
           # attrs result.
-          then map (e: e.data) sortedCommands.result
-          else abort ("Dependency cycle in hook script: " + builtins.toJSON sortedCommands);
+          then
+            map (e: e.data) sortedCommands.result
+          else
+            abort ("Dependency cycle in hook script: " + builtins.toJSON sortedCommands);
       };
 
       package = mkOption {

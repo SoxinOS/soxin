@@ -1,4 +1,11 @@
-{ mode, config, pkgs, lib, soxin, ... }:
+{
+  mode,
+  config,
+  pkgs,
+  lib,
+  soxin,
+  ...
+}:
 
 with lib;
 let
@@ -100,23 +107,35 @@ in
 
     (optionalAttrs (mode == "home-manager") {
       # TODO: I wish home-manager had a defaultEditor as well!
-      home.sessionVariables = { EDITOR = "nvim"; };
+      home.sessionVariables = {
+        EDITOR = "nvim";
+      };
 
-      programs.neovim = {
-        enable = true;
-        inherit (cfg) extraLuaConfig plugins;
+      programs.neovim =
+        {
+          enable = true;
+          inherit (cfg) extraLuaConfig plugins;
 
-        extraConfig = ""
-          + (optionalString (cfg.mapleader != null) ''let mapleader = "${cfg.mapleader}"'')
-          + cfg.extraConfig;
+          extraConfig =
+            ""
+            + (optionalString (cfg.mapleader != null) ''let mapleader = "${cfg.mapleader}"'')
+            + cfg.extraConfig;
 
-        # Add the Python's neovim plugin
-        extraPython3Packages = ps: with ps; [ pynvim ];
-      }
-      # Create aliases
-      // (genAttrs [ "viAlias" "vimAlias" "vimdiffAlias" ] (name: true))
-      # Add support for NodeJS, Python 2 and 3 as well as Ruby
-      // (genAttrs [ "withNodeJs" "withPython3" "withRuby" ] (name: true));
+          # Add the Python's neovim plugin
+          extraPython3Packages = ps: with ps; [ pynvim ];
+        }
+        # Create aliases
+        // (genAttrs [
+          "viAlias"
+          "vimAlias"
+          "vimdiffAlias"
+        ] (name: true))
+        # Add support for NodeJS, Python 2 and 3 as well as Ruby
+        // (genAttrs [
+          "withNodeJs"
+          "withPython3"
+          "withRuby"
+        ] (name: true));
     })
   ]);
 }

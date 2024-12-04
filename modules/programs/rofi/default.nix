@@ -1,4 +1,12 @@
-{ mode, soxin, options, config, pkgs, lib, ... }:
+{
+  mode,
+  soxin,
+  options,
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 with lib;
 let
@@ -22,9 +30,9 @@ in
             modi name. If the attribute value is not null, its path is given to
             rofi.
           '';
-          apply = attrs:
-            builtins.concatStringsSep ","
-              (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") attrs);
+          apply =
+            attrs:
+            builtins.concatStringsSep "," (mapAttrsToList (n: v: if v == null then n else "${n}:${v}") attrs);
           example = {
             custom = "/some/custom/script.sh";
           };
@@ -72,9 +80,9 @@ in
 
         theme = cfg.theme.name;
 
-        extraConfig =
-          { inherit (cfg) modi; }
-          // (optionalAttrs (cfg.dpi != null) { inherit (cfg) dpi; });
+        extraConfig = {
+          inherit (cfg) modi;
+        } // (optionalAttrs (cfg.dpi != null) { inherit (cfg) dpi; });
 
         font = "Source Code Pro for Powerline 9";
       };
