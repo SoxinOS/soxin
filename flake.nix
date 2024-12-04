@@ -70,6 +70,8 @@
           };
 
           packages = flattenTree (import ./pkgs pkgs);
+
+          formatter = pkgs.nixfmt-rfc-style;
         }
       );
     in
