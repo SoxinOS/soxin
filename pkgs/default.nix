@@ -6,7 +6,7 @@
 }:
 
 let
-  inherit (lib) findSingle filterAttrs platforms;
+  inherit (lib) findSingle filterAttrs;
 
   pkgs = {
     rbrowser = callPackage ./rbrowser { };

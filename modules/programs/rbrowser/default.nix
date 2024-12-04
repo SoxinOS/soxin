@@ -120,12 +120,12 @@ in
 
       package = mkOption {
         type = types.package;
-        default = rbrowser.override { inherit (cfg) browsers; };
+        default = rbrowser.override { configuredBrowsers = cfg.browsers; };
         defaultText = ''
-          pkgs.soxin.rbrowser.override { inherit (cfg) browsers; };
+          pkgs.soxin.rbrowser.override { configuredBrowsers = cfg.browsers; };
         '';
         example = ''
-          pkgs.soxin.rbrowser.override { browsers = [ { name = "chromium"; profile = "personal"; flags = []; } ]; };
+          pkgs.soxin.rbrowser.override { configuredBrowsers = [ { name = "chromium"; profile = "personal"; flags = []; } ]; };
         '';
         description = ''
           The rbrowser package to use. It it automatically overriden depending

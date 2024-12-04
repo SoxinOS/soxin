@@ -10,7 +10,7 @@
   vivaldi,
   writeScriptBin,
 
-  browsers ? [
+  configuredBrowsers ? [
     {
       name = "brave";
       profile = "default";
@@ -33,6 +33,7 @@
     }
   ],
 }:
+
 let
   # What are the supported browsers by Rbrowser?
   supportedBrowsers = [
@@ -56,7 +57,7 @@ let
     in
     browser:
     let
-      mb = builtins.length (matchBrowsers browsers browser);
+      mb = builtins.length (matchBrowsers configuredBrowsers browser);
     in
     mb >= 1;
   withBrave = withBrowser "brave";
@@ -67,7 +68,7 @@ let
   rbrowser = writeScriptBin "rbrowser" (
     let
       items = builtins.concatStringsSep "\n" (
-        map (browser: ''"${browser.name}@${browser.profile}"'') browsers
+        map (browser: ''"${browser.name}@${browser.profile}"'') configuredBrowsers
       );
 
       declareFlags = builtins.concatStringsSep "\n" (
@@ -75,7 +76,7 @@ let
           if [[ "$browser" == "${b.name}" ]] && [[ "$profile" == "${b.profile}" ]]; then
             args=(''${args[@]} ${builtins.concatStringsSep " " (map (f: ''"${f}"'') b.flags)})
           fi
-        '') (builtins.filter (b: b.flags != [ ]) browsers)
+        '') (builtins.filter (b: b.flags != [ ]) configuredBrowsers)
       );
     in
     ''
@@ -347,7 +348,7 @@ in
 assert lib.asserts.assertMsg (
   withBrave || withChromium || withFirefox || withVivaldi
 ) "At least one browser must be enabled.";
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation {
   name = "rbrowser";
 
   src = rbrowser;
@@ -360,7 +361,7 @@ stdenvNoCC.mkDerivation rec {
   '';
 
   passthru = {
-    inherit supportedBrowsers;
+    inherit configuredBrowsers supportedBrowsers;
   };
 
   meta =
