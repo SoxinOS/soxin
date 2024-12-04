@@ -65,7 +65,6 @@
             buildInputs = with pkgs; [
               git
               nixfmt-rfc-style
-              pre-commit
             ];
           };
 
