@@ -81,8 +81,8 @@ in
       };
 
       services.xserver = {
-        layout = concatMapStringsSep "," (l: l.x11.layout) cfg.layouts;
-        xkbVariant = concatMapStringsSep "," (l: l.x11.variant) cfg.layouts;
+        xkb.layout = concatMapStringsSep "," (l: l.x11.layout) cfg.layouts;
+        xkb.variant = concatMapStringsSep "," (l: l.x11.variant) cfg.layouts;
       };
     })
 
