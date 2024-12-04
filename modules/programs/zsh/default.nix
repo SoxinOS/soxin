@@ -115,7 +115,9 @@ in
 
     (optionalAttrs (mode == "home-manager") {
       programs.zsh = {
-        inherit (cfg) enableAutosuggestions plugins;
+        inherit (cfg) plugins;
+
+        autosuggestion.enable = cfg.enableAutosuggestions;
       };
     })
 
