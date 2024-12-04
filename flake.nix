@@ -64,7 +64,7 @@
           devShell = pkgs.mkShell {
             buildInputs = with pkgs; [
               git
-              nixpkgs-fmt
+              nixfmt-rfc-style
               pre-commit
             ];
           };
