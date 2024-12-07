@@ -58,7 +58,7 @@
         };
         nixosModule = self.nixosModules.soxin;
 
-        overlay = final: prev: { soxin = import ./pkgs prev; };
+        overlays.default = final: prev: { soxin = import ./pkgs prev; };
       };
 
       specificSystemOutputs = eachDefaultSystem (

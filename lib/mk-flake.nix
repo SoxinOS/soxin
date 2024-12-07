@@ -112,9 +112,9 @@ let
   sharedOverlays' =
     [
       # Overlay imported from this flake
-      self.overlay
+      self.overlays.default
       # Nix User Repository overlay
-      nur.overlay
+      nur.overlays.default
     ]
     # pass along the sharedModules
     ++ sharedOverlays
