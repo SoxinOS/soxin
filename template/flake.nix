@@ -42,6 +42,7 @@
       flake-utils-plus,
       nixos-hardware,
       nixpkgs,
+      nixpkgs-unstable,
       self,
       soxin,
       ...
@@ -54,12 +55,14 @@
       withSops = true;
 
       inherit (nixpkgs) lib;
-      inherit (lib) optionalAttrs recursiveUpdate singleton;
+      inherit (lib) optionalAttrs;
       inherit (flake-utils-plus.lib) flattenTree;
 
       # Channel definitions. `channels.<name>.{input,overlaysBuilder,config,patches}`
       channels = {
         nixpkgs = {
+          input = nixpkgs;
+
           # Channel specific overlays
           overlaysBuilder = channels: [ (final: prev: { }) ];
 
@@ -68,6 +71,10 @@
 
           # Yep, you see it first folks - you can patch nixpkgs!
           patches = [ ];
+        };
+
+        nixpkgs-unstable = {
+          input = nixpkgs-unstable;
         };
       };
 

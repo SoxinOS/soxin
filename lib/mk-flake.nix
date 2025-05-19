@@ -3,8 +3,6 @@
   deploy-rs,
   home-manager,
   flake-utils-plus,
-  nixpkgs,
-  nixpkgs-unstable,
   nur,
   self,
   sops-nix,
@@ -14,6 +12,9 @@
 {
   # inputs of your own soxincfg
   inputs,
+
+  # channels configuration
+  channels ? { },
 
   # attr attribute set of hosts
   # See https://github.com/gytis-ivaskevicius/flake-utils-plus/blob/e7ae270a23695b50fbb6b72759a7fb1e3340ca86/examples/fully-featured/flake.nix#L101-L112
@@ -72,10 +73,17 @@
 }@args:
 
 let
+  assertMsg = pred: msg: pred || builtins.throw msg;
+in
+assert assertMsg (
+  channels ? "nixpkgs" && channels.nixpkgs ? "input"
+) "You must pass in channels.nixpkgs.input";
+
+let
   soxin = self;
   soxincfg = inputs.self;
 
-  inherit (nixpkgs) lib;
+  inherit (channels.nixpkgs.input) lib;
 
   inherit (lib)
     asserts
@@ -255,10 +263,6 @@ let
 
       # set the hosts
       hosts = hosts';
-
-      # configure the channels.
-      channels.nixpkgs.input = nixpkgs;
-      channels.nixpkgs-unstable.input = nixpkgs-unstable;
 
       # TODO: Add support for modifying the outputsBuilder.
       outputsBuilder =
