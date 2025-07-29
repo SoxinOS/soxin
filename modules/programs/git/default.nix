@@ -1,6 +1,5 @@
 {
   mode,
-  config,
   pkgs,
   lib,
   ...
@@ -8,6 +7,7 @@
 
 let
   inherit (lib)
+    literalExpression
     mkEnableOption
     mkOption
     optionals
@@ -20,24 +20,40 @@ let
         type = types.nullOr types.str;
         default = null;
         description = ''
-          The default GPG signing key fingerprint.
+          The default signing key fingerprint.
 
-          Set to `null` to let GnuPG decide what signing key
+          Set to `null` to let the signer decide what signing key
           to use depending on commit’s author.
         '';
       };
 
+      format = mkOption {
+        type = types.nullOr (
+          types.enum [
+            "openpgp"
+            "ssh"
+            "x509"
+          ]
+        );
+        defaultText = literalExpression ''
+          "openpgp" for state version < 25.05,
+          undefined for state version ≥ 25.05
+        '';
+        description = ''
+          The signing method to use when signing commits and tags.
+          Valid values are `openpgp` (OpenPGP/GnuPG), `ssh` (SSH), and `x509` (X.509 certificates).
+        '';
+      };
+
       signByDefault = mkOption {
-        type = types.bool;
-        default = false;
+        type = types.nullOr types.bool;
+        default = null;
         description = "Whether commits and tags should be signed by default.";
       };
 
-      gpgPath = mkOption {
-        type = types.str;
-        default = "${pkgs.gnupg}/bin/gpg2";
-        defaultText = "\${pkgs.gnupg}/bin/gpg2";
-        description = "Path to GnuPG binary to use.";
+      signer = mkOption {
+        type = types.nullOr types.str;
+        description = "Path to signer binary to use.";
       };
     };
   };
@@ -72,8 +88,8 @@ in
       };
 
       signing = mkOption {
-        type = types.nullOr signModule;
-        default = null;
+        type = signModule;
+        default = { };
         description = "Options related to signing commits using GnuPG.";
       };
 
