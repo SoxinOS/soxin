@@ -29,9 +29,9 @@ in
           signer =
             let
               defaultSigners = {
-                openpgp = lib.getExe config.programs.gpg.package;
+                openpgp = lib.getExe config.programs.gnupg.package;
                 ssh = lib.getExe' pkgs.openssh "ssh-keygen";
-                x509 = lib.getExe' config.programs.gpg.package "gpgsm";
+                x509 = lib.getExe' config.programs.gnupg.package "gpgsm";
               };
             in
             mkIf (cfg.signing.format != null) (mkOptionDefault defaultSigners.${cfg.signing.format});

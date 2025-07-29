@@ -6,12 +6,7 @@
 }:
 
 let
-  inherit (lib)
-    mkDefault
-    mkIf
-    mkMerge
-    mkOptionDefault
-    ;
+  inherit (lib) mkIf mkMerge mkOptionDefault;
 
   cfg = config.soxin.programs.git;
 in
