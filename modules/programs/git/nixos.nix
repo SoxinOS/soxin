@@ -1,35 +1,72 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  inherit (lib) mkDefault mkIf mkMerge;
+  inherit (lib)
+    mkDefault
+    mkIf
+    mkMerge
+    mkOptionDefault
+    ;
 
   cfg = config.soxin.programs.git;
 
 in
 {
-  config = mkIf cfg.enable {
-    programs.git = mkMerge [
-      {
+  config = mkMerge [
+    (mkIf (cfg.signing != { }) {
+      soxin.programs.git = {
+        signing = {
+          format =
+            if (lib.versionOlder config.system.stateVersion "25.05") then
+              (mkOptionDefault "openpgp")
+            else
+              (mkOptionDefault null);
+          signer =
+            let
+              defaultSigners = {
+                openpgp = lib.getExe config.programs.gnupg.package;
+                ssh = lib.getExe' pkgs.openssh "ssh-keygen";
+                x509 = lib.getExe' config.programs.gnupg.package "gpgsm";
+              };
+            in
+            mkIf (cfg.signing.format != null) (mkOptionDefault defaultSigners.${cfg.signing.format});
+        };
+      };
+
+      programs.git.config = mkMerge [
+        (mkIf (cfg.signing.key != null) { user.signingKey = mkDefault cfg.signing.key; })
+        (mkIf (cfg.signing.signByDefault != null) {
+          commit.gpgSign = mkDefault cfg.signing.signByDefault;
+          tag.gpgSign = mkDefault cfg.signing.signByDefault;
+        })
+        (mkIf (cfg.signing.format != null) {
+          gpg = {
+            format = mkDefault cfg.signing.format;
+            ${cfg.signing.format}.program = mkDefault cfg.signing.signer;
+          };
+        })
+      ];
+    })
+
+    (mkIf cfg.enable {
+      programs.git = {
         inherit (cfg) enable package;
 
         lfs = {
           inherit (cfg.lfs) enable;
         };
-      }
 
-      (mkIf (cfg.signing != null) {
-        config.commit.gpgSign = mkDefault cfg.signing.signByDefault;
-        config.tag.gpgSign = mkDefault cfg.signing.signByDefault;
-        config.gpg.program = cfg.signing.gpgPath;
-      })
+        config = mkMerge [
+          (mkIf (cfg.userName != null) { user.name = cfg.userName; })
 
-      (mkIf (cfg.signing != null && cfg.signing.key != null) {
-        config.user.signingKey = cfg.signing.key;
-      })
-
-      (mkIf (cfg.userName != null) { config.user.name = cfg.userName; })
-
-      (mkIf (cfg.userEmail != null) { config.user.email = cfg.userEmail; })
-    ];
-  };
+          (mkIf (cfg.userEmail != null) { user.email = cfg.userEmail; })
+        ];
+      };
+    })
+  ];
 }
