@@ -42,7 +42,7 @@
     }@inputs:
     let
       inherit (nixpkgs) lib;
-      inherit (lib) recurseIntoAttrs recursiveUpdate;
+      inherit (lib) recursiveUpdate;
       inherit (flake-utils-plus.lib) eachDefaultSystem flattenTree;
 
       anySystemOutputs = {
@@ -65,7 +65,7 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          pre-commit-check = pre-commit-hooks.lib.${pkgs.hostPlatform.system}.run {
+          pre-commit-check = pre-commit-hooks.lib.${pkgs.stdenv.hostPlatform.system}.run {
             src = ./.;
             hooks = {
               # TODO: Fix all errors and enable statix
