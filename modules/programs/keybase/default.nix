@@ -17,7 +17,7 @@ let
     recursiveUpdate
     ;
 
-  inherit (pkgs.hostPlatform) isLinux;
+  inherit (pkgs.stdenv.hostPlatform) isLinux;
 in
 {
   options = {

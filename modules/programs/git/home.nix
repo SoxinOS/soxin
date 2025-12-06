@@ -39,9 +39,12 @@ in
           enable
           package
           signing
-          userName
-          userEmail
           ;
+
+        settings.user = {
+          name = cfg.userName;
+          email = cfg.userEmail;
+        };
 
         lfs = {
           inherit (cfg.lfs) enable;
