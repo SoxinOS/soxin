@@ -117,17 +117,16 @@ let
   ];
 
   # Overlays which are applied to all channels.
-  sharedOverlays' =
-    [
-      # Overlay imported from this flake
-      self.overlays.default
-      # Nix User Repository overlay
-      nur.overlays.default
-    ]
-    # pass along the sharedModules
-    ++ sharedOverlays
-    # pass along sops-nix overlays.
-    ++ optionals withSops (singleton sops-nix.overlays.default);
+  sharedOverlays' = [
+    # Overlay imported from this flake
+    self.overlays.default
+    # Nix User Repository overlay
+    nur.overlays.default
+  ]
+  # pass along the sharedModules
+  ++ sharedOverlays
+  # pass along sops-nix overlays.
+  ++ optionals withSops (singleton sops-nix.overlays.default);
 
   # generate each host by injecting special arguments and the given host
   # without certain soxin-only attributes.
@@ -169,23 +168,22 @@ let
                 # configure home-manager with host-specific settings
                 ++ (singleton { home-manager.extraSpecialArgs = host.specialArgs; });
 
-              specialArgs =
-                {
-                  inherit
-                    home-manager
-                    inputs
-                    soxin
-                    soxincfg
-                    ;
+              specialArgs = {
+                inherit
+                  home-manager
+                  inputs
+                  soxin
+                  soxincfg
+                  ;
 
-                  inherit (host) mode;
-                }
-                # include the specialArgs that were passed in.
-                // (host.specialArgs or { })
-                # include the global special arguments.
-                // globalSpecialArgs
-                # include the NixDarwin special arguments.
-                // nixDarwinSpecialArgs;
+                inherit (host) mode;
+              }
+              # include the specialArgs that were passed in.
+              // (host.specialArgs or { })
+              # include the global special arguments.
+              // globalSpecialArgs
+              # include the NixDarwin special arguments.
+              // nixDarwinSpecialArgs;
             }
           )
         ) darwinOnlyHosts;
@@ -217,23 +215,22 @@ let
                 # configure home-manager with host-specific settings
                 ++ (singleton { home-manager.extraSpecialArgs = host.specialArgs; });
 
-              specialArgs =
-                {
-                  inherit
-                    home-manager
-                    inputs
-                    soxin
-                    soxincfg
-                    ;
+              specialArgs = {
+                inherit
+                  home-manager
+                  inputs
+                  soxin
+                  soxincfg
+                  ;
 
-                  inherit (host) mode;
-                }
-                # include the specialArgs that were passed in.
-                // (host.specialArgs or { })
-                # include the global special arguments.
-                // globalSpecialArgs
-                # include the NixOS special arguments.
-                // nixosSpecialArgs;
+                inherit (host) mode;
+              }
+              # include the specialArgs that were passed in.
+              // (host.specialArgs or { })
+              # include the global special arguments.
+              // globalSpecialArgs
+              # include the NixOS special arguments.
+              // nixosSpecialArgs;
             }
           )
         ) nixosOnlyHosts;
@@ -250,167 +247,167 @@ let
     in
     mapAttrs (_: host: host.deploy) deploy-hosts;
 
-  soxinSystemFlake =
-    {
-      # inherit the required fields as-is
-      inherit inputs flake-utils-plus;
+  soxinSystemFlake = {
+    # inherit the required fields as-is
+    inherit inputs flake-utils-plus;
 
-      # Overlays which are applied to all channels.
-      sharedOverlays = sharedOverlays';
+    # Overlays which are applied to all channels.
+    sharedOverlays = sharedOverlays';
 
-      # send self as soxincfg
-      self = soxincfg;
+    # send self as soxincfg
+    self = soxincfg;
 
-      # set the hosts
-      hosts = hosts';
+    # set the hosts
+    hosts = hosts';
 
-      # TODO: Add support for modifying the outputsBuilder.
-      outputsBuilder =
-        channels:
-        let
-          userOutputs = outputsBuilder channels;
+    # TODO: Add support for modifying the outputsBuilder.
+    outputsBuilder =
+      channels:
+      let
+        userOutputs = outputsBuilder channels;
 
-          # Evaluates to `packages.<system>.coreutils = <unstable-nixpkgs-reference>.package-from-overlays`.
-          soxinPackages =
-            let
-              inherit (channels) nixpkgs;
-            in
-            # these packages construct themselves if and only if the system is supported.
-            (import ../pkgs nixpkgs);
+        # Evaluates to `packages.<system>.coreutils = <unstable-nixpkgs-reference>.package-from-overlays`.
+        soxinPackages =
+          let
+            inherit (channels) nixpkgs;
+          in
+          # these packages construct themselves if and only if the system is supported.
+          (import ../pkgs nixpkgs);
 
-          # Evaluates to `devShell.<system> = <nixpkgs-channel-reference>.mkShell { name = "devShell"; };`.
-          devShell =
-            let
-              inherit (channels) nixpkgs;
+        # Evaluates to `devShell.<system> = <nixpkgs-channel-reference>.mkShell { name = "devShell"; };`.
+        devShell =
+          let
+            inherit (channels) nixpkgs;
 
-              inherit (nixpkgs)
-                mkShell
+            inherit (nixpkgs)
+              mkShell
+              nixpkgs-fmt
+              pre-commit
+              sops
+              sops-import-keys-hook
+              ssh-to-pgp
+              ;
+
+            userShell = userOutputs.devShell or (mkShell { name = "devShell"; });
+
+            # the base devShell.
+            baseShell = userShell.overrideAttrs (oa: {
+              name = "soxincfg";
+              buildInputs = (oa.buildInputs or [ ]) ++ [
                 nixpkgs-fmt
                 pre-commit
-                sops
-                sops-import-keys-hook
-                ssh-to-pgp
-                ;
+              ];
+            });
 
-              userShell = userOutputs.devShell or (mkShell { name = "devShell"; });
-
-              # the base devShell.
-              baseShell = userShell.overrideAttrs (oa: {
-                name = "soxincfg";
+            # overlay the baseShell with things that are only necessary if the
+            # user has enabled sops support.
+            sopsShell = baseShell.overrideAttrs (
+              oa:
+              optionalAttrs withSops {
                 buildInputs = (oa.buildInputs or [ ]) ++ [
-                  nixpkgs-fmt
-                  pre-commit
+                  sops
+                  ssh-to-pgp
                 ];
-              });
+                nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-import-keys-hook ];
+                sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
+                  "./vars/sops-keys/hosts"
+                  "./vars/sops-keys/users"
+                ];
 
-              # overlay the baseShell with things that are only necessary if the
-              # user has enabled sops support.
-              sopsShell = baseShell.overrideAttrs (
-                oa:
-                optionalAttrs withSops {
-                  buildInputs = (oa.buildInputs or [ ]) ++ [
-                    sops
-                    ssh-to-pgp
-                  ];
-                  nativeBuildInputs = (oa.nativeBuildInputs or [ ]) ++ [ sops-import-keys-hook ];
-                  sopsPGPKeyDirs = (oa.sopsPGPKeyDirs or [ ]) ++ [
-                    "./vars/sops-keys/hosts"
-                    "./vars/sops-keys/users"
-                  ];
-
-                  shellHook =
-                    (oa.shellHook or "")
-                    + ''
-                      sopsImportKeysHook
-                      git config diff.sopsdiffer.textconv "sops -d"
-                    '';
-                }
-              );
-
-              # overlay the baseShell with things that are only necessary if the
-              # user has enabled deploy-rs support.
-              deployShell = sopsShell.overrideAttrs (
-                oa:
-                optionalAttrs withDeploy {
-                  buildInputs = (oa.buildInputs or [ ]) ++ [ deploy-rs.packages.${nixpkgs.system}.deploy-rs ];
-                }
-              );
-
-              homeManagerShell = deployShell.overrideAttrs (
-                oa:
-                optionalAttrs (home-managers != { }) {
-                  buildInputs = (oa.buildInputs or [ ]) ++ [ home-manager.packages.${nixpkgs.system}.home-manager ];
-                }
-              );
-
-              # set the final shell to be returned
-              finalShell = homeManagerShell;
-            in
-            finalShell;
-
-          outputs = recursiveUpdate userOutputs {
-            inherit devShell;
-            packages = recursiveUpdate soxinPackages (userOutputs.packages or { });
-          };
-        in
-        outputs;
-
-      # configure the modules
-      hostDefaults = hostDefaults // {
-        modules =
-          # include the modules that are passed in
-          (hostDefaults.modules or [ ])
-          # include the global modules
-          ++ extraGlobalModules
-          # include Soxin modules
-          ++ (singleton soxin.nixosModule)
-          # configure fup to expose NIX_PATH and Nix registry from inputs.
-          ++ (singleton {
-            nix = {
-              inherit generateNixPathFromInputs generateRegistryFromInputs linkInputs;
-            };
-          })
-          # configure home-manager
-          ++ (singleton {
-            # tell home-manager to use the global (as in NixOS/Nix-Darwin
-            # system-level) pkgs and install all user packages through the
-            # users.users.<name>.packages.
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            home-manager.extraSpecialArgs =
-              {
-                inherit
-                  inputs
-                  soxin
-                  soxincfg
-                  home-manager
-                  ;
-
-                # the mode allows us to tell at what level we are within the modules.
-                mode = "home-manager";
+                shellHook = (oa.shellHook or "") + ''
+                  sopsImportKeysHook
+                  git config diff.sopsdiffer.textconv "sops -d"
+                '';
               }
-              # include the global special arguments.
-              // globalSpecialArgs
-              # include the home-manager special arguments.
-              // hmSpecialArgs;
+            );
 
-            home-manager.sharedModules =
-              # include the global modules
-              extraGlobalModules
-              # include the home-manager modules
-              ++ extraHomeManagerModules
-              # include Soxin module
-              ++ (singleton soxin.nixosModule);
-          });
-      };
-    }
-    // (optionalAttrs withDeploy {
-      inherit deploy;
+            # overlay the baseShell with things that are only necessary if the
+            # user has enabled deploy-rs support.
+            deployShell = sopsShell.overrideAttrs (
+              oa:
+              optionalAttrs withDeploy {
+                buildInputs = (oa.buildInputs or [ ]) ++ [
+                  deploy-rs.packages.${nixpkgs.stdenv.hostPlatform.system}.deploy-rs
+                ];
+              }
+            );
 
-      # add the deploy-rs checks
-      checks = mapAttrs (system: deployLib: deployLib.deployChecks deploy) deploy-rs.lib;
-    });
+            homeManagerShell = deployShell.overrideAttrs (
+              oa:
+              optionalAttrs (home-managers != { }) {
+                buildInputs = (oa.buildInputs or [ ]) ++ [
+                  home-manager.packages.${nixpkgs.stdenv.hostPlatform.system}.home-manager
+                ];
+              }
+            );
+
+            # set the final shell to be returned
+            finalShell = homeManagerShell;
+          in
+          finalShell;
+
+        outputs = recursiveUpdate userOutputs {
+          inherit devShell;
+          packages = recursiveUpdate soxinPackages (userOutputs.packages or { });
+        };
+      in
+      outputs;
+
+    # configure the modules
+    hostDefaults = hostDefaults // {
+      modules =
+        # include the modules that are passed in
+        (hostDefaults.modules or [ ])
+        # include the global modules
+        ++ extraGlobalModules
+        # include Soxin modules
+        ++ (singleton soxin.nixosModule)
+        # configure fup to expose NIX_PATH and Nix registry from inputs.
+        ++ (singleton {
+          nix = {
+            inherit generateNixPathFromInputs generateRegistryFromInputs linkInputs;
+          };
+        })
+        # configure home-manager
+        ++ (singleton {
+          # tell home-manager to use the global (as in NixOS/Nix-Darwin
+          # system-level) pkgs and install all user packages through the
+          # users.users.<name>.packages.
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+
+          home-manager.extraSpecialArgs = {
+            inherit
+              inputs
+              soxin
+              soxincfg
+              home-manager
+              ;
+
+            # the mode allows us to tell at what level we are within the modules.
+            mode = "home-manager";
+          }
+          # include the global special arguments.
+          // globalSpecialArgs
+          # include the home-manager special arguments.
+          // hmSpecialArgs;
+
+          home-manager.sharedModules =
+            # include the global modules
+            extraGlobalModules
+            # include the home-manager modules
+            ++ extraHomeManagerModules
+            # include Soxin module
+            ++ (singleton soxin.nixosModule);
+        });
+    };
+  }
+  // (optionalAttrs withDeploy {
+    inherit deploy;
+
+    # add the deploy-rs checks
+    checks = mapAttrs (system: deployLib: deployLib.deployChecks deploy) deploy-rs.lib;
+  });
 
 in
 
