@@ -16,7 +16,7 @@
   specialArgs ? { },
 
   # What packages to use?
-  pkgs ? inputs.nixpkgs.legacyPackages."${system}",
+  pkgs ? inputs.nixpkgs.legacyPackages.stdenv.hostPlatform."${system}",
 
   # Define the overlays to apply to pkgs
   overlays ? [ ],
@@ -52,14 +52,13 @@ let
         overlays = pkgs.overlays ++ overlays;
       };
 
-      extraSpecialArgs =
-        {
-          inherit inputs soxin soxincfg;
+      extraSpecialArgs = {
+        inherit inputs soxin soxincfg;
 
-          mode = "home-manager";
-        }
-        # include the home-manager special arguments.
-        // specialArgs;
+        mode = "home-manager";
+      }
+      # include the home-manager special arguments.
+      // specialArgs;
 
       modules =
         modules

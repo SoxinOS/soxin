@@ -143,7 +143,7 @@ with lib;
         let
           tmux-gruvbox-dark-plugin-src =
             with pkgs;
-            runCommandNoCCLocal "tmux-gruvbox-dark"
+            runCommandLocal "tmux-gruvbox-dark"
               {
                 theme = writeShellScript "tmux-gruvbox-dark.tmux" ''
                   set -e
