@@ -64,7 +64,7 @@
       specificSystemOutputs = eachDefaultSystem (
         system:
         let
-          pkgs = nixpkgs.legacyPackages.stdenv.hostPlatform.${system};
+          pkgs = nixpkgs.legacyPackages.${system};
           pre-commit-check = pre-commit-hooks.lib.${pkgs.stdenv.hostPlatform.system}.run {
             src = ./.;
             hooks = {
