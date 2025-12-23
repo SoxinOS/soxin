@@ -16,7 +16,7 @@
   specialArgs ? { },
 
   # What packages to use?
-  pkgs ? inputs.nixpkgs.legacyPackages.stdenv.hostPlatform."${system}",
+  pkgs ? inputs.nixpkgs.legacyPackages."${system}",
 
   # Define the overlays to apply to pkgs
   overlays ? [ ],
