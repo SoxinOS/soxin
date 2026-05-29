@@ -415,9 +415,12 @@ assert asserts.assertMsg (
   hosts != { } || home-managers != { }
 ) "At least hosts or home-managers must be set";
 
-flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
+let
+  flakeOutputs = flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments);
+in
 
 # TODO: Let flake-utils-plus.lib.mkFlake handle the home-managers by using the host's builder function
+flakeOutputs
 // {
   homeConfigurations = (
     mapAttrs (
@@ -426,6 +429,10 @@ flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
         host
         // {
           inherit inputs;
+
+          # Use the nixpkgs channel built by flake-utils-plus for this system,
+          # which already has all sharedOverlays and overlaysBuilder overlays applied.
+          pkgs = flakeOutputs.pkgs.${host.system}.nixpkgs;
 
           specialArgs =
             { }
@@ -442,8 +449,6 @@ flake-utils-plus.lib.mkFlake (recursiveUpdate soxinSystemFlake otherArguments)
             ++ extraGlobalModules
             # include the home-manager modules
             ++ extraHomeManagerModules;
-
-          overlays = sharedOverlays';
         }
       )
     ) home-managers
