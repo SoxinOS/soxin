@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 Wael Nasreddine
+# SPDX-License-Identifier: MIT
+#
+# The private-material guard, with the owner's denylist. The denylist lives in
+# the SOXIN_GUARD_DENYLIST_WORDS repository secret (words separated by newlines
+# or commas), never in the repository. The guard prints only a word's number,
+# never the word, so its log is safe to keep public.
+name: guard
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    env:
+      SOXIN_GUARD_DENYLIST_WORDS: ${{ secrets.SOXIN_GUARD_DENYLIST_WORDS }}
+      # Commits on top of this branch are checked too, so a word that was
+      # added and removed again is still caught.
+      BASE: ${{ github.base_ref || 'main' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - name: guard
+        run: |
+          # Pull requests from forks get no secrets; pushes to this
+          # repository always do, so they must have a denylist.
+          require=
+          if [ "${{ github.event_name }}" = push ]; then require=--require-denylist; fi
+          nix run .#guard -- $require --history "origin/$BASE..HEAD" .
