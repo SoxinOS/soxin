@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Wael Nasreddine
+# SPDX-License-Identifier: MIT
+version = 1
+
+# Files that cannot carry a comment.
+[[annotations]]
+path = ["flake.lock"]
+SPDX-FileCopyrightText = "2026 Wael Nasreddine"
+SPDX-License-Identifier = "MIT"
+
+# Kept from v1 as it was.
+[[annotations]]
+path = [".envrc"]
+SPDX-FileCopyrightText = [
+  "2020 Wael Nasreddine & Marc 'risson' Schmitt",
+  "2026 Wael Nasreddine",
+]
+SPDX-License-Identifier = "MIT"

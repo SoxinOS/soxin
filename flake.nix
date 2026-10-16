@@ -1,97 +1,100 @@
+# SPDX-FileCopyrightText: 2026 Wael Nasreddine
+# SPDX-License-Identifier: MIT
 {
-  description = "soxin: opiniated configs for everyone";
+  description = "Soxin: a public Nix framework for running a fleet of machines";
 
   inputs = {
-    deploy-rs.url = "github:serokell/deploy-rs";
-    flake-utils-plus.url = "github:gytis-ivaskevicius/flake-utils-plus/1.5.0";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    nur.url = "github:nix-community/NUR";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
-    darwin = {
-      url = "github:lnl7/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    pre-commit-hooks = {
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:cachix/pre-commit-hooks.nix";
+    };
+
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs = {
-        nixpkgs.follows = "nixpkgs-unstable";
-        nixpkgs-stable.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs =
-    {
-      flake-utils-plus,
-      pre-commit-hooks,
-      nixpkgs,
-      self,
-      ...
-    }@inputs:
-    let
-      inherit (nixpkgs) lib;
-      inherit (lib) recursiveUpdate;
-      inherit (flake-utils-plus.lib) eachDefaultSystem flattenTree;
+    inputs@{ flake-parts, self, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } (
+      { flake-parts-lib, ... }:
+      let
+        fleetModule = flake-parts-lib.importApply ./modules/fleet {
+          soxin = self;
+          soxinInputs = inputs;
+        };
+      in
+      {
+        systems = [
+          "x86_64-linux"
+          "aarch64-linux"
+          "aarch64-darwin"
+        ];
 
-      anySystemOutputs = {
-        defaultTemplate = {
-          path = ./template;
-          description = "Template for a personal soxincfg repository.";
+        imports = [
+          ./checks
+        ];
+
+        flake = {
+          flakeModules = {
+            default = fleetModule;
+            fleet = fleetModule;
+          };
+
+          lib = import ./lib {
+            inherit fleetModule;
+            inherit (inputs) flake-parts;
+            inherit (inputs.nixpkgs) lib;
+          };
+
+          templates.default = {
+            path = ./examples/fleet;
+            description = "A made-up fleet: one NixOS, one nix-darwin and one standalone home-manager host";
+          };
         };
 
-        lib = import ./lib inputs;
-
-        nixosModules = (import ./modules) // {
-          soxin = import ./modules/soxin.nix;
-        };
-        nixosModule = self.nixosModules.soxin;
-
-        overlays.default = final: prev: { soxin = import ./pkgs prev; };
-      };
-
-      specificSystemOutputs = eachDefaultSystem (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          pre-commit-check = pre-commit-hooks.lib.${pkgs.stdenv.hostPlatform.system}.run {
-            src = ./.;
-            hooks = {
-              # TODO: Fix all errors and enable statix
-              # statix.enable = true;
-              nixfmt-rfc-style.enable = true;
+        perSystem =
+          { pkgs, self', ... }:
+          {
+            packages = {
+              guard = pkgs.callPackage ./guard { };
+              default = self'.packages.guard;
             };
-          };
-        in
-        {
-          checks = {
-            inherit pre-commit-check;
-          };
 
-          devShell = pkgs.mkShell {
-            inherit (pre-commit-check) shellHook;
-            buildInputs = with pkgs; [
-              git
-              nixfmt-rfc-style
-            ];
+            apps.guard = {
+              type = "app";
+              program = "${self'.packages.guard}/bin/soxin-guard";
+              meta.description = "Fail when the repository carries private material";
+            };
+
+            devShells.default = pkgs.mkShell {
+              packages = [
+                pkgs.nixfmt
+                pkgs.reuse
+                self'.packages.guard
+              ];
+            };
+
+            formatter = pkgs.nixfmt;
           };
-
-          packages = flattenTree (import ./pkgs pkgs);
-
-          formatter = pkgs.nixfmt-rfc-style;
-        }
-      );
-    in
-    recursiveUpdate anySystemOutputs specificSystemOutputs;
+      }
+    );
 }

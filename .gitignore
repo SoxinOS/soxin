@@ -1,5 +1,6 @@
-/.pre-commit-config.yaml
-/flake.lock
+# SPDX-FileCopyrightText: 2026 Wael Nasreddine
+# SPDX-License-Identifier: MIT
 /result*
-/template/flake.lock
-/template/result*
+/examples/*/flake.lock
+/examples/*/result*
+/.pre-commit-config.yaml
