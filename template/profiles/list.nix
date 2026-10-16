@@ -1,4 +1,0 @@
-{
-  core = ./core;
-  workstation = ./workstation;
-}
