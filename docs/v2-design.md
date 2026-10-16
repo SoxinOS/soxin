@@ -156,8 +156,12 @@ This file records the decisions taken while building v2 and why.
     age secret keys, sops-encrypted values, age-encrypted files).
   - `hosts/` directories anywhere except under `examples/`.
   - denylist words, case-insensitive, in paths and contents, and with
-    `--history <range>` in commit messages, authors and patches (a word added
-    and removed again is still in history).
+    `--history <range>` in the messages, authors, file names and added lines
+    of the range's commits (a word added and removed again is still in
+    history). Removed lines are skipped: they were in history before the
+    range, and removing them is how a leak gets fixed. Author fields are
+    scanned too, so a denylist should not name the address commits are
+    authored with.
 - **The denylist never lives in the repository.** It comes from
   `--denylist FILE`, `SOXIN_GUARD_DENYLIST` (a file) or
   `SOXIN_GUARD_DENYLIST_WORDS` (words). A denylist file inside the checked
@@ -186,7 +190,8 @@ This file records the decisions taken while building v2 and why.
   and nested `hosts/`, denylist by flag, file variable and word variable,
   denylist in a file name, a word inside and outside an exception, a
   denylist inside the repo, `--require-denylist`,
-  a word only in history, a word in a commit message) and the passes (clean
+  a word only in history, a range that only removes a word, a word in a
+  commit message) and the passes (clean
   repo, clean repo with a denylist, an allowed extra host, a word removed from
   the tree without `--history`), and fails if any output contains the denied
   word. Strings that would trip the guard on its own sources (key headers,

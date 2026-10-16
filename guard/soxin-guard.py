@@ -111,19 +111,23 @@ class Report:
 
 def repository_files(root):
     """Relative paths of the files to scan, without following symlinks."""
-    if os.path.isdir(os.path.join(root, ".git")):
+    # .git is a directory in a clone and a file in a worktree.
+    if os.path.exists(os.path.join(root, ".git")):
         out = subprocess.run(
             ["git", "-C", root, "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
             check=True,
             capture_output=True,
         ).stdout
         paths = [p.decode() for p in out.split(b"\0") if p]
+        paths = [p for p in paths if p.split("/")[0] not in SKIP_DIRS]
         return sorted(p for p in paths if os.path.lexists(os.path.join(root, p)))
 
     paths = []
     for directory, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS)
         for name in filenames:
+            if name in SKIP_DIRS:
+                continue
             paths.append(os.path.relpath(os.path.join(directory, name), root))
     return sorted(paths)
 
@@ -314,23 +318,33 @@ def check_denylist(root, files, words, report):
 
 
 def check_history(root, revisions, words, report):
-    """Commit messages, authors, file names and patches of a revision range."""
+    """Messages, authors, and what the commits of a revision range add.
+
+    Removed lines are skipped: they were already in the history before the
+    range, and removing them is what fixing a leak looks like.
+    """
     log = subprocess.run(
-        ["git", "-C", root, "log", "--format=%x1e%H%n%an <%ae>%n%cn <%ce>%n%B", "--no-ext-diff", "-p", revisions],
+        ["git", "-C", root, "log", "--format=%x1e%H%n%an <%ae>%n%cn <%ce>%n%B", "--no-ext-diff", "--no-color", "-p", revisions],
         check=True,
         capture_output=True,
     ).stdout.decode("utf-8", "replace")
     for entry in log.split("\x1e")[1:]:
         commit = entry[:12]
-        for index, _ in words.hits(entry):
-            report.add(f"commit {commit}", f"contains denylist entry #{index} (message, author or patch)")
-        for line in entry.splitlines():
-            if line.startswith(("+++ b/", "--- a/")):
-                name = os.path.basename(line[6:]).lower()
+        header, _, patch = entry.partition("\ndiff --git ")
+        added = [header]
+        for line in patch.splitlines():
+            if line.startswith("+++ b/") or line.startswith("rename to "):
+                name = line.split(" ", 1)[1].removeprefix("b/")
+                added.append(name)
+                base = os.path.basename(name).lower()
                 for pattern in SECRET_NAMES:
-                    if fnmatch.fnmatchcase(name, pattern):
-                        report.add(f"commit {commit}", f"touches secrets file {line[6:]} (matches {pattern})")
+                    if fnmatch.fnmatchcase(base, pattern):
+                        report.add(f"commit {commit}", f"adds secrets file {name} (matches {pattern})")
                         break
+            elif line.startswith("+") and not line.startswith("+++ "):
+                added.append(line[1:])
+        for index, _ in words.hits("\n".join(added)):
+            report.add(f"commit {commit}", f"adds denylist entry #{index} (message, author, file name or added line)")
 
 
 def main(argv=None):

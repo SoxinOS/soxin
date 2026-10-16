@@ -222,6 +222,15 @@ expect pass "word removed from the tree" soxin-guard --denylist "$work/denylist"
 expect fail "word still in the history" soxin-guard --denylist "$work/denylist" --history HEAD "$r"
 
 r=$(base)
+echo "$denied_word" >"$r/notes.txt"
+git -C "$r" init -q -b main
+git -C "$r" add -A
+git -C "$r" commit -q -m "initial"
+git -C "$r" rm -q notes.txt
+git -C "$r" commit -q -m "remove notes"
+expect pass "a range that only removes a word" soxin-guard --denylist "$work/denylist" --history HEAD~1..HEAD "$r"
+
+r=$(base)
 git -C "$r" init -q -b main
 git -C "$r" add -A
 git -C "$r" commit -q -m "deploy to $denied_word"
