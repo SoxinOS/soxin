@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2026 Wael Nasreddine
 # SPDX-License-Identifier: MIT
 #
-# The options of one host, `fleet.hosts.<name>`. A host's `hosts/<name>/host.nix`
-# is a module of this type, so it may be a plain attribute set or a function of
+# The options of one host, `fleet.hosts.<name>`. A `machines/<name>/host.nix` or
+# `homes/<name>/host.nix` is a module of this type, so it may be a plain
+# attribute set or a function of
 # `{ inputs, name, config, lib, ... }`.
 { defaultChannel }:
-{ config, lib, ... }:
+{ lib, ... }:
 
 let
   inherit (lib) mkOption types;
@@ -61,45 +62,6 @@ in
       type = types.attrsOf types.raw;
       default = { };
       description = "Extra arguments passed to the host's modules, on top of `fleet.specialArgs`.";
-    };
-
-    deploy = {
-      hostname = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        example = "example-server.example.com";
-        description = "The address deploy-rs reaches the host at. A host without one gets no deploy-rs node.";
-      };
-
-      sshUser = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = "The user deploy-rs connects as.";
-      };
-
-      user = mkOption {
-        type = types.nullOr types.str;
-        default = if config.kind == "home-manager" then null else "root";
-        defaultText = lib.literalExpression ''if kind == "home-manager" then null else "root"'';
-        description = "The user the profile is activated as. Required for a `home-manager` host.";
-      };
-
-      profileName = mkOption {
-        type = types.str;
-        default = if config.kind == "home-manager" then "home" else "system";
-        defaultText = lib.literalExpression ''if kind == "home-manager" then "home" else "system"'';
-        description = "The name of the deploy-rs profile.";
-      };
-
-      settings = mkOption {
-        type = types.attrsOf types.raw;
-        default = { };
-        example = {
-          fastConnection = true;
-          remoteBuild = true;
-        };
-        description = "Extra deploy-rs node settings, merged into the node as they are.";
-      };
     };
   };
 }

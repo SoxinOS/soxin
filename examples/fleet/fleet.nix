@@ -24,4 +24,13 @@ inputs: {
   # Extra arguments for every module, e.g. hardware or WSL modules:
   #   specialArgs.nixos = { inherit (inputs) nixos-hardware nixos-wsl; };
   specialArgs.global.fleetName = "example";
+
+  # Pin the machines' Nix registry and NIX_PATH to this flake's inputs.
+  pinInputs = {
+    registry = true;
+    nixPath = true;
+  };
+
+  # Expose modules and profiles as nixosModules, darwinModules, homeModules.
+  exportModules = true;
 }

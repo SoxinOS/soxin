@@ -7,9 +7,4 @@
   kind = "nixos";
   system = "x86_64-linux";
   profiles = [ "server" ];
-
-  deploy = {
-    hostname = "example-server.example.com";
-    sshUser = "alice";
-  };
 }

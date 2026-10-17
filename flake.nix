@@ -21,11 +21,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    deploy-rs = {
-      url = "github:serokell/deploy-rs";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -47,9 +42,9 @@
   outputs =
     inputs@{ flake-parts, self, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } (
-      { flake-parts-lib, ... }:
+      _:
       let
-        fleetModule = flake-parts-lib.importApply ./modules/fleet {
+        fleetModules = import ./modules/fleet {
           soxin = self;
           soxinInputs = inputs;
         };
@@ -66,13 +61,12 @@
         ];
 
         flake = {
-          flakeModules = {
-            default = fleetModule;
-            fleet = fleetModule;
+          flakeModules = fleetModules // {
+            fleet = fleetModules.default;
           };
 
           lib = import ./lib {
-            inherit fleetModule;
+            fleetModule = fleetModules.default;
             inherit (inputs) flake-parts;
             inherit (inputs.nixpkgs) lib;
           };

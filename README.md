@@ -7,16 +7,16 @@ SPDX-License-Identifier: MIT
 
 Soxin is a public Nix framework for running a fleet of machines: NixOS
 systems, nix-darwin systems and standalone home-manager configurations,
-declared as a directory of machines, homes and profiles and deployed with
-deploy-rs.
+declared as a directory of machines, homes and profiles. Machines are
+deployed with Clan's CLI (`clan machines update`).
 
 It is a thin layer on [Clan](https://clan.lol)'s
 [flake-parts](https://flake.parts) module. Clan discovers the NixOS and
 nix-darwin machines in `machines/<name>/` and builds them. Soxin adds what
 Clan lacks: nixpkgs channels whose overlays see every channel, standalone
 home-manager hosts, profiles and the fleet's own modules split by kind, the
-`mode` argument v1 modules switch on, sops-nix as an opt-in and deploy-rs
-nodes. A thin `lib.mkFleet` wrapper serves flakes that do not use flake-parts
+`mode` argument v1 modules switch on, sops-nix as an opt-in, pinning of the
+Nix registry and NIX_PATH to the fleet's inputs, and module outputs. A thin `lib.mkFleet` wrapper serves flakes that do not use flake-parts
 themselves.
 
 This is Soxin v2. v1 (the `flake-utils-plus` based `mkFlake` and the Soxin
@@ -38,7 +38,7 @@ my-fleet/
 ├── flake.nix
 ├── machines/                   # Clan's machines: NixOS and nix-darwin
 │   ├── example-server/
-│   │   ├── host.nix            # kind, system, profiles, modules, deploy
+│   │   ├── host.nix            # kind, system, channel, profiles, modules
 │   │   └── configuration.nix   # imported by Clan
 │   └── example-laptop/
 │       ├── host.nix
@@ -73,11 +73,6 @@ my-fleet/
     profiles = [ "server" ];   # on top of fleet.defaultProfiles
     modules = [ ];             # more modules; Clan imports configuration.nix itself
     specialArgs = { };         # optional, extra module arguments
-
-    deploy = {                 # optional; a host with a hostname gets a deploy-rs node
-      hostname = "example-server.example.com";
-      sshUser = "alice";
-    };
   }
   ```
 
@@ -109,10 +104,27 @@ Each machine's packages are its channel's (`nixpkgs.pkgs`), while its NixOS
 or nix-darwin modules come from the default channel's nixpkgs and from
 `fleet.inputs.nix-darwin`, which Clan builds every machine with.
 
-The framework also produces `deploy.nodes` for deploy-rs, a `host-<name>`
-check per host that evaluates it, and a `deploy-schema` check. Clan's own
-options (`clan.meta`, `clan.inventory`, services, vars) are all available
-under `clan`.
+A machine is deployed with `clan machines update <name>`, to the address in
+its `clan.core.networking.targetHost`. Clan does not deploy standalone homes;
+home-manager switches them itself.
+
+The framework also adds a `host-<name>` check per host that evaluates it.
+Clan's own options (`clan.meta`, `clan.inventory`, services, vars) are all
+available under `clan`.
+
+### Pieces
+
+`flakeModules.default` imports all of Soxin. Each piece is a flake-parts
+module of its own, importable alone or with others:
+
+| Module | |
+| --- | --- |
+| `flakeModules.channels` | `fleet.channels` and perSystem `pkgs`. |
+| `flakeModules.profiles` | Profiles and the fleet's modules by kind, `fleet.exportModules`. |
+| `flakeModules.hosts` | `fleet.hosts`, the frameworks, sops-nix and the module arguments. |
+| `flakeModules.homes` | Standalone home-manager hosts. |
+| `flakeModules.machines` | Machines on Clan, with Clan's flake module and `fleet.pinInputs`. |
+| `flakeModules.checks` | The `host-<name>` checks. |
 
 ## A minimal fleet flake
 
@@ -177,8 +189,11 @@ home-manager host, all made up.
 | `specialArgs.{global,nixos,darwin,home}` | `{ }` | Extra module arguments. |
 | `homeManager.enable` | `true` | Add home-manager to NixOS and nix-darwin hosts. |
 | `sops.enable` | `false` | Add sops-nix to NixOS, nix-darwin and home-manager. |
-| `inputs.{home-manager,nix-darwin,deploy-rs,sops-nix}` | your input of that name, else Soxin's | The frameworks the fleet is built with. |
-| `checks.hosts`, `checks.deploySchema` | `true` | The evaluation and deploy-rs schema checks. |
+| `pinInputs.registry` | `false` | Put every flake input into the machines' Nix registry. |
+| `pinInputs.nixPath` | `false` | Link every input to `/etc/nix/inputs/<name>` and point NIX_PATH there. |
+| `exportModules` | `false` | Expose `nixosModules`, `darwinModules` and `homeModules` (`default` and `profile-<name>`). |
+| `inputs.{home-manager,nix-darwin,sops-nix}` | your input of that name, else Soxin's | The frameworks the fleet is built with. |
+| `checks.hosts` | `true` | The evaluation checks. |
 
 ## Parity
 

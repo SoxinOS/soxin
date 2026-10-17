@@ -30,12 +30,12 @@ This file records the decisions taken while building v2 and why.
   own core modules added to each. Soxin's own `nixosSystem`/`darwinSystem`
   builders are gone; what remains is what Clan lacks: channels whose overlays
   see every channel, standalone home-manager hosts, profiles and modules by
-  kind, the `mode` argument, sops-nix as an opt-in, deploy-rs nodes and the
-  evaluation checks. `flakeModules.default` imports Clan's module, so a fleet
+  kind, the `mode` argument, sops-nix as an opt-in, pinned inputs, module
+  outputs and the evaluation checks. `flakeModules.default` imports Clan's module, so a fleet
   imports Soxin's only.
 - **Clan follows Soxin's nixpkgs** (`clan-core.inputs.nixpkgs.follows`), and
   a fleet points Soxin's at its own pin. Clan tracks nixpkgs-unstable; following
-  it would move every package of a fleet on the release branches. Provisional.
+  it would move every package of a fleet on the release branches.
 - **A machine's Soxin settings stay in `host.nix`**, now in
   `machines/<name>/host.nix`. Its `kind` becomes Clan's `machineClass` in the
   inventory (`nixos` by default, as in Clan). Clan imports the machine's
@@ -62,7 +62,29 @@ This file records the decisions taken while building v2 and why.
   fleet sets its own.
 - **Clan's per-system packages** (`perSystem.clan.pkgs`) are the default
   channel, overlays included.
-- **deploy-rs stays for now** and is built from Clan's configurations.
+- **Machines deploy with Clan's CLI.** deploy-rs node generation and the
+  deploy-schema check are gone; a machine sets
+  `clan.core.networking.targetHost`. Standalone homes are not deployed by
+  the framework.
+- **The builder wrappers live in `modules/fleet/clan-builders.nix`**, and the
+  `clan-builder-wrapper` check fails if Clan builds a machine without them,
+  which is what happens if Clan stops reading `inputs.nixpkgs` and
+  `inputs.nix-darwin`. Each wrapped build carries a `soxinBuilder` special
+  argument the check reads.
+- **Every piece is a module of its own** (`flakeModules.channels`,
+  `profiles`, `hosts`, `homes`, `machines`, `checks`; `default` imports
+  them). Each has a `key`, so importing several declares options once.
+- **Pinned inputs and module outputs come back, as opt-ins.**
+  `fleet.pinInputs.registry` puts every flake input into the machines' Nix
+  registry; `fleet.pinInputs.nixPath` links every input to
+  `/etc/nix/inputs/<name>` and points NIX_PATH there, as v1 did by default.
+  `fleet.exportModules` exposes `nixosModules`, `darwinModules` and
+  `homeModules`, each with `default` (the fleet's modules) and
+  `profile-<name>`.
+- **No channel patches, no NUR.** A fleet points a channel at a patched
+  nixpkgs, and adds NUR as an overlay itself.
+- **`mode` stays until the module library is ported**, then goes, without a
+  deprecation period.
 
 ## The framework
 
@@ -116,7 +138,7 @@ This file records the decisions taken while building v2 and why.
   overlays and config live in one place for the whole fleet; the price is that
   `nixpkgs.config` and `nixpkgs.overlays` inside host modules have no effect.
 - **The frameworks come from the fleet when it has them.**
-  `fleet.inputs.{home-manager,nix-darwin,deploy-rs,sops-nix}` default to the
+  `fleet.inputs.{home-manager,nix-darwin,sops-nix}` default to the
   fleet's input of the same name, else to the one Soxin pins. A fleet thus
   controls those versions simply by having the input, without `follows`
   gymnastics, and a fleet that does not care gets working defaults. The flake
@@ -136,21 +158,9 @@ This file records the decisions taken while building v2 and why.
 - **sops-nix is opt-in** (`fleet.sops.enable`) and adds the module to NixOS,
   nix-darwin and home-manager (standalone and inside systems) at once.
   Secrets files themselves stay in the fleet.
-- **deploy-rs nodes are per host and opt-in by `deploy.hostname`.** The
-  profile path is derived from the host's kind (`activate.nixos`,
-  `activate.darwin`, `activate.home-manager`), `user` defaults to root for
-  systems and must be set for home-manager hosts, and `deploy.settings` passes
-  anything else through.
-- **Checks build nothing heavy.** deploy-rs's own `deployChecks` build every
-  node's closure, which a machine of another system cannot do (a macOS
-  workstation checking a Linux server). Instead:
-  - `host-<name>` per host evaluates the host down to its toplevel (or
-    activation package) derivation and writes its path to a file;
-  - `deploy-schema` validates the nodes against deploy-rs's `interface.json`
-    with the store paths replaced by their (unbuilt) derivation paths.
-
-  Both exist on every system, so `nix flake check` on any machine evaluates
-  every host.
+- **Checks build nothing heavy.** `host-<name>` per host evaluates the host
+  down to its toplevel (or activation package) derivation and writes its path
+  to a file, so `nix flake check` on any machine evaluates every host.
 - **perSystem `pkgs` is the default channel**, overlays included, so a fleet's
   own perSystem modules see the same packages as its hosts.
 - **Systems.** Soxin and `mkFleet` default to `x86_64-linux`, `aarch64-linux`
@@ -158,23 +168,22 @@ This file records the decisions taken while building v2 and why.
   out; a fleet can still pass `systems`, and a host's own system is always
   supported regardless.
 - **Pinned to the 26.05 releases** (nixpkgs `nixos-26.05`, home-manager
-  `release-26.05`, nix-darwin `nix-darwin-26.05`), with sops-nix, deploy-rs,
+  `release-26.05`, nix-darwin `nix-darwin-26.05`), with sops-nix,
   flake-parts and Clan following Soxin's nixpkgs, and Clan following Soxin's
   flake-parts, nix-darwin and sops-nix.
 - **Not carried over from v1:** NUR in every channel (a fleet adds it as an
   overlay if it wants it), the Soxin package set and overlay, the generated
-  dev shell, NIX_PATH and registry generation from inputs (flake-utils-plus),
-  and the pre-commit-hooks input. These are fleet choices, not framework
-  mechanism; see open questions for the registry.
+  dev shell and the pre-commit-hooks input. These are fleet choices, not
+  framework mechanism. Registry and NIX_PATH pinning came back as an opt-in.
 
 ## The example fleet
 
-- `examples/fleet` has one NixOS machine (`example-server`, with a deploy-rs
-  node), one nix-darwin machine (`example-laptop`), both in Clan's
-  `machines/`, and one standalone home-manager host (`example-devbox`, in
-  `homes/`, with a deploy-rs node), three profiles, the fleet's own
-  modules, two channels with an overlay taking a package from unstable, sops
-  enabled, and a global special argument. Users and addresses are made up
+- `examples/fleet` has one NixOS machine (`example-server`) and one
+  nix-darwin machine (`example-laptop`), both in Clan's `machines/` with a
+  `targetHost`, one standalone home-manager host (`example-devbox`, in
+  `homes/`), three profiles, the fleet's own modules, two channels with an
+  overlay taking a package from unstable, sops enabled, pinned inputs,
+  exported modules and a global special argument. Users and addresses are made up
   (`alice`, `example.com`).
 - **The fleet's settings are in `fleet.nix`, apart from `flake.nix`.** The
   example's `flake.nix` is what a consumer writes (and the flake template). Its
@@ -288,13 +297,8 @@ This file records the decisions taken while building v2 and why.
 
 ## Open questions
 
-- **Nix registry and NIX_PATH from inputs.** v1 (via flake-utils-plus) pinned
-  `nix.registry` and `NIX_PATH` to the fleet's inputs on every host. v2 leaves
-  that to the fleet; it could become an opt-in option.
 - **Channel patches.** v1 could patch a channel's nixpkgs. v2 cannot; a fleet
   can point a channel at a patched nixpkgs flake instead.
-- **Exposing the fleet's modules** as `nixosModules` / `darwinModules` /
-  `homeModules` outputs is not done; nothing needed it yet.
 - **Denylist in `nix flake check`.** Kept out on purpose (see above); the
   owner may prefer an opt-in impure mode despite the store and cache exposure.
 - **Example `flake.lock`.** Once v2 is published, the example could carry a

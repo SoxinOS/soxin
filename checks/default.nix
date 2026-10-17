@@ -40,6 +40,23 @@ in
 
         guard-fixtures = pkgs.callPackage ../guard/fixtures.nix { guard = self'.packages.guard; };
 
+        # Soxin passes `mode` and `fleet.specialArgs` to Clan's machines by
+        # wrapping the builders Clan takes from `inputs.nixpkgs` and
+        # `inputs.nix-darwin` (modules/fleet/clan-builders.nix). Fails when a
+        # machine was built without the wrappers, i.e. when Clan stops
+        # reading those inputs.
+        clan-builder-wrapper =
+          let
+            builtBy = configuration: configuration._module.specialArgs.soxinBuilder or null;
+            server = builtBy example.nixosConfigurations.example-server;
+            laptop = builtBy example.darwinConfigurations.example-laptop;
+          in
+          assert lib.assertMsg (server == "nixos")
+            "Clan built example-server without Soxin's nixosSystem wrapper; it no longer reads inputs.nixpkgs";
+          assert lib.assertMsg (laptop == "darwin")
+            "Clan built example-laptop without Soxin's darwinSystem wrapper; it no longer reads inputs.nix-darwin";
+          pkgs.runCommandLocal "soxin-clan-builder-wrapper" { } "touch $out";
+
         parity = pkgs.runCommandLocal "soxin-parity-tests" { nativeBuildInputs = [ pkgs.python3 ]; } ''
           python3 ${../parity/test-parity.py} ${../parity/soxin-parity.py}
           touch $out
