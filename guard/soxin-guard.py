@@ -37,6 +37,7 @@ PUBLIC_HOSTS = {
     "github.com",
     "gitlab.com",
     "codeberg.org",
+    "git.clan.lol",
     "git.sr.ht",
     "hg.sr.ht",
     "bitbucket.org",

@@ -30,6 +30,18 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Clan follows the fleet's nixpkgs pin rather than its own unstable one,
+    # so a fleet's packages do not move when Soxin is built on Clan.
+    clan-core = {
+      url = "git+https://git.clan.lol/clan/clan-core";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        nix-darwin.follows = "nix-darwin";
+        sops-nix.follows = "sops-nix";
+      };
+    };
   };
 
   outputs =
@@ -67,7 +79,7 @@
 
           templates.default = {
             path = ./examples/fleet;
-            description = "A made-up fleet: one NixOS, one nix-darwin and one standalone home-manager host";
+            description = "A made-up fleet on Clan: one NixOS and one nix-darwin machine, and one standalone home-manager host";
           };
         };
 

@@ -1,10 +1,14 @@
 # SPDX-FileCopyrightText: 2026 Wael Nasreddine
 # SPDX-License-Identifier: MIT
 #
-# The fleet flake-parts module. It reads a fleet directory (hosts, profiles and
-# the fleet's own modules) into the `fleet` options and builds
-# nixosConfigurations, darwinConfigurations, homeConfigurations, deploy-rs
-# nodes and checks out of them.
+# The fleet flake-parts module: Soxin's layer on Clan.
+#
+# Clan discovers the NixOS and nix-darwin machines (`machines/<name>/`) and
+# builds them. This layer adds what Clan lacks: nixpkgs channels whose
+# overlays see every channel, standalone home-manager hosts (`homes/<name>/`),
+# profiles and the fleet's own modules split by kind, the `inputs`, `soxin`,
+# `hostName`, `channels` and `mode` module arguments, sops-nix as an opt-in,
+# deploy-rs nodes and evaluation checks.
 { soxin, soxinInputs }:
 {
   config,
@@ -20,6 +24,7 @@ let
     attrNames
     concatMap
     filterAttrs
+    functionArgs
     genAttrs
     literalExpression
     mapAttrs
@@ -31,6 +36,7 @@ let
     nameValuePair
     optional
     optionals
+    setFunctionArgs
     types
     unique
     ;
@@ -108,6 +114,8 @@ let
 
   hosts = cfg.hosts;
   hostsOfKind = kind: filterAttrs (_: host: host.kind == kind) hosts;
+  machines = filterAttrs (_: host: host.kind != "home-manager") hosts;
+  homes = hostsOfKind "home-manager";
 
   # Every system a host runs on or the flake is evaluated for.
   allSystems = unique (config.systems ++ mapAttrsToList (_: host: host.system) hosts);
@@ -154,17 +162,71 @@ let
     name: host: stem:
     cfg.modules.${stem} ++ profileModules name host stem;
 
-  specialArgsOf =
-    name: host: scope: kind:
+  # The arguments every module of a kind gets, usable in `imports`: the
+  # framework's, then `fleet.specialArgs.global`, then the kind's.
+  kindArgs =
+    kind: scope:
     {
       inherit inputs soxin;
-      hostName = name;
-      channels = channels.${host.system};
       mode = modes.${kind};
     }
     // cfg.specialArgs.global
-    // cfg.specialArgs.${scope}
+    // cfg.specialArgs.${scope};
+
+  # The arguments of one host: its name, its system's channels and its own
+  # `specialArgs`.
+  hostArgs =
+    name: host:
+    {
+      hostName = name;
+      channels = channels.${host.system};
+    }
     // host.specialArgs;
+
+  specialArgsOf =
+    name: host: scope: kind:
+    kindArgs kind scope // hostArgs name host;
+
+  # Clan builds every machine with `nixpkgs.lib.nixosSystem` or
+  # `nix-darwin.lib.darwinSystem`, both taken from the flake's inputs, and
+  # passes the same special arguments to every machine. Soxin hands Clan the
+  # fleet's nixpkgs and nix-darwin with those two functions wrapped, so each
+  # kind gets its own `mode` and `fleet.specialArgs`, which modules may use in
+  # `imports`. A host's own arguments vary per machine and reach its modules
+  # as module arguments instead (see `machineModule`).
+  constructors =
+    let
+      nixpkgs = cfg.channels.${cfg.defaultChannel}.input;
+      nix-darwin = cfg.inputs.nix-darwin;
+      withArgs =
+        kind: scope: build: args:
+        build (args // { specialArgs = (args.specialArgs or { }) // kindArgs kind scope; });
+    in
+    {
+      nixpkgs = nixpkgs // {
+        lib = nixpkgs.lib // {
+          nixosSystem = withArgs "nixos" "nixos" nixpkgs.lib.nixosSystem;
+        };
+      };
+      nix-darwin = nix-darwin // {
+        lib = nix-darwin.lib // {
+          darwinSystem = withArgs "darwin" "darwin" nix-darwin.lib.darwinSystem;
+        };
+      };
+    };
+
+  clanFlakeModule = (inputs.clan-core or soxinInputs.clan-core).flakeModules.default;
+
+  # Clan's flake-parts module, seeing `constructors` in place of the flake's
+  # own nixpkgs and nix-darwin inputs.
+  clanModule = {
+    _file = "${toString ./default.nix}#clan";
+    imports = [
+      (setFunctionArgs (args: clanFlakeModule (args // { inputs = args.inputs // constructors; })) (
+        functionArgs clanFlakeModule
+      ))
+    ];
+  };
 
   # home-manager inside a NixOS or nix-darwin host.
   homeManagerModule =
@@ -181,61 +243,45 @@ let
       };
     };
 
-  systemModule =
+  # What Soxin adds to a Clan machine.
+  machineModule =
     name: host:
-    { lib, ... }:
+    let
+      inherit (host) kind;
+    in
     {
-      nixpkgs.pkgs = pkgsOf name host;
-      networking.hostName = lib.mkDefault name;
+      _file = "${toString ./default.nix}#machine-${name}";
+
+      imports =
+        sharedModules name host stems.${kind}
+        ++ host.modules
+        ++ optional cfg.sops.enable cfg.inputs.sops-nix."${kind}Modules".sops
+        ++ optionals cfg.homeManager.enable [
+          cfg.inputs.home-manager."${kind}Modules".home-manager
+          (homeManagerModule name host)
+        ];
+
+      config = {
+        _module.args = hostArgs name host;
+        nixpkgs.pkgs = pkgsOf name host;
+      };
     };
 
-  build = {
-    nixos =
-      name: host:
-      (channelOf name host).input.lib.nixosSystem {
-        specialArgs = specialArgsOf name host "nixos" "nixos";
-        modules = [
-          (systemModule name host)
-        ]
-        ++ sharedModules name host "nixos"
+  homeConfiguration =
+    name: host:
+    cfg.inputs.home-manager.lib.homeManagerConfiguration {
+      pkgs = pkgsOf name host;
+      extraSpecialArgs = specialArgsOf name host "home" "home-manager";
+      modules =
+        sharedModules name host "home"
         ++ host.modules
-        ++ optional cfg.sops.enable cfg.inputs.sops-nix.nixosModules.sops
-        ++ optionals cfg.homeManager.enable [
-          cfg.inputs.home-manager.nixosModules.home-manager
-          (homeManagerModule name host)
-        ];
-      };
+        ++ optional cfg.sops.enable cfg.inputs.sops-nix.homeManagerModules.sops;
+    };
 
-    darwin =
-      name: host:
-      cfg.inputs.nix-darwin.lib.darwinSystem {
-        inherit ((channelOf name host).input) lib;
-        specialArgs = specialArgsOf name host "darwin" "darwin";
-        modules = [
-          (systemModule name host)
-        ]
-        ++ sharedModules name host "darwin"
-        ++ host.modules
-        ++ optional cfg.sops.enable cfg.inputs.sops-nix.darwinModules.sops
-        ++ optionals cfg.homeManager.enable [
-          cfg.inputs.home-manager.darwinModules.home-manager
-          (homeManagerModule name host)
-        ];
-      };
-
-    home-manager =
-      name: host:
-      cfg.inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = pkgsOf name host;
-        extraSpecialArgs = specialArgsOf name host "home" "home-manager";
-        modules =
-          sharedModules name host "home"
-          ++ host.modules
-          ++ optional cfg.sops.enable cfg.inputs.sops-nix.homeManagerModules.sops;
-      };
-  };
-
-  configurations = mapAttrs (name: host: build.${host.kind} name host) hosts;
+  configurations =
+    mapAttrs (name: _: config.flake.nixosConfigurations.${name}) (hostsOfKind "nixos")
+    // mapAttrs (name: _: config.flake.darwinConfigurations.${name}) (hostsOfKind "darwin")
+    // mapAttrs homeConfiguration homes;
 
   # What evaluating a host produces: the derivation deploy-rs activates.
   toplevel =
@@ -277,24 +323,48 @@ let
     // host.deploy.settings;
 
   deployNodes = mapAttrs deployNode deployHosts;
+
+  # The `<name>/host.nix` of every directory in `dir`, as host modules whose
+  # `kind` defaults to `defaultKind`.
+  hostFiles =
+    dir: defaultKind:
+    genAttrs (subdirectories dir) (
+      name:
+      let
+        file = dir + "/${name}/host.nix";
+      in
+      if pathExists file then
+        {
+          imports = [ file ];
+          kind = mkDefault defaultKind;
+        }
+      else
+        throw "fleet: ${toString dir}/${name} has no host.nix"
+    );
+
+  machinesDir = if cfg.root == null then null else cfg.root + "/machines";
 in
 {
+  imports = [ clanModule ];
+
   options.fleet = {
     root = mkOption {
       type = types.nullOr types.path;
       default = null;
       example = literalExpression "./.";
       description = ''
-        The fleet directory. `hostsDir`, `profilesDir` and `modulesDir` default
-        to its `hosts`, `profiles` and `modules` subdirectories.
+        The fleet directory, which is also Clan's directory: its `machines/`
+        holds the NixOS and nix-darwin machines, and `homesDir`, `profilesDir`
+        and `modulesDir` default to its `homes`, `profiles` and `modules`
+        subdirectories.
       '';
     };
 
-    hostsDir = mkOption {
+    homesDir = mkOption {
       type = types.nullOr types.path;
-      default = if cfg.root == null then null else cfg.root + "/hosts";
-      defaultText = literalExpression "root + \"/hosts\"";
-      description = "A directory of hosts: every `<name>/host.nix` in it defines `fleet.hosts.<name>`.";
+      default = if cfg.root == null then null else cfg.root + "/homes";
+      defaultText = literalExpression "root + \"/homes\"";
+      description = "A directory of standalone home-manager hosts: every `<name>/host.nix` in it defines `fleet.hosts.<name>`.";
     };
 
     profilesDir = mkOption {
@@ -361,13 +431,17 @@ in
         }
       );
       default = { };
-      description = "The nixpkgs channels hosts can use.";
+      description = ''
+        The nixpkgs channels hosts can use. A host's packages come from its
+        channel. The NixOS and nix-darwin modules of every machine come from
+        the default channel's nixpkgs, which Clan builds all machines with.
+      '';
     };
 
     defaultChannel = mkOption {
       type = types.str;
       default = "nixpkgs";
-      description = "The channel of a host that does not name one.";
+      description = "The channel of a host that names none, and the nixpkgs Clan builds machines with.";
     };
 
     channelsConfig = mkOption {
@@ -440,7 +514,10 @@ in
         }
       );
       default = { };
-      description = "The hosts of the fleet.";
+      description = ''
+        The hosts of the fleet. `nixos` and `darwin` hosts are Clan machines,
+        which Clan builds; `home-manager` hosts are built by Soxin.
+      '';
     };
 
     configurations = mkOption {
@@ -454,13 +531,7 @@ in
     fleet = {
       channels.nixpkgs.input = mkDefault (inputs.nixpkgs or soxinInputs.nixpkgs);
 
-      hosts = genAttrs (subdirectories cfg.hostsDir) (
-        name:
-        let
-          file = cfg.hostsDir + "/${name}/host.nix";
-        in
-        if pathExists file then file else throw "fleet: ${toString cfg.hostsDir}/${name} has no host.nix"
-      );
+      hosts = hostFiles machinesDir "nixos" // hostFiles cfg.homesDir "home-manager";
 
       profiles = genAttrs (subdirectories cfg.profilesDir) (
         name: genAttrs [ "nixos" "darwin" "home" ] (kindModule (cfg.profilesDir + "/${name}"))
@@ -472,9 +543,18 @@ in
     };
 
     flake = {
-      nixosConfigurations = mapAttrs (name: _: configurations.${name}) (hostsOfKind "nixos");
-      darwinConfigurations = mapAttrs (name: _: configurations.${name}) (hostsOfKind "darwin");
-      homeConfigurations = mapAttrs (name: _: configurations.${name}) (hostsOfKind "home-manager");
+      clan = {
+        directory = mkIf (cfg.root != null) (mkDefault cfg.root);
+
+        # Clan requires a name; a fleet sets its own with `clan.meta.name`.
+        meta.name = mkDefault "fleet";
+
+        inventory.machines = mapAttrs (_: host: { machineClass = host.kind; }) machines;
+
+        machines = mapAttrs machineModule machines;
+      };
+
+      homeConfigurations = mapAttrs (name: _: configurations.${name}) homes;
       deploy = mkIf (deployNodes != { }) { nodes = deployNodes; };
     };
 
@@ -523,6 +603,9 @@ in
       in
       {
         _module.args.pkgs = mkDefault pkgs;
+
+        # Clan's per-system packages: the default channel, overlays included.
+        clan.pkgs = mkDefault pkgs;
 
         checks =
           lib.optionalAttrs cfg.checks.hosts hostChecks

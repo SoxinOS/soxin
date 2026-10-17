@@ -7,12 +7,17 @@ SPDX-License-Identifier: MIT
 
 Soxin is a public Nix framework for running a fleet of machines: NixOS
 systems, nix-darwin systems and standalone home-manager configurations,
-declared as a directory of hosts and profiles and deployed with deploy-rs.
+declared as a directory of machines, homes and profiles and deployed with
+deploy-rs.
 
-It is a [flake-parts](https://flake.parts) module built on plain
-`nixpkgs.lib.nixosSystem`, nix-darwin's `darwinSystem` and home-manager's
-`homeManagerConfiguration`, plus a thin `lib.mkFleet` wrapper for flakes that
-do not use flake-parts themselves.
+It is a thin layer on [Clan](https://clan.lol)'s
+[flake-parts](https://flake.parts) module. Clan discovers the NixOS and
+nix-darwin machines in `machines/<name>/` and builds them. Soxin adds what
+Clan lacks: nixpkgs channels whose overlays see every channel, standalone
+home-manager hosts, profiles and the fleet's own modules split by kind, the
+`mode` argument v1 modules switch on, sops-nix as an opt-in and deploy-rs
+nodes. A thin `lib.mkFleet` wrapper serves flakes that do not use flake-parts
+themselves.
 
 This is Soxin v2. v1 (the `flake-utils-plus` based `mkFlake` and the Soxin
 modules) lives on the `main` branch.
@@ -31,14 +36,17 @@ A guard enforces it (see [The guard](#the-guard)).
 ```
 my-fleet/
 ├── flake.nix
-├── hosts/
+├── machines/                   # Clan's machines: NixOS and nix-darwin
 │   ├── example-server/
 │   │   ├── host.nix            # kind, system, profiles, modules, deploy
-│   │   └── configuration.nix
-│   ├── example-laptop/
-│   │   └── host.nix
+│   │   └── configuration.nix   # imported by Clan
+│   └── example-laptop/
+│       ├── host.nix
+│       └── configuration.nix
+├── homes/                      # standalone home-manager hosts
 │   └── example-devbox/
-│       └── host.nix
+│       ├── host.nix
+│       └── home.nix
 ├── profiles/
 │   ├── base/                   # bundles of settings, taken by name
 │   │   ├── nixos.nix
@@ -52,16 +60,18 @@ my-fleet/
     └── home.nix
 ```
 
-- **`hosts/<name>/host.nix`** declares one host. It is a module (an attribute
-  set, or a function of `{ inputs, name, ... }`):
+- **`machines/<name>/host.nix`** and **`homes/<name>/host.nix`** declare one
+  host each. A host file is a module (an attribute set, or a function of
+  `{ inputs, name, ... }`):
 
   ```nix
   {
-    kind = "nixos";            # "nixos", "darwin" or "home-manager"
+    kind = "nixos";            # "nixos" or "darwin" under machines/ (default "nixos"),
+                               # "home-manager" under homes/ (the default there)
     system = "x86_64-linux";
     channel = "nixpkgs";       # optional, defaults to fleet.defaultChannel
     profiles = [ "server" ];   # on top of fleet.defaultProfiles
-    modules = [ ./configuration.nix ];
+    modules = [ ];             # more modules; Clan imports configuration.nix itself
     specialArgs = { };         # optional, extra module arguments
 
     deploy = {                 # optional; a host with a hostname gets a deploy-rs node
@@ -71,9 +81,12 @@ my-fleet/
   }
   ```
 
-  `nixos` hosts become `nixosConfigurations.<name>`, `darwin` hosts
-  `darwinConfigurations.<name>` and `home-manager` hosts
-  `homeConfigurations.<name>`.
+  `nixos` and `darwin` hosts are Clan machines (their `kind` is Clan's
+  `machineClass`) and become `nixosConfigurations.<name>` and
+  `darwinConfigurations.<name>`; Clan imports their `configuration.nix` (and,
+  for NixOS, `hardware-configuration.nix` and `disko.nix`) by itself.
+  `home-manager` hosts become `homeConfigurations.<name>`. Hosts can also be
+  declared inline in `fleet.hosts`.
 
 - **`profiles/<name>/`** holds a `nixos.nix`, `darwin.nix` and/or `home.nix`
   (or `nixos/`, `darwin/`, `home/` directories). A host that takes the profile
@@ -87,9 +100,19 @@ Every module receives these arguments besides the usual ones: `inputs` (the
 fleet flake's inputs), `soxin`, `hostName`, `channels` (every channel's
 packages for the host's system) and `mode` (`"NixOS"`, `"nix-darwin"` or
 `"home-manager"`), plus whatever `fleet.specialArgs` and the host add.
+`inputs`, `soxin`, `mode` and `fleet.specialArgs` can be used in `imports`.
+In NixOS and nix-darwin machines, `hostName`, `channels` and a host's own
+`specialArgs` are ordinary module arguments, which cannot: Clan passes the
+same special arguments to every machine.
+
+Each machine's packages are its channel's (`nixpkgs.pkgs`), while its NixOS
+or nix-darwin modules come from the default channel's nixpkgs and from
+`fleet.inputs.nix-darwin`, which Clan builds every machine with.
 
 The framework also produces `deploy.nodes` for deploy-rs, a `host-<name>`
-check per host that evaluates it, and a `deploy-schema` check.
+check per host that evaluates it, and a `deploy-schema` check. Clan's own
+options (`clan.meta`, `clan.inventory`, services, vars) are all available
+under `clan`.
 
 ## A minimal fleet flake
 
@@ -129,7 +152,9 @@ check per host that evaluates it, and a `deploy-schema` check.
 ```
 
 A flake-parts flake imports `inputs.soxin.flakeModules.default` and sets the
-same options under `fleet`.
+same options under `fleet`. That module imports Clan's flake-parts module
+itself, so a fleet does not import Clan's as well. Clan follows Soxin's
+nixpkgs, which a fleet points at its own pin with `follows`.
 
 `nix flake init -t github:SoxinOS/soxin/v2` copies the [example
 fleet](examples/fleet): one NixOS, one nix-darwin and one standalone
@@ -139,13 +164,14 @@ home-manager host, all made up.
 
 | Option | Default | |
 | --- | --- | --- |
-| `root` | `null` | The fleet directory; `hostsDir`, `profilesDir` and `modulesDir` default to its subdirectories. |
-| `hosts.<name>` | from `hosts/` | Hosts; see `host.nix` above. |
+| `root` | `null` | The fleet directory and Clan's directory; machines are in its `machines/`, and `homesDir`, `profilesDir` and `modulesDir` default to its subdirectories. |
+| `hosts.<name>` | from `machines/` and `homes/` | Hosts; see `host.nix` above. |
+| `homesDir`, `profilesDir`, `modulesDir` | under `root` | Where standalone homes, profiles and the fleet's modules are found. |
 | `profiles.<name>.{nixos,darwin,home}` | from `profiles/` | Profiles as lists of modules. |
 | `defaultProfiles` | `[ ]` | Profiles every host takes. |
 | `modules.{nixos,darwin,home}` | from `modules/` | Modules every host of that kind imports. |
 | `channels.<name>.{input,config,overlays}` | `nixpkgs` = `inputs.nixpkgs` | nixpkgs channels; `overlays` is a function of every channel. |
-| `defaultChannel` | `"nixpkgs"` | The channel of a host that names none. |
+| `defaultChannel` | `"nixpkgs"` | The channel of a host that names none, and the nixpkgs Clan builds machines with. |
 | `channelsConfig` | `{ }` | nixpkgs config shared by all channels. |
 | `sharedOverlays` | `[ ]` | Overlays applied to every channel. |
 | `specialArgs.{global,nixos,darwin,home}` | `{ }` | Extra module arguments. |

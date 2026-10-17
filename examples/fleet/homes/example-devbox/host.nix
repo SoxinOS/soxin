@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2026 Wael Nasreddine
 # SPDX-License-Identifier: MIT
 #
-# A host file is a module, so it can take arguments such as `inputs` and `name`.
+# A standalone home-manager host, which Soxin builds itself as Clan has none.
+# A host file is a module, so it can take arguments such as `inputs` and
+# `name`. `kind` defaults to "home-manager" under homes/.
 { name, ... }:
 {
-  kind = "home-manager";
   system = "x86_64-linux";
   profiles = [ "workstation" ];
   modules = [ ./home.nix ];
