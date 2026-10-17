@@ -162,7 +162,9 @@ home-manager host, all made up.
   `git+ssh:`, `ssh:`, registry references, anything not on a public forge;
 - secrets files: `*.sops.*`, private keys, sops- or age-encrypted payloads and
   other well-known secret file names;
-- a `hosts/` directory outside `examples/`;
+- a `hosts/` or `machines/` directory outside `examples/`;
+- the planning directory of a spec-driven workflow (its `designs/`
+  directory), which belongs in a private branch;
 - words of a denylist you supply from **outside** the repository.
 
 The denylist is a file of words, one per line, given with `--denylist FILE` or

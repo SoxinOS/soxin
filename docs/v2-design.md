@@ -154,7 +154,11 @@ This file records the decisions taken while building v2 and why.
   - secrets: file names (`*.sops.*`, `.sops.yaml`, `*.age`, `*.pem`, `*.key`,
     ssh key names, `.env`, `.netrc`, ...) and contents (private key blocks,
     age secret keys, sops-encrypted values, age-encrypted files).
-  - `hosts/` directories anywhere except under `examples/`.
+  - `hosts/` and `machines/` directories anywhere except under `examples/`.
+  - the planning directory of a spec-driven workflow (its `designs/`
+    directory), anywhere: planning notes are kept in a private branch and
+    the public branch is cut without them. The tool's name is assembled from
+    pieces in the guard and its fixtures, so a denylist may contain it.
   - denylist words, case-insensitive, in paths and contents, and with
     `--history <range>` in the messages, authors, file names and added lines
     of the range's commits (a word added and removed again is still in
@@ -179,7 +183,7 @@ This file records the decisions taken while building v2 and why.
   derivation, and that writes them into the Nix store and, from there, into
   any binary cache the checks are pushed to. Hashing the words does not help
   enough (short names are easy to brute-force). So the flake check covers
-  inputs, secrets and hosts; the denylist is applied by `nix run .#guard`
+  inputs, secrets, hosts and planning directories; the denylist is applied by `nix run .#guard`
   locally and by the `guard` CI workflow from a repository secret.
 - **The fixture test builds its fixtures at run time** in a temporary
   directory. Committed fixtures would contain a `hosts/` directory, secrets
@@ -187,12 +191,14 @@ This file records the decisions taken while building v2 and why.
   rejects. It covers each failure (git+ssh, git+file, path, private forge,
   private gitlab, indirect, locked path/ssh/file/tarball inputs, `*.sops.*`,
   `.sops.yaml`, ssh key names, private key, sops and age contents, top-level
-  and nested `hosts/`, denylist by flag, file variable and word variable,
+  and nested `hosts/`, top-level `machines/`, a planning `designs/`
+  directory (also under `examples/`), denylist by flag, file variable and word variable,
   denylist in a file name, a word inside and outside an exception, a
   denylist inside the repo, `--require-denylist`,
   a word only in history, a range that only removes a word, a word in a
   commit message) and the passes (clean
-  repo, clean repo with a denylist, an allowed extra host, a word removed from
+  repo, clean repo with a denylist, an allowed extra host, `machines/` under
+  `examples/`, a `designs/` directory of another parent, a word removed from
   the tree without `--history`), and fails if any output contains the denied
   word. Strings that would trip the guard on its own sources (key headers,
   sops markers) are assembled from pieces.

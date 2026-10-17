@@ -179,6 +179,36 @@ mkdir -p "$r/modules/hosts"
 echo "{ }" >"$r/modules/hosts/default.nix"
 expect fail "nested hosts/" soxin-guard "$r"
 
+r=$(base)
+mkdir -p "$r/machines/example-real"
+echo "{ }" >"$r/machines/example-real/configuration.nix"
+expect fail "top-level machines/" soxin-guard "$r"
+
+r=$(base)
+mkdir -p "$r/examples/fleet/machines/example-host"
+echo "{ }" >"$r/examples/fleet/machines/example-host/configuration.nix"
+expect pass "machines/ under examples/" soxin-guard "$r"
+
+# --- planning directories -------------------------------------------------------
+
+# The tool's name is assembled from pieces, as in the guard.
+planner="open""spec"
+
+r=$(base)
+mkdir -p "$r/$planner/designs/example-change"
+echo "{ }" >"$r/$planner/designs/example-change/spec.json"
+expect fail "a planning designs/ directory" soxin-guard "$r"
+
+r=$(base)
+mkdir -p "$r/examples/$planner/designs"
+echo "{ }" >"$r/examples/$planner/designs/spec.json"
+expect fail "a planning designs/ directory under examples/" soxin-guard "$r"
+
+r=$(base)
+mkdir -p "$r/docs/designs"
+echo "notes" >"$r/docs/designs/notes.md"
+expect pass "a designs/ directory of another parent" soxin-guard "$r"
+
 # --- denylist from outside the repository ---------------------------------------
 
 r=$(base)

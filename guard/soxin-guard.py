@@ -8,7 +8,9 @@ It fails on:
   ssh:, indirect (registry) references, and anything not on a public forge;
 * secrets files: *.sops.* files, private keys, age and sops encrypted payloads
   and other well-known secret file names;
-* a hosts/ directory outside the examples directory;
+* a hosts/ or machines/ directory outside the examples directory;
+* the planning directory of a spec-driven workflow (its designs/ directory),
+  which belongs in a private branch;
 * words of a denylist supplied from outside the repository, in file names,
   file contents and, with --history, in commit messages and patches.
 
@@ -88,6 +90,14 @@ SECRET_CONTENTS = [
 ]
 
 SKIP_DIRS = {".git", ".direnv"}
+
+# Directories that hold real fleets: hosts/ (Soxin's layout before v2 moved
+# to Clan) and machines/ (Clan's layout).
+FLEET_DIRS = {"hosts", "machines"}
+
+# (parent, child) directory pairs that hold private planning documents. The
+# tool's name is assembled from pieces so this file does not spell it out.
+PLANNING_DIRS = [("open" + "spec", "designs")]
 
 
 class Report:
@@ -258,11 +268,19 @@ def check_secrets(root, files, report):
 def check_hosts(files, examples, report):
     for directory in repository_dirs(files):
         parts = directory.split("/")
-        if parts[-1] != "hosts":
+        if parts[-1] not in FLEET_DIRS:
             continue
         if parts[0] == examples:
             continue
-        report.add(directory, f"is a hosts/ directory outside {examples}/; real hosts belong in a private fleet")
+        report.add(directory, f"is a {parts[-1]}/ directory outside {examples}/; real hosts belong in a private fleet")
+
+
+def check_planning(files, report):
+    for directory in repository_dirs(files):
+        parts = directory.split("/")
+        for parent, child in PLANNING_DIRS:
+            if parts[-2:] == [parent, child]:
+                report.add(directory, f"is a {parent}/{child}/ directory; planning documents belong in a private branch")
 
 
 class Denylist:
@@ -369,7 +387,7 @@ def main(argv=None):
         if args.require_denylist:
             print("soxin-guard: no denylist supplied and --require-denylist is set", file=sys.stderr)
             return 2
-        print("soxin-guard: no denylist supplied; checking inputs, secrets and hosts only", file=sys.stderr)
+        print("soxin-guard: no denylist supplied; checking inputs, secrets, hosts and planning directories only", file=sys.stderr)
 
     allowed = PUBLIC_HOSTS | {h.lower() for h in args.allow_host}
     files = repository_files(root)
@@ -378,6 +396,7 @@ def main(argv=None):
     check_inputs(root, files, allowed, report)
     check_secrets(root, files, report)
     check_hosts(files, args.examples_dir, report)
+    check_planning(files, report)
     if words:
         check_denylist(root, files, words, report)
         if args.history:
