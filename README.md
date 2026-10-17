@@ -180,6 +180,42 @@ home-manager host, all made up.
 | `inputs.{home-manager,nix-darwin,deploy-rs,sops-nix}` | your input of that name, else Soxin's | The frameworks the fleet is built with. |
 | `checks.hosts`, `checks.deploySchema` | `true` | The evaluation and deploy-rs schema checks. |
 
+## Parity
+
+`soxin-parity` (`nix run github:SoxinOS/soxin/v2#parity`) proves that a
+fleet builds the same after a change of framework, or any other refactoring:
+it evaluates each host's derivation in a baseline flake and in a target
+flake, runs [nix-diff](https://github.com/Gabriella439/nix-diff) on the pair
+and lists the causes of each difference (an environment variable, an input,
+a source, the builder) while skipping what merely follows from a changed
+store path. Nothing is built, so a Mac can compare Linux hosts.
+
+```sh
+nix run github:SoxinOS/soxin/v2#parity -- \
+  --baseline github:me/my-fleet/<old-rev> --target . \
+  --hosts example-server,example-laptop \
+  --accepted ./parity-accepted.toml
+```
+
+A host is compared at its toplevel (or a home's activation package) unless
+`--host NAME=ATTR` names another attribute. `--baseline-override-input` and
+`--target-override-input` override an input on either side, and
+`--baseline-drv NAME=PATH` takes a host's baseline from a derivation or a
+built system such as `/run/current-system`. It exits 1 when any host has a
+difference the fleet has not accepted.
+
+Accepted differences live in the fleet's own TOML file, each with its reason:
+
+```toml
+[[difference]]
+hosts = ["example-server"]   # optional; every host when left out
+derivation = "etc"           # the derivation's name, a glob
+what = "env"                 # env, input, source, builder, arguments, platform, structure
+key = "nixPath"              # env variable, input or source name, a glob
+changed = "^nixpkgs="        # optional: every changed line must match
+reason = "NIX_PATH now points at the flake's own nixpkgs"
+```
+
 ## The guard
 
 `soxin-guard` fails when a repository carries private material:

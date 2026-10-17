@@ -4,3 +4,4 @@
 /examples/*/flake.lock
 /examples/*/result*
 /.pre-commit-config.yaml
+__pycache__/

@@ -88,13 +88,22 @@
           {
             packages = {
               guard = pkgs.callPackage ./guard { };
+              parity = pkgs.callPackage ./parity { };
               default = self'.packages.guard;
             };
 
-            apps.guard = {
-              type = "app";
-              program = "${self'.packages.guard}/bin/soxin-guard";
-              meta.description = "Fail when the repository carries private material";
+            apps = {
+              guard = {
+                type = "app";
+                program = "${self'.packages.guard}/bin/soxin-guard";
+                meta.description = "Fail when the repository carries private material";
+              };
+
+              parity = {
+                type = "app";
+                program = "${self'.packages.parity}/bin/soxin-parity";
+                meta.description = "Compare the derivations of hosts built two ways with nix-diff";
+              };
             };
 
             devShells.default = pkgs.mkShell {
@@ -102,6 +111,7 @@
                 pkgs.nixfmt
                 pkgs.reuse
                 self'.packages.guard
+                self'.packages.parity
               ];
             };
 

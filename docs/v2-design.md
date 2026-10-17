@@ -185,6 +185,27 @@ This file records the decisions taken while building v2 and why.
 - The example has no `flake.lock`: it would lock the published v2, which does
   not exist yet. `.gitignore` keeps one out.
 
+## Parity
+
+- **`apps.parity` compares derivations, never builds.** It evaluates each
+  host's `drvPath` in a baseline flake and a target flake and runs nix-diff
+  (`--json --environment`). Its output is a list of causes: environment
+  variables, inputs, sources, builder, arguments or platform of one
+  derivation whose value changed beyond store hashes. Differences that only
+  follow from a rebuilt store path below them are skipped, since the walk
+  reaches their cause anyway. A host whose derivations differ without a
+  cause found is reported as differing.
+- **Accepted differences belong to the fleet.** The app takes their TOML file
+  as `--accepted`; each entry names a derivation (glob), optionally the kind
+  of difference, the key, the hosts and a regular expression every changed
+  line must match, and must give a reason. Entries that match nothing are
+  reported, so the list does not rot.
+- **A baseline can be a built system.** `--baseline-drv NAME=PATH` takes a
+  derivation or a store path (its deriver is used), for comparing with
+  `/run/current-system`.
+- **Tests.** A `parity` check runs the app's reading of nix-diff output and
+  of accepted entries against a made-up nix-diff document.
+
 ## The guard
 
 - **One tool, `soxin-guard`** (Python, standard library only), exposed as
