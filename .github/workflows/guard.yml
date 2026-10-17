@@ -23,10 +23,10 @@ jobs:
       # added and removed again is still caught.
       BASE: ${{ github.base_ref || 'main' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: cachix/install-nix-action@v31
+      - uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
       - name: guard
         run: |
           # Pull requests from forks get no secrets; pushes to this
