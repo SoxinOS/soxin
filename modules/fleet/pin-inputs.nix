@@ -46,7 +46,10 @@ in
     };
 
     module = mkOption {
-      type = types.deferredModule;
+      # A plain module rather than a deferredModule, which would nest it
+      # deeper in the module tree and move its list definitions ahead of the
+      # fleet's.
+      type = types.raw;
       readOnly = true;
       internal = true;
       description = "The NixOS and nix-darwin module that pins the inputs.";
