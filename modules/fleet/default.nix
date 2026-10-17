@@ -35,7 +35,6 @@ let
     mkOption
     nameValuePair
     optional
-    optionals
     setFunctionArgs
     types
     unique
@@ -252,14 +251,14 @@ let
     {
       _file = "${toString ./default.nix}#machine-${name}";
 
+      # The fleet's modules and profiles come first and the host's own last,
+      # so the host's list definitions follow the fleet's.
       imports =
         sharedModules name host stems.${kind}
+        ++ optional cfg.homeManager.enable (homeManagerModule name host)
         ++ host.modules
         ++ optional cfg.sops.enable cfg.inputs.sops-nix."${kind}Modules".sops
-        ++ optionals cfg.homeManager.enable [
-          cfg.inputs.home-manager."${kind}Modules".home-manager
-          (homeManagerModule name host)
-        ];
+        ++ optional cfg.homeManager.enable cfg.inputs.home-manager."${kind}Modules".home-manager;
 
       config = {
         _module.args = hostArgs name host;

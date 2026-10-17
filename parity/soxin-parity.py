@@ -28,6 +28,7 @@ is not accepted, 0 otherwise, and 2 on usage or evaluation errors.
 """
 
 import argparse
+import difflib
 import fnmatch
 import json
 import os
@@ -56,13 +57,26 @@ def drv_name(path):
     return name.removesuffix(".drv")
 
 
+def readable(text):
+    """JSON (structured attributes, generated JSON files) one value per line,
+    so a line diff shows which value changed."""
+    stripped = text.strip()
+    if not stripped.startswith(("{", "[")):
+        return text
+    try:
+        value = json.loads(stripped)
+    except ValueError:
+        return text
+    return json.dumps(value, indent=1, sort_keys=True)
+
+
 class Difference:
     def __init__(self, chain, what, key, old, new):
         self.chain = chain
         self.what = what
         self.key = key
-        self.old = old
-        self.new = new
+        self.old = readable(old)
+        self.new = readable(new)
         self.accepted_by = None
 
     @property
@@ -85,16 +99,25 @@ class Difference:
         removed, added = self.changed()
         return removed + added
 
-    def describe(self, width):
+    def describe(self, width, limit=40):
         where = " > ".join(self.chain)
         head = f"{self.derivation}: {self.what}" + (f" {self.key}" if self.key else "")
         lines = [head, f"      in {where}"]
         removed, added = self.changed()
-        lines += [f"      - {line[:width]}" for line in removed]
-        lines += [f"      + {line[:width]}" for line in added]
-        if not removed and not added:
-            lines.append(f"      - {self.old[:width]!r}")
-            lines.append(f"      + {self.new[:width]!r}")
+        if removed or added:
+            body = [f"- {line}" for line in removed] + [f"+ {line}" for line in added]
+        else:
+            # Same lines in another order: show where they moved.
+            old = [mask(line) for line in self.old.splitlines()]
+            new = [mask(line) for line in self.new.splitlines()]
+            body = ["(same lines, another order)"] + [
+                line
+                for line in difflib.unified_diff(old, new, lineterm="", n=1)
+                if not line.startswith(("---", "+++"))
+            ]
+        if len(body) > limit:
+            body = body[:limit] + [f"... {len(body) - limit} more line(s)"]
+        lines += [f"      {line[:width]}" for line in body]
         return lines
 
 
@@ -218,7 +241,8 @@ def accepts(entry, host, difference):
 
 
 def nix(args, nix_args):
-    result = subprocess.run(["nix", *nix_args, *args], capture_output=True, text=True)
+    # Flags such as --override-input belong after the subcommand.
+    result = subprocess.run(["nix", args[0], *nix_args, *args[1:]], capture_output=True, text=True)
     if result.returncode != 0:
         sys.stderr.write(result.stderr)
         raise SystemExit(f"soxin-parity: nix {' '.join(args)} failed")
