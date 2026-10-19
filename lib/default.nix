@@ -8,6 +8,12 @@
 
 {
   /**
+    Soxin's module library by kind (`nixos`, `darwin`, `home`), as paths:
+    `<kind>.<area>-<name>` for one module and `<kind>.soxin` for all of them.
+  */
+  library = import ../modules/library;
+
+  /**
     Build the outputs of a fleet flake.
 
     A thin wrapper around `flake-parts.lib.mkFlake` with the fleet module

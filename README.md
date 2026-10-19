@@ -129,7 +129,9 @@ Each module has an `options.nix` and a `nixos.nix`, `darwin.nix` and
 `home.nix` that import it, so configuration shared by every kind can set the
 options. Outside a Soxin fleet they are `nixosModules`, `darwinModules` and
 `homeModules` of this flake: `soxin` for all of them, or one by
-`<area>-<name>` (e.g. `nixosModules.settings-users`).
+`<area>-<name>` (e.g. `nixosModules.settings-users`); `lib.library` gives the
+same as plain paths. A fleet that places the library's modules itself sets
+`fleet.library.enable = false`.
 
 ### Pieces
 
