@@ -250,6 +250,7 @@ derivation = "etc"           # the derivation's name, a glob
 what = "env"                 # env, input, source, builder, arguments, platform, structure
 key = "nixPath"              # env variable, input or source name, a glob
 changed = "^nixpkgs="        # optional: every changed line must match
+reordered = true             # optional: lines only moved, none added or removed
 reason = "NIX_PATH now points at the flake's own nixpkgs"
 ```
 

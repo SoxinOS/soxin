@@ -91,4 +91,11 @@ assert parity.accepts(accepted[1], "other", by_key["zshrc"])
 d = parity.Difference(["x"], "env", "k", f"a {H1}-foo\nb\n", f"a {H2}-foo\nc\n")
 assert d.changed() == (["b"], ["c"]), d.changed()
 
+# `reordered` accepts lines that only moved, and nothing else.
+moved = parity.Difference(["x"], "env", "k", "a\nb\nc\n", "b\na\nc\n")
+grown = parity.Difference(["x"], "env", "k", "a\nb\n", "b\na\nc\n")
+entry = {"derivation": "x", "reason": "r", "reordered": True, "_number": 9}
+assert parity.accepts(entry, "host", moved)
+assert not parity.accepts(entry, "host", grown)
+
 print("soxin-parity: tests passed")

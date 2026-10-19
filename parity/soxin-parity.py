@@ -21,6 +21,8 @@ Differences the fleet has accepted are listed in a TOML file given with
                                  # optional
     changed = "^nix-path ="      # optional regular expression every changed
                                  # line (store hashes masked) must match
+    reordered = true             # optional: only lines that moved, none
+                                 # added or removed
     reason = "why it is accepted"
 
 It prints a summary per host and exits 1 when any host has a difference that
@@ -233,6 +235,11 @@ def accepts(entry, host, difference):
         return False
     if "key" in entry and not fnmatch.fnmatchcase(difference.key, entry["key"]):
         return False
+    if entry.get("reordered"):
+        old = sorted(mask(line) for line in difference.old.splitlines())
+        new = sorted(mask(line) for line in difference.new.splitlines())
+        if old != new:
+            return False
     if "_changed" in entry:
         lines = [mask(line) for line in difference.changed_lines()]
         if not lines or not all(entry["_changed"].search(line) for line in lines):
