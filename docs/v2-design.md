@@ -30,7 +30,7 @@ This file records the decisions taken while building v2 and why.
   own core modules added to each. Soxin's own `nixosSystem`/`darwinSystem`
   builders are gone; what remains is what Clan lacks: channels whose overlays
   see every channel, standalone home-manager hosts, profiles and modules by
-  kind, the `mode` argument, sops-nix as an opt-in, pinned inputs, module
+  kind, sops-nix as an opt-in, pinned inputs, module
   outputs and the evaluation checks. `flakeModules.default` imports Clan's module, so a fleet
   imports Soxin's only.
 - **Clan follows Soxin's nixpkgs** (`clan-core.inputs.nixpkgs.follows`), and
@@ -47,8 +47,8 @@ This file records the decisions taken while building v2 and why.
   taking both from the flake's inputs, and passes one set of special
   arguments to every machine. Soxin imports Clan's flake module with those
   two inputs replaced by the fleet's nixpkgs and nix-darwin with the two
-  functions wrapped, adding `mode` and `fleet.specialArgs` per kind. So
-  modules can still use `mode` in `imports`, and Clan's own evaluations of a
+  functions wrapped, adding `fleet.specialArgs` per kind. So modules can
+  use them in `imports`, and Clan's own evaluations of a
   machine (vars, its CLI) see the same arguments. Per-host arguments
   (`hostName`, `channels`, a host's `specialArgs`) cannot take that route, as
   the constructor does not know the machine; they are module arguments in
@@ -83,8 +83,10 @@ This file records the decisions taken while building v2 and why.
   `profile-<name>`.
 - **No channel patches, no NUR.** A fleet points a channel at a patched
   nixpkgs, and adds NUR as an overlay itself.
-- **`mode` stays until the module library is ported**, then goes, without a
-  deprecation period.
+- **`mode` is gone.** v1 passed `mode` (`"NixOS"`, `"nix-darwin"`,
+  `"home-manager"`) so one module could serve every kind. A module that
+  differs by kind is now one file per kind, which each kind imports; it went
+  once the operator's fleet was split, without a deprecation period.
 
 ## The module library
 
@@ -166,10 +168,8 @@ This file records the decisions taken while building v2 and why.
   gymnastics, and a fleet that does not care gets working defaults. The flake
   inputs are fetched lazily, so a fleet without darwin hosts never fetches
   nix-darwin.
-- **Module arguments.** Every module gets `inputs`, `soxin`, `hostName`,
-  `channels` and `mode`. `mode` keeps v1's values (`"NixOS"`, `"nix-darwin"`,
-  `"home-manager"`) so existing modules that switch on it keep working while
-  they are ported. `fleet.specialArgs.{global,nixos,darwin,home}` and a host's
+- **Module arguments.** Every module gets `inputs`, `soxin`, `hostName` and
+  `channels`. `fleet.specialArgs.{global,nixos,darwin,home}` and a host's
   `specialArgs` add more (e.g. nixos-hardware, nixos-wsl). Later ones win:
   framework arguments, then global, then per kind, then per host. In
   machines, the per-host ones are module arguments (see Built on Clan).

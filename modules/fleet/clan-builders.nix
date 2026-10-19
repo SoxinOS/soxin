@@ -8,8 +8,8 @@
 # (`inputs.nixpkgs`, `inputs.nix-darwin`), and passes one set of special
 # arguments to every machine. Soxin imports Clan's module with those two
 # inputs replaced by the fleet's nixpkgs (the default channel's) and
-# nix-darwin, their system builders wrapped to add `mode` and
-# `fleet.specialArgs` of the machine's kind. Modules can then use them in
+# nix-darwin, their system builders wrapped to add `fleet.specialArgs` of the
+# machine's kind. Modules can then use them in
 # `imports`, and Clan's own evaluations of a machine see the same arguments.
 #
 # This leans on how Clan's flake module reads its inputs. The

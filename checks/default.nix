@@ -40,7 +40,7 @@ in
 
         guard-fixtures = pkgs.callPackage ../guard/fixtures.nix { guard = self'.packages.guard; };
 
-        # Soxin passes `mode` and `fleet.specialArgs` to Clan's machines by
+        # Soxin passes `fleet.specialArgs` per kind to Clan's machines by
         # wrapping the builders Clan takes from `inputs.nixpkgs` and
         # `inputs.nix-darwin` (modules/fleet/clan-builders.nix). Fails when a
         # machine was built without the wrappers, i.e. when Clan stops

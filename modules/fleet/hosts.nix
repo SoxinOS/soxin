@@ -3,7 +3,7 @@
 #
 # The hosts of the fleet and what every kind of configuration shares: the
 # frameworks it is built with, sops-nix as an opt-in, and the module
-# arguments (`inputs`, `soxin`, `hostName`, `channels`, `mode` and
+# arguments (`inputs`, `soxin`, `hostName`, `channels` and
 # `fleet.specialArgs`). Machines and homes build on it.
 {
   soxin,
@@ -39,14 +39,6 @@ let
     "nix-darwin"
     "sops-nix"
   ];
-
-  # The value `mode` takes in each kind's modules; the names are the ones v1
-  # used, so modules that switch on `mode` keep working.
-  modes = {
-    nixos = "NixOS";
-    darwin = "nix-darwin";
-    home-manager = "home-manager";
-  };
 
   subdirectories =
     dir:
@@ -88,7 +80,6 @@ let
     kind: scope:
     {
       inherit inputs soxin;
-      mode = modes.${kind};
     }
     // cfg.specialArgs.global
     // cfg.specialArgs.${scope};

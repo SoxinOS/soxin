@@ -14,9 +14,9 @@ It is a thin layer on [Clan](https://clan.lol)'s
 [flake-parts](https://flake.parts) module. Clan discovers the NixOS and
 nix-darwin machines in `machines/<name>/` and builds them. Soxin adds what
 Clan lacks: nixpkgs channels whose overlays see every channel, standalone
-home-manager hosts, profiles and the fleet's own modules split by kind, the
-`mode` argument v1 modules switch on, sops-nix as an opt-in, pinning of the
-Nix registry and NIX_PATH to the fleet's inputs, and module outputs. A thin `lib.mkFleet` wrapper serves flakes that do not use flake-parts
+home-manager hosts, profiles and the fleet's own modules split by kind, a
+small module library, sops-nix as an opt-in, pinning of the Nix registry and
+NIX_PATH to the fleet's inputs, and module outputs. A thin `lib.mkFleet` wrapper serves flakes that do not use flake-parts
 themselves.
 
 This is Soxin v2. v1 (the `flake-utils-plus` based `mkFlake` and the Soxin
@@ -93,9 +93,10 @@ my-fleet/
 
 Every module receives these arguments besides the usual ones: `inputs` (the
 fleet flake's inputs), `soxin`, `hostName`, `channels` (every channel's
-packages for the host's system) and `mode` (`"NixOS"`, `"nix-darwin"` or
-`"home-manager"`), plus whatever `fleet.specialArgs` and the host add.
-`inputs`, `soxin`, `mode` and `fleet.specialArgs` can be used in `imports`.
+packages for the host's system), plus whatever `fleet.specialArgs` and the
+host add. `inputs`, `soxin` and `fleet.specialArgs` can be used in `imports`.
+There is no `mode`: a module that differs by kind is one file per kind
+(`nixos.nix`, `darwin.nix`, `home.nix`), and each kind imports its own.
 In NixOS and nix-darwin machines, `hostName`, `channels` and a host's own
 `specialArgs` are ordinary module arguments, which cannot: Clan passes the
 same special arguments to every machine.
