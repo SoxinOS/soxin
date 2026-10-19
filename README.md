@@ -112,6 +112,25 @@ The framework also adds a `host-<name>` check per host that evaluates it.
 Clan's own options (`clan.meta`, `clan.inventory`, services, vars) are all
 available under `clan`.
 
+### The module library
+
+Soxin ships a small, supported module library. Every host gets it, and its
+modules configure nothing until enabled or set:
+
+| Option | |
+| --- | --- |
+| `soxin.settings.users` | Users declared once (`users.<name>` with `isAdmin`, `isNixTrustedUser`, `sshKeys`), created on NixOS and nix-darwin; other modules add to `groups`. |
+| `soxin.settings.keyboard` | Keyboard layouts for the consoles, the X server and home-manager, which programs read. |
+| `soxin.settings.theme` | One theme by name from `soxin.themes` (gruvbox-dark and gruvbox-light included), which programs read. |
+| `soxin.hardware.yubikey` | YubiKey tools, pcscd and GnuPG's agent with SSH support. |
+| `soxin.hardware.serial_console` | The kernel console and GRUB on the first serial port. |
+
+Each module has an `options.nix` and a `nixos.nix`, `darwin.nix` and
+`home.nix` that import it, so configuration shared by every kind can set the
+options. Outside a Soxin fleet they are `nixosModules`, `darwinModules` and
+`homeModules` of this flake: `soxin` for all of them, or one by
+`<area>-<name>` (e.g. `nixosModules.settings-users`).
+
 ### Pieces
 
 `flakeModules.default` imports all of Soxin. Each piece is a flake-parts
@@ -125,6 +144,7 @@ module of its own, importable alone or with others:
 | `flakeModules.homes` | Standalone home-manager hosts. |
 | `flakeModules.machines` | Machines on Clan, with Clan's flake module and `fleet.pinInputs`. |
 | `flakeModules.checks` | The `host-<name>` checks. |
+| `flakeModules.library` | Soxin's module library on every host. |
 
 ## A minimal fleet flake
 

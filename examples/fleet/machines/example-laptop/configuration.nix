@@ -3,7 +3,11 @@
 {
   clan.core.networking.targetHost = "alice@example-laptop.example.com";
 
-  users.users.alice.home = "/Users/alice";
+  soxin.settings.users = {
+    enable = true;
+    userName = "alice";
+    users.alice.sshKeys = [ ];
+  };
   system.primaryUser = "alice";
 
   home-manager.users.alice = ./home.nix;

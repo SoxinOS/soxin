@@ -129,11 +129,21 @@ in
       '';
     };
 
+    internal.libraryModules = genAttrs [ "nixos" "darwin" "home" ] (
+      stem:
+      mkOption {
+        type = types.listOf types.raw;
+        default = [ ];
+        internal = true;
+        description = "Library modules every host of that kind imports first (${stem}).";
+      }
+    );
+
     internal.modulesOf = mkOption {
       type = types.functionTo (types.functionTo (types.functionTo (types.listOf types.raw)));
       readOnly = true;
       internal = true;
-      description = "`name: host: stem:` the fleet's modules and the host's profiles of one kind.";
+      description = "`name: host: stem:` the library, the fleet's modules and the host's profiles of one kind.";
     };
   };
 
@@ -147,7 +157,8 @@ in
 
       internal.modulesOf =
         name: host: stem:
-        cfg.modules.${stem}
+        cfg.internal.libraryModules.${stem}
+        ++ cfg.modules.${stem}
         ++ lib.concatMap (
           profile:
           if cfg.profiles ? ${profile} then

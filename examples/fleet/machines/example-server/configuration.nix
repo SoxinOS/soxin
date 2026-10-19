@@ -11,9 +11,11 @@
     fsType = "ext4";
   };
 
-  users.users.alice = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ];
+  # Soxin's users: created on the system, with groups other modules add.
+  soxin.settings.users = {
+    enable = true;
+    userName = "alice";
+    users.alice.isAdmin = true;
   };
 
   home-manager.users.alice = ./home.nix;

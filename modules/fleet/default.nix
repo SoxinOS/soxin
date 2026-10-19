@@ -10,6 +10,7 @@
 # - machines: NixOS and nix-darwin machines on Clan (with clan-builders and
 #   pin-inputs);
 # - checks: an evaluation check per host;
+# - library: Soxin's module library on every host;
 # - default: all of them.
 #
 # Each carries a `key`, so importing several of them, or one twice, declares
@@ -31,9 +32,11 @@ let
     pin-inputs = piece "pin-inputs" ./pin-inputs.nix;
     machines = piece "machines" ./machines.nix;
     checks = piece "checks" ./checks.nix;
+    library = piece "library" ./library.nix;
     default = {
       key = "soxin#default";
       imports = [
+        modules.library
         modules.homes
         modules.machines
         modules.checks

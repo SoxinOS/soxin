@@ -71,6 +71,12 @@
             inherit (inputs.nixpkgs) lib;
           };
 
+          # Soxin's module library, all of it (`soxin`) or one module
+          # (`<area>-<name>`, e.g. `settings-users`), by kind.
+          nixosModules = (import ./modules/library).nixos;
+          darwinModules = (import ./modules/library).darwin;
+          homeModules = (import ./modules/library).home;
+
           templates.default = {
             path = ./examples/fleet;
             description = "A made-up fleet on Clan: one NixOS and one nix-darwin machine, and one standalone home-manager host";

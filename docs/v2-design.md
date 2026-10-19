@@ -86,6 +86,28 @@ This file records the decisions taken while building v2 and why.
 - **`mode` stays until the module library is ported**, then goes, without a
   deprecation period.
 
+## The module library
+
+- **Small and supported.** A public module implies support, so the library
+  holds only what is useful to others and worth supporting: the shared
+  settings programs read (`soxin.settings.users`, `soxin.settings.keyboard`,
+  `soxin.settings.theme`) and two hardware modules (`soxin.hardware.yubikey`,
+  `soxin.hardware.serial_console`). Fleets keep their other modules.
+- **No `mode`.** Each module is `modules/library/<area>/<name>/` with an
+  `options.nix` and a `nixos.nix`, `darwin.nix` and `home.nix`, each importing
+  the options, so configuration shared by every kind can still set them.
+  v1's option names are kept (`soxin.settings.keyboard.layouts`,
+  `soxin.settings.theme`, `soxin.themes`).
+- **Generic core only.** Values a fleet chooses (a user name, default
+  groups, a primary group, a shell, password defaults) are options with
+  neutral defaults; users are only created with `enable`, and keyboard
+  settings only apply once a layout is set.
+- **Delivered by path.** `flakeModules.library` (in `default`) imports the
+  library on every host before the fleet's modules, and it is not part of a
+  fleet's exported modules. The flake's `nixosModules`, `darwinModules` and
+  `homeModules` give the same files by path, so a configuration that imports
+  a module both ways declares it once.
+
 ## The framework
 
 - **flake-parts module first, `lib.mkFleet` second.** The module
