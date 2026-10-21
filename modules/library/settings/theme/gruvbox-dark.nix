@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Wael Nasreddine
 # SPDX-License-Identifier: MIT
 {
-  config,
   lib,
   pkgs,
   ...
@@ -14,14 +13,9 @@ with lib;
       config =
         let
           # hard contrast: bg = '#282828'
-          bg = "#282828";
           # soft contrast: bg = '#32302f'
-
-          aqua = "#689d68";
           blue = "#458588";
           darkgray = "#1d2021";
-          gray = "#a89984";
-          green = "#98971a";
           purple = "#b16286";
           red = "#cc241d";
           white = "#ebdbb2";

@@ -149,6 +149,15 @@ module of its own, importable alone or with others:
 | `flakeModules.checks` | The `host-<name>` checks. |
 | `flakeModules.library` | Soxin's module library on every host. |
 
+`flakeModules.formatter`, not in `default`, formats the repository rather than
+the fleet: deadnix, statix and nixfmt through treefmt-nix, as `formatter` (`nix
+fmt`), as the `treefmt` hook of git-hooks.nix and as the `treefmt` and
+`pre-commit` checks, all over the importing flake's own files. The hook runs
+treefmt's wrapper, so a commit the hook accepts is one `nix fmt` leaves alone.
+Add formatters with `perSystem.treefmt.programs`, hooks with
+`perSystem.pre-commit.settings.hooks`, and install the hook from a development
+shell with `inputsFrom = [ config.pre-commit.devShell ]`.
+
 ## A minimal fleet flake
 
 ```nix

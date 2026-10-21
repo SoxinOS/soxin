@@ -77,7 +77,7 @@ let
     );
 
   kindArgs =
-    kind: scope:
+    _kind: scope:
     {
       inherit inputs soxin;
     }

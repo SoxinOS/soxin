@@ -11,6 +11,8 @@
 #   pin-inputs);
 # - checks: an evaluation check per host;
 # - library: Soxin's module library on every host;
+# - formatter: `nix fmt` and the pre-commit hook on one treefmt (not in
+#   default: it formats a repository, not a fleet);
 # - default: all of them.
 #
 # Each carries a `key`, so importing several of them, or one twice, declares
@@ -33,6 +35,7 @@ let
     machines = piece "machines" ./machines.nix;
     checks = piece "checks" ./checks.nix;
     library = piece "library" ./library.nix;
+    formatter = piece "formatter" ./formatter.nix;
     default = {
       key = "soxin#default";
       imports = [

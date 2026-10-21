@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: MIT
 #
 # Soxin's own checks: the private-material guard on this repository, its
-# fixture test, the parity app's tests, formatting, REUSE compliance and the
-# example fleet.
+# fixture test, the parity app's tests, REUSE compliance and the example
+# fleet. Formatting is checked by the formatter piece (`treefmt`,
+# `pre-commit`).
 { inputs, self, ... }:
 
 let
@@ -59,12 +60,6 @@ in
 
         parity = pkgs.runCommandLocal "soxin-parity-tests" { nativeBuildInputs = [ pkgs.python3 ]; } ''
           python3 ${../parity/test-parity.py} ${../parity/soxin-parity.py}
-          touch $out
-        '';
-
-        formatting = pkgs.runCommandLocal "soxin-formatting" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
-          cd ${self}
-          find . -name '*.nix' -print0 | xargs -0 nixfmt --check
           touch $out
         '';
 

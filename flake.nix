@@ -26,6 +26,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # The formatter piece (flakeModules.formatter): treefmt for `nix fmt` and
+    # git-hooks.nix for the pre-commit hook that runs the same treefmt.
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Clan follows the fleet's nixpkgs pin rather than its own unstable one,
     # so a fleet's packages do not move when Soxin is built on Clan.
     clan-core = {
@@ -35,6 +47,7 @@
         flake-parts.follows = "flake-parts";
         nix-darwin.follows = "nix-darwin";
         sops-nix.follows = "sops-nix";
+        treefmt-nix.follows = "treefmt-nix";
       };
     };
   };
@@ -58,6 +71,7 @@
 
         imports = [
           ./checks
+          fleetModules.formatter
         ];
 
         flake = {
@@ -84,7 +98,12 @@
         };
 
         perSystem =
-          { pkgs, self', ... }:
+          {
+            config,
+            pkgs,
+            self',
+            ...
+          }:
           {
             packages = {
               guard = pkgs.callPackage ./guard { };
@@ -107,15 +126,13 @@
             };
 
             devShells.default = pkgs.mkShell {
+              inputsFrom = [ config.pre-commit.devShell ];
               packages = [
-                pkgs.nixfmt
                 pkgs.reuse
                 self'.packages.guard
                 self'.packages.parity
               ];
             };
-
-            formatter = pkgs.nixfmt;
           };
       }
     );
