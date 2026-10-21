@@ -24,7 +24,13 @@
       treefmt = {
         projectRootFile = lib.mkDefault "flake.nix";
         programs = {
-          deadnix.enable = lib.mkDefault true;
+          deadnix = {
+            enable = lib.mkDefault true;
+            # An unused name in a `{ a, b }:` pattern without `...` is part of
+            # the function's interface: a caller that passes `b` breaks when
+            # deadnix drops it. Leave patterns alone.
+            no-lambda-pattern-names = lib.mkDefault true;
+          };
           nixfmt.enable = lib.mkDefault true;
           statix.enable = lib.mkDefault true;
         };

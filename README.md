@@ -150,7 +150,8 @@ module of its own, importable alone or with others:
 | `flakeModules.library` | Soxin's module library on every host. |
 
 `flakeModules.formatter`, not in `default`, formats the repository rather than
-the fleet: deadnix, statix and nixfmt through treefmt-nix, as `formatter` (`nix
+the fleet: deadnix (leaving `{ a, b }:` patterns alone, which callers may
+fill), statix and nixfmt through treefmt-nix, as `formatter` (`nix
 fmt`), as the `treefmt` hook of git-hooks.nix and as the `treefmt` and
 `pre-commit` checks, all over the importing flake's own files. The hook runs
 treefmt's wrapper, so a commit the hook accepts is one `nix fmt` leaves alone.
