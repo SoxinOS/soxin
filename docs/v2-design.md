@@ -213,8 +213,15 @@ This file records the decisions taken while building v2 and why.
   checks import `fleet.nix` and evaluate it with Soxin's own inputs, with
   Soxin itself as `soxin` and Soxin's nixpkgs standing in for unstable (no
   second nixpkgs to fetch). Every example check appears as `example-<check>`.
-- The example has no `flake.lock`: it would lock the published v2, which does
-  not exist yet. `.gitignore` keeps one out.
+- **The example carries a `flake.lock`** that locks the published v2, so
+  `nix flake init -t github:SoxinOS/soxin/v2` gives a fleet that evaluates as
+  it is. The `example` job in `check.yml` runs `nix flake check` on the
+  example with that lock, on Linux and macOS, so the template is checked
+  against the published framework and not only against this checkout.
+  Because the lock names a published commit, a change that makes the example
+  use something v2 does not have yet lands in two steps: the framework
+  first, then the example with its lock moved to the new v2
+  (`nix flake update soxin` in `examples/fleet`).
 
 ## Parity
 
@@ -298,7 +305,8 @@ This file records the decisions taken while building v2 and why.
   the tree without `--history`), and fails if any output contains the denied
   word. Strings that would trip the guard on its own sources (key headers,
   sops markers) are assembled from pieces.
-- **CI.** `check.yml` runs `nix flake check` on Linux and macOS. `guard.yml`
+- **CI.** `check.yml` runs `nix flake check` on Linux and macOS, for Soxin
+  and, in the `example` job, for the example fleet with its lock. `guard.yml`
   runs the guard with the `SOXIN_GUARD_DENYLIST_WORDS` secret and
   `--history origin/<base>..HEAD`. Pushes must have a denylist
   (`--require-denylist`), so a missing secret fails loudly; pull requests from
@@ -317,11 +325,8 @@ This file records the decisions taken while building v2 and why.
   licence text; it adds no text of its own.
 - A `reuse` check runs `reuse lint` in `nix flake check`.
 
-## Open questions
+## Decided, not built yet
 
-- **Channel patches.** v1 could patch a channel's nixpkgs. v2 cannot; a fleet
-  can point a channel at a patched nixpkgs flake instead.
-- **Denylist in `nix flake check`.** Kept out on purpose (see above); the
-  owner may prefer an opt-in impure mode despite the store and cache exposure.
-- **Example `flake.lock`.** Once v2 is published, the example could carry a
-  lock and its own CI evaluation against the published framework.
+- **A local pre-push hook for the denylist.** The denylist stays out of
+  `nix flake check` (see above) and runs in CI and in `nix run .#guard`; a
+  pre-push hook that runs it locally is decided but not built yet.
